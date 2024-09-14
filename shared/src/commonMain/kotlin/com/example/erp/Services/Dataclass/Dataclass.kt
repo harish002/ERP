@@ -60,7 +60,7 @@ data class ProjectRole(
     val project: Project,
     val role: Role,
     val permissions: List<Permission>,
-    val scope: String,
+    val scope: String? = null,
     val admin: Boolean,
     val superAdmin: Boolean
 )
@@ -71,8 +71,8 @@ data class DepartmentRole(
     val name: String,
     val level: Int,
     val department: Department,
-    val role: List<String>?= emptyList(),
-    val permissions: List<Permission>,
+    val role: Role? = null,
+    val permissions: List<Permission> ?= null,
     val admin: Boolean,
     val superAdmin: Boolean
 )
@@ -82,17 +82,17 @@ data class Zone(
     val id: String,
     val name: String,
     val parentZone: String,
-    val zones: List<String>
+    val zones: List<String>? = null
 )
 @Serializable
 data class Department(
     val id: String,
     val level: Int,
     val name: String,
-    val projects: List<Project>?,
-    val roles: List<String>?,
-    val organisation: Organisation?,
-    val zones: List<Zone>?
+    val projects: List<Project>? = null,
+    val roles: List<String>? = null,
+    val organisation: Organisation? = null,
+    val zones: List<Zone>? = null
 )
 @Serializable
 data class DepartmentX(
@@ -119,8 +119,8 @@ data class NotificationPreference(
 data class Project(
     val id: String,
     val name: String,
-    val subject: String,
-    val department: DepartmentX,//String in Example
+    val subject: String? = null,
+    val department: DepartmentX?= null,//String in Example
     val roles: List<String>?= emptyList(),
     val createdDate: String?= null,
     val pipelines: List<Pipeline>?= emptyList()
@@ -137,8 +137,8 @@ data class Role(
 data class Permission(
     val id: String,
     val name: String,
-    val type: String,
-    val module: Module
+    val type: String? = null,
+    val module: Module? = null
 )
 
 @Serializable
@@ -159,8 +159,8 @@ data class Module(
 data class Organisation(
     val id: String,
     val name: String,
-    val departments: List<String>,
-    val zones: List<Zone>
+    val departments: List<String>? = null,
+    val zones: List<Zone>? = null
 )
 @Serializable
 data class FailedResponse(
@@ -613,24 +613,211 @@ data class GetNotificationsResponse(
 
 //-----------------------------------------------------------------------------
 
-// Get list of all Content Types ---------------------------------------------
+// Module 2 - Sales Tools Filter Apis /  Policy Rates ---------------------------------------------
+// Read All Policy Rates ------------------------------------------
 // Response Body
 @Serializable
-data class GetContentTypes(
-    val id: String,
-    val title: String,
-    val thumbnail_id: String,
-    val thumbnail_url: String,
-    val is_enabled: Boolean,
-    val is_assignment: Boolean,
-    val created_by: String,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null
+data class GetPolicyRates(
+    val message: String,
+    val data : List<PolicyRateData>
 )
 
+@Serializable
+data class PolicyRateData(
+    val city_id: String,
+    val fuel_type_id: String,
+    val renewal_type_id: String,
+    val insurance_type_id: String,
+    val insurer_id: String,
+    val vehicle_model_id: String,
+    val payouts: String,
+    val payins: String? = null,
+    val description: String? = null,
+    val id: String,
+    val city: City,
+    val vehicle_model: VehicleModel,
+    val fuel_type: FuelType,
+    val insurance_type: InsuranceType,
+    val insurer: Insurer,
+    val renewal_type: RenewalType,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+@Serializable
+data class City(
+    val name: String,
+    val description: String? = null,
+    val state_id: String,
+    val city_category_id: String,
+    val id: String,
+    val city_category: CityCategory,
+    val state: State,
+    val status: Int,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null
+)
+
+@Serializable
+data class VehicleModel(
+    val id: String,
+    val name: String,
+    val description: String,
+    val vehicle_brand_id: String,
+    val vehicle_type_id: String,
+    val vehicle_brand: VehicleBrand,
+    val vehicle_type: VehicleType,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+@Serializable
+data class FuelType(
+    val name: String,
+    val description: String? = null,
+    val created_at: String? = null,
+    val id: String,
+    val status: Int
+)
+
+@Serializable
+data class InsuranceType(
+    val name: String,
+    val description: String? = null,
+    val created_at: String? = null,
+    val id: String,
+    val status: Int
+)
+
+@Serializable
+data class Insurer(
+    val id: String,
+    val name: String,
+    val status: Int,
+    val description: String? = null,
+    val created_at: String? = null
+)
+
+@Serializable
+data class RenewalType(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+@Serializable
+data class CityCategory(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val status: Int,
+    val created_at: String
+)
+
+@Serializable
+data class State(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+@Serializable
+data class VehicleBrand(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+@Serializable
+data class VehicleType(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+//-----------------------------------------------------------------
+
+// Read all Vehicle Types ------------------------------------------
+// Response Body
+@Serializable
+data class VehicleTypes(
+    val message: String,
+    val data : List<Data>
+)
+
+@Serializable
+data class Data(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+// Read All Fuel Types -----------------------------------------------------
+// Response Body
+@Serializable
+data class FuelTypes(
+    val message: String,
+    val data : List<FuelTypeData>
+)
+
+@Serializable
+data class FuelTypeData(
+    val name: String,
+    val description: String? = null,
+    val created_at: String? = null,
+    val id: String,
+    val status: Int
+)
 
 //-----------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------------
+
+
