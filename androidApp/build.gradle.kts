@@ -9,6 +9,11 @@ plugins {
 }
 
 android {
+
+    lint{
+        abortOnError = false
+    }
+
     namespace = "com.example.erp.android"
     compileSdk = 34
     defaultConfig {

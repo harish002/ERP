@@ -2,19 +2,19 @@ package com.example.lms.Services
 
 import com.example.lms.Services.Dataclass.AllCourseCategoryResponse
 import com.example.lms.Services.Dataclass.FailedResponse
-import com.example.lms.Services.Dataclass.GetContentTypes
+import com.example.lms.Services.Dataclass.FuelTypes
 import com.example.lms.Services.Dataclass.GetNotificationsResponse
+import com.example.lms.Services.Dataclass.GetPolicyRates
 import com.example.lms.Services.Dataclass.GetUserCoursesResponse
 import com.example.lms.Services.Dataclass.GetUserData
 import com.example.lms.Services.Dataclass.MyCoursesResponse
 import com.example.lms.Services.Dataclass.PublishedCourseResponse
 import com.example.lms.Services.Dataclass.RefreshToken
-import com.example.lms.Services.Dataclass.RegisterRequest
-import com.example.lms.Services.Dataclass.RegisterResponse
 import com.example.lms.Services.Dataclass.ShowCourseByCourseId
 import com.example.lms.Services.Dataclass.ShowMyCoursesPayload
 import com.example.lms.Services.Dataclass.UserDetails
 import com.example.lms.Services.Dataclass.UserResponse
+import com.example.lms.Services.Dataclass.VehicleTypes
 import com.example.lms.Services.Dataclass.VerifyOTP
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -45,10 +45,11 @@ class ApiConfig {
     companion object {
 
         @SerialName("ACCESS_API")
-//        const val ACCESS_API = "https://api.1clicktech.in/api/access"
-        const val ACCESS_API = "https://api.1click.tech/api/access"
+        const val  UAT_ACCESS_API = "https://api.1click.tech/api/access"
+        const val ACCESS_API = "https://api.1clicktech.in/api/access"
         const val COURSE_MANAGEMENT_API = "https://ccm-api.1clicktech.in/api"
         const val NOTIFICATION_MANAGEMENT = "https://api.1clicktech.in/api/notifications"
+        const val SALES_TOOL_API = "https://sales-tool-api.1click.tech"
     }
 }
 
@@ -185,11 +186,11 @@ class ApiServices {
     @Throws(IOException::class, CancellationException::class)
     suspend fun loginApi(user: UserDetails): UserResponse {
         try {
-            val response: HttpResponse = client.post {
-                url("${ApiConfig.ACCESS_API}/auth/login")
+            val response: HttpResponse = client.post{
+                url("${ApiConfig.UAT_ACCESS_API}/auth/login")
                 contentType(ContentType.Application.Json)
-                header("Referer", "https://api.1click.tech")
-                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("Referer","https://api.1click.tech")
                 body = Json.encodeToString(UserDetails.serializer(), user)
             }
             if (response.status.isSuccess()) {
@@ -218,7 +219,7 @@ class ApiServices {
             }
             if (response.status.isSuccess()) {
                 return true
-            } else {
+            }else{
                 throw IOException(
                     "${response.status}"
                 )
@@ -261,6 +262,8 @@ class ApiServices {
                 url("${ApiConfig.ACCESS_API}/users")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("Referer","https://api.1click.tech")
             }
 
             if (response.status.isSuccess()) {
@@ -301,229 +304,108 @@ class ApiServices {
             throw e.message?.let { IOException(it) }!!
         }
     }
-
-
-    // Module 1 - Authentication Flow / Login/Register Flow --------------------------------------------------
-
-    // Course Category
-    //  Give list of all course category
-    @OptIn(InternalAPI::class)
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun allCourseCategory(token: String): List<AllCourseCategoryResponse> {
-        try {
-            val response: HttpResponse = client.post {
-                url("${ApiConfig.COURSE_MANAGEMENT_API}/course_category/forSelectBox")
-                contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-            }
-
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.status.value.toString()
-                )
-            }
-        } catch (e: Exception) {
-            println("Login error Message allCourseCategory ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
-
-    // Published Courses
-    // Give list of All Published Courses
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun allPublishesCourses(token: String): List<PublishedCourseResponse> {
-        try {
-            val response: HttpResponse = client.get {
-                url("${ApiConfig.COURSE_MANAGEMENT_API}/course/publishedCourse")
-                contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-            }
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.body<FailedResponse>().message
-                )
-            }
-
-        } catch (e: Exception) {
-            println("Login error Message allPublishesCourses ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-
-    }
-
-    // Search Course By Course Category ID
-    // Gives List of Courses Filtered By Course Category ID
-    @OptIn(InternalAPI::class)
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun searchCourseByCategoryId(
-        token: String,
-        courseCategoryId: String
-    ): List<PublishedCourseResponse> {
-        try {
-            val response: HttpResponse = client.post {
-                url("${ApiConfig.COURSE_MANAGEMENT_API}/course/searchCourseByCategoryId")
-                contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-                setBody(
-                    MultiPartFormDataContent(
-                        formData {
-                            append("course_category_id", courseCategoryId)
-                        }
-                    )
-                )
-            }
-
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.body<FailedResponse>().message
-                )
-            }
-        } catch (e: Exception) {
-            println("Login error Message searchCourseByCategoryId ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
-
-    // Get Course Details By Course ID
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun showCourseById(
-        token: String,
-        courseId: String
-    ): ShowCourseByCourseId {
-        try {
-            val response: HttpResponse = client.post {
-                url("${ApiConfig.COURSE_MANAGEMENT_API}/course/show")
-                contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-                setBody(
-                    MultiPartFormDataContent(
-                        formData {
-                            append("id", courseId)
-                        }
-                    )
-                )
-            }
-
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.body<String>()
-                )
-            }
-        } catch (e: Exception) {
-            println("Login error Message ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
-
-
-    // Get Courses Assigned to a user
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun getUserCourses(token: String): List<GetUserCoursesResponse> {
-        try {
-            val response: HttpResponse = client.get {
-                url("${ApiConfig.COURSE_MANAGEMENT_API}/course_enrollment/getUserCourses")
-                contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-            }
-
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.body<String>()
-                )
-            }
-
-        } catch (e: Exception) {
-            println("Login error Message ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
-
-    // Give an object of an course using course-Id / My Course Detail Information
-    @OptIn(InternalAPI::class)
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun showMyCourses(
-        token: String,
-        myCourseId: ShowMyCoursesPayload
-    ): List<MyCoursesResponse> {
-        try {
-            val response: HttpResponse = client.post {
-                url("${ApiConfig.COURSE_MANAGEMENT_API}/my_courses/show")
-                contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-                body = Json.encodeToString(ShowMyCoursesPayload.serializer(), myCourseId)
-            }
-
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.body<String>()
-                )
-            }
-        } catch (e: Exception) {
-            println("Login error Message ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
+    //----------------------------------------------------------------------
 
     // Get In-App Notifications
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getNotifications(token: String, projectId: String):
+    suspend fun getNotifications(token : String, projectId : String) :
             List<GetNotificationsResponse> {
         try {
-            val response: HttpResponse = client.get {
+            val response : HttpResponse = client.get {
                 url("${ApiConfig.NOTIFICATION_MANAGEMENT}/notifications/appNotifications")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
-                parameter("projectId", projectId)
+                parameter("projectId",projectId)
             }
-            if (response.status.isSuccess()) {
+            if (response.status.isSuccess()){
                 return response.body()
-            } else {
+            }
+            else{
                 throw IOException(
                     response.body<String>()
                 )
             }
-        } catch (e: Exception) {
+        }
+        catch (e: Exception) {
             println("Login error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
 
-    // Get list of all content types
+    // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api
+    // Read all Policy Rates
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getContentTypes(token: String): List<GetContentTypes> {
+    suspend fun getPolicyRates(token : String) : List<GetPolicyRates> {
         try {
-            val response: HttpResponse = client.get {
-                url("${ApiConfig.COURSE_MANAGEMENT_API}/content_type/show")
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/policy_rates/")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("skip",0)
+                parameter("limit",10)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Get Policy Rates Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Read all vehicle types
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getVehicleTypes(token : String) : VehicleTypes {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/vehicle_type/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-
-            if (response.status.isSuccess()) {
+            if (response.status.isSuccess()){
                 return response.body()
-            } else {
+            }
+            else{
                 throw IOException(
                     response.body<String>()
                 )
             }
-        } catch (e: Exception) {
-            println("Login error Message ${e.message}")
+        }
+        catch (e: Exception) {
+            println("Vehicle Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
 
-//    POLICY DETAILS
+    // Read all Fuel Types
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getFuelTypes(token : String) : FuelTypes {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/fuel_type/all")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Vehicle Type Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
 
 
 }
