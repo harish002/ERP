@@ -149,7 +149,6 @@ fun SharedTransitionScope.CustSplashScreen(
 //        delay(2000) // Wait for 2 seconds
         if(Methods().retrieve_Token(context = context)?.isNotBlank() == true){
             navController.navigate(Graph.MAIN)
-
         }else{
         navController.navigate("AuthScreen/$encodedLogo/$cName")
     }

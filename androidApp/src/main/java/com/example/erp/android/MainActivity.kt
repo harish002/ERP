@@ -21,12 +21,12 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
 
-            val navController = rememberNavController()
+            val rootnavController = rememberNavController()
             val authNavController = rememberNavController()
             val mainNavController = rememberNavController()
             ERPTheme {
                 RootNavGraph(
-                    navController,
+                    rootnavController,
                     authNavController,
                     mainNavController,
                     LocalContext.current,

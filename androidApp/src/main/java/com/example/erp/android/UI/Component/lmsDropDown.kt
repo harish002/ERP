@@ -80,8 +80,145 @@ fun CustDropdown(
 }
 
 
+//@Composable
+//fun Selection_View(label: MutableState<String>):Boolean {
+//    var isContentVisible by remember { mutableStateOf(false) }
+//    var isEmailIdSelected by remember { mutableStateOf(true) }
+//
+//    Column(
+//        modifier = Modifier
+//            .padding(vertical = 12.dp)
+//            .background(
+//                color = Color.Transparent,
+//                shape = RoundedCornerShape(8.dp)
+//            )
+//            .border(1.dp, Color(0xFF949494), RoundedCornerShape(8.dp))
+//            .clickable { isContentVisible = !isContentVisible }
+//            .padding(16.dp)
+//    ) {
+//        Row(
+//            verticalAlignment = Alignment.CenterVertically,
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            Column(
+//                modifier = Modifier.weight(1f),
+//                verticalArrangement = Arrangement.spacedBy(8.dp)
+//            ) {
+//                Row(Modifier.fillMaxWidth(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                    horizontalArrangement = Arrangement.SpaceBetween){
+//                    Column(
+//                        Modifier.wrapContentWidth(),
+//                        verticalArrangement = Arrangement.Center,
+//                    ) {
+//                        Text(
+//                            text = "Choose Credential Type",
+//                            fontSize = 14.sp,
+//                            color = MaterialTheme.colorScheme.background,
+//                            fontWeight = FontWeight.Normal
+//                        )
+//
+//                        if(!isContentVisible){
+//                            Text(
+//                                text = if (isEmailIdSelected) "Email ID" else "Phone Number",
+//                                fontSize = 16.sp,
+//                                color = MaterialTheme.colorScheme.onSecondary,
+//                                fontWeight = FontWeight.SemiBold,
+//                                modifier = Modifier.padding(vertical = 4.dp)
+//                            )
+//                        }
+//                    }
+//
+//                    Image(
+//                        painter = painterResource(
+//                            id = if (!isContentVisible) R.drawable.union_2
+//                            else R.drawable.union_1
+//                        ),
+//                        contentDescription = null
+//                    )
+//                }
+//
+//            }
+//
+//        }
+//        if(isContentVisible){
+//            Spacer(modifier = Modifier.padding(10.dp))}
+//        if (isContentVisible) {
+//            CredentialOption(
+//                text = "Email ID",
+//                isSelected = isEmailIdSelected,
+//                onClick = {
+//                    isEmailIdSelected = true
+//                    label.value = "Enter Email ID"
+//                    isContentVisible = false
+//                }
+//            )
+//
+//            CredentialOption(
+//                text = "Phone Number",
+//                isSelected = !isEmailIdSelected,
+//                onClick = {
+//                    isEmailIdSelected = false
+//                    label.value = "Enter Phone Number"
+//                    isContentVisible = false
+//                }
+//            )
+//        }
+//    }
+//    return isEmailIdSelected
+//}
+//
+//@Composable
+//fun CredentialOption(text: String, isSelected: Boolean, onClick: () -> Unit) {
+//    Row(
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(vertical = 14.dp)
+//            .clickable(onClick = onClick),
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        Text(
+//            text = text,
+//            fontSize = 16.sp,
+//            color = MaterialTheme.colorScheme.onSecondary,
+//            fontWeight = FontWeight.SemiBold,
+//            modifier = Modifier.padding(vertical = 4.dp).weight(1f),
+//        )
+//
+//        Spacer(modifier = Modifier.width(8.dp))
+//
+//        val circleColor = if (isSelected) MaterialTheme.colorScheme.background
+//        else Color.Transparent
+//        val borderColor = if (isSelected) MaterialTheme.colorScheme.background
+//        else MaterialTheme.colorScheme.background
+//
+//        Box(
+//            modifier = Modifier
+//                .size(14.dp)
+//                .drawWithContent {
+//                    drawCircle(
+//                        color = circleColor,
+//                        radius = size.width / 2 - 4.dp.toPx()
+//                    )
+//
+//                    drawCircle(
+//                        color = borderColor,
+//                        radius = size.width / 2,
+//                        style = Stroke(width = 2.dp.toPx())
+//                    )
+//                }
+//        )
+//
+//    }
+//}
+//
+//
+
+
+
+
 @Composable
-fun Selection_View(label: MutableState<String>):Boolean {
+fun Selection_View(label: MutableState<String>): Boolean {
     var isContentVisible by remember { mutableStateOf(false) }
     var isEmailIdSelected by remember { mutableStateOf(true) }
 
@@ -104,46 +241,35 @@ fun Selection_View(label: MutableState<String>):Boolean {
                 modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Row(Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween){
-                    Column(
-                        Modifier.wrapContentWidth(),
-                        verticalArrangement = Arrangement.Center,
-                    ) {
-                        Text(
-                            text = "Choose Credential Type",
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.background,
-                            fontWeight = FontWeight.Normal
-                        )
+                Text(
+                    text = "Choose Credential Type",
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.background,
+                    fontWeight = FontWeight.Normal
+                )
 
-                        if(!isContentVisible){
-                            Text(
-                                text = if (isEmailIdSelected) "Email ID" else "Phone Number",
-                                fontSize = 16.sp,
-                                color = MaterialTheme.colorScheme.onSecondary,
-                                fontWeight = FontWeight.SemiBold,
-                                modifier = Modifier.padding(vertical = 4.dp)
-                            )
-                        }
-                    }
-
-                    Image(
-                        painter = painterResource(
-                            id = if (!isContentVisible) R.drawable.union_2
-                            else R.drawable.union_1
-                        ),
-                        contentDescription = null
+                if (!isContentVisible) {
+                    Text(
+                        text = if (isEmailIdSelected) "Email ID" else "Phone Number",
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSecondary,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(vertical = 4.dp)
                     )
                 }
-
             }
 
+            Image(
+                painter = painterResource(
+                    id = if (!isContentVisible) R.drawable.union_2 else R.drawable.union_1
+                ),
+                contentDescription = null
+            )
         }
-        if(isContentVisible){
-            Spacer(modifier = Modifier.padding(10.dp))}
+
         if (isContentVisible) {
+            Spacer(modifier = Modifier.padding(10.dp))
+
             CredentialOption(
                 text = "Email ID",
                 isSelected = isEmailIdSelected,
@@ -182,34 +308,27 @@ fun CredentialOption(text: String, isSelected: Boolean, onClick: () -> Unit) {
             fontSize = 16.sp,
             color = MaterialTheme.colorScheme.onSecondary,
             fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(vertical = 4.dp).weight(1f),
+            modifier = Modifier.weight(1f)
         )
 
         Spacer(modifier = Modifier.width(8.dp))
-
-        val circleColor = if (isSelected) MaterialTheme.colorScheme.background
-        else Color.Transparent
-        val borderColor = if (isSelected) MaterialTheme.colorScheme.background
-        else MaterialTheme.colorScheme.background
 
         Box(
             modifier = Modifier
                 .size(14.dp)
                 .drawWithContent {
                     drawCircle(
-                        color = circleColor,
+                        color = if (isSelected)
+                            Color.Blue else Color.Transparent,
                         radius = size.width / 2 - 4.dp.toPx()
                     )
 
                     drawCircle(
-                        color = borderColor,
+                        color = Color.Blue,
                         radius = size.width / 2,
                         style = Stroke(width = 2.dp.toPx())
                     )
                 }
         )
-
     }
 }
-
-

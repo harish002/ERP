@@ -175,7 +175,7 @@ fun SharedTransitionScope.Auth_Main(
                 modifier = Modifier
                     .fillMaxWidth()
                     .constrainAs(loginBtn) {
-                        bottom.linkTo(signUpBtn.top, margin = 12.dp)
+                        bottom.linkTo(parentCompany.top, margin = 12.dp)
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     },

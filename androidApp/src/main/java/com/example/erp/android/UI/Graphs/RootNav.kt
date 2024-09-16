@@ -1,5 +1,6 @@
 import android.annotation.SuppressLint
 import android.content.Context
+import android.net.Uri
 import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -9,6 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,6 +19,7 @@ import androidx.navigation.navArgument
 import com.example.erp.android.UI.Graphs.Graph
 import com.example.erp.android.UI.Screens.CustSplashScreen
 import com.example.lms.android.Services.ApiViewModel
+import com.example.lms.android.Services.Methods
 import com.example.lms.android.ui.Screens.Auth.Auth_Main
 import com.example.lms.android.ui.Screens.BottomNavScreens.MainScreen
 
@@ -25,19 +28,22 @@ import com.example.lms.android.ui.Screens.BottomNavScreens.MainScreen
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun RootNavGraph(
-    navController: NavHostController,
+    rootnavController: NavHostController,
     authNavController: NavHostController,
     mainNavController: NavHostController,
     context: Context,
 ) {
     val viewModel = ApiViewModel()
+    val context= LocalContext.current
+    val encodedLogo = Uri.encode("https://picsum.photos/300/300")
+    val cName = "1 Click Policy ERP"
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         SharedTransitionLayout {
             NavHost(
-                navController = navController,
+                navController = rootnavController,
                 route = Graph.ROOT,
                 startDestination =
 //                Graph.MAIN
@@ -45,7 +51,7 @@ fun RootNavGraph(
             ) {
 
                 composable(route = "Splashscreen") {
-                    CustSplashScreen(navController,
+                    CustSplashScreen(rootnavController,
                         animatedVisibilityScope = this)
                 }
 
@@ -73,7 +79,7 @@ fun RootNavGraph(
                     val logo = it.arguments?.getString("cLogo") ?: ""
                     val cName = it.arguments?.getString("cName") ?: ""
                     Auth_Main(
-                        navController,
+                        rootnavController,
                         authNavController,
                         mainNavController,
                         logo,
@@ -84,11 +90,20 @@ fun RootNavGraph(
                 composable(route = Graph.MAIN) {
 
                         MainScreen(
-                            navController,
+                            rootnavController,
                             mainNavController,
                             viewModel,
-                            context = context
-                        )
+                            context = context,
+                        ){
+                            Methods().clearToken(context)
+                            rootnavController.navigate("AuthScreen/$encodedLogo/$cName")
+                            {
+                                popUpTo(rootnavController.graph.startDestinationId) {
+                                    inclusive = true // This will also remove the start destination from the back stack
+                                }
+                            }
+
+                        }
 
                 }
             }
