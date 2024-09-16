@@ -19,18 +19,21 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.example.erp.android.ERPTheme
 import com.example.erp.android.UI.BottomBarGraph.BottomBarScreen
 import com.example.erp.android.UI.BottomBarGraph.BottomNav
+import com.example.erp.android.UI.Graphs.Graph
 import com.example.erp.android.UI.Graphs.MainNavGraph
 import com.example.erp.android.UI.Graphs.allRoutes
 import com.example.lms.android.Services.ApiViewModel
+import com.example.lms.android.Services.Methods
 
 @SuppressLint("SuspiciousIndentation")
 @RequiresApi(Build.VERSION_CODES.Q)
 @Composable
 fun MainScreen(
-    navController: NavHostController,
+    rootnavController: NavHostController,
     mainNavController: NavHostController,
-    viewModel:ApiViewModel,
+    viewModel: ApiViewModel,
     context: Context,
+    logout:()->Unit
 ) {
 
     var isBottomNavigationEnabled by remember { mutableStateOf(true) }
@@ -57,15 +60,19 @@ fun MainScreen(
             Box(
                 Modifier
                     .fillMaxSize()
-                    .padding(paddingValues)){
+                    .padding(paddingValues)
+            ) {
                 MainNavGraph(
-                    navController,
+                    rootnavController,
                     mainNavController,
                     context,
-                    viewModel
+                    viewModel,
+                    onBottomNavigationStateChanged = { isEnabled ->
+                        isBottomNavigationEnabled = isEnabled
+                    }
                 )
-                { isEnabled ->
-                    isBottomNavigationEnabled = isEnabled
+                {
+                    logout()
                 }
             }
 

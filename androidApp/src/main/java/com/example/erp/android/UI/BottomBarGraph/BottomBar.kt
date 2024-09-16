@@ -185,7 +185,7 @@ sealed class BottomBarScreen(
     data object Profile: BottomBarScreen(
         route = "profile",
         title = "Profile",
-        icon =  R.drawable.lock_01,
+        icon =  R.drawable.baseline_person_outline_24,
 //        icon_focused = Icons.Outlined.AccountCircle
     )
 
@@ -220,6 +220,6 @@ val Product_Screens = listOf(
     BottomBarScreen.Explore,
     BottomBarScreen.Search,
 //    BottomBarScreen.Learn,
-    BottomBarScreen.Progress,
+//    BottomBarScreen.Progress,
     BottomBarScreen.Profile
 )

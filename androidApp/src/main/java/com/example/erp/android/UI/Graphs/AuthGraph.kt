@@ -42,8 +42,8 @@ fun AuthNav_Graph(
     {
         composable(route = AuthScreen.Login.route) {
             Login_Screen(
-                navController=navController,
-                authnavController=authNavController, sheetState = sheetState,
+                navController = navController,
+                authnavController = authNavController, sheetState = sheetState,
                 scope = scope, viewModel = viewModel
             ) { onDismiss() }
         }
@@ -57,13 +57,13 @@ fun AuthNav_Graph(
         composable(
             route = "${AuthScreen.Otp.route}/{screentype}/{otptype}/{phone}",
             arguments = listOf(
-                navArgument("screentype"){
+                navArgument("screentype") {
                     type = NavType.StringType
                 },
-                navArgument("otptype"){
+                navArgument("otptype") {
                     type = NavType.StringType
                 },
-                navArgument("phone"){
+                navArgument("phone") {
                     type = NavType.StringType
                 }
             )
@@ -72,10 +72,10 @@ fun AuthNav_Graph(
             val phone = backStackEntry.arguments?.getString("phone") ?: ""
             val otptype = backStackEntry.arguments?.getString("otptype") ?: ""
             Otp_Screen(
-                mainNavController=navController,
+                mainNavController = navController,
                 authnavController = authNavController,
                 sheetState, scope, viewModel,
-                otptype, screentype,phone
+                otptype, screentype, phone
             ) {
                 onDismiss()
             }
@@ -86,7 +86,7 @@ fun AuthNav_Graph(
         ) { backStackEntry ->
             val otptype = backStackEntry.arguments?.getString("otptype") ?: ""
 
-            Get_OTP(navController = authNavController, sheetState, scope,viewModel, otptype) {
+            Get_OTP(navController = authNavController, sheetState, scope, viewModel, otptype) {
                 onDismiss()
             }
         }
@@ -102,7 +102,7 @@ fun AuthNav_Graph(
             val otptype = backStackEntry.arguments?.getString("otptype") ?: ""
             val phone = backStackEntry.arguments?.getString("phone") ?: ""
 
-            OtpSent_Screen(navController = authNavController, sheetState, otptype, scope,phone)
+            OtpSent_Screen(navController = authNavController, sheetState, otptype, scope, phone)
             { onDismiss() }
         }
         composable(route = AuthScreen.AccNot_Found.route) {

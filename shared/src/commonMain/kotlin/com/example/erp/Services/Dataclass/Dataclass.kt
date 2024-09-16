@@ -60,7 +60,7 @@ data class ProjectRole(
     val project: Project,
     val role: Role,
     val permissions: List<Permission>,
-    val scope: String,
+    val scope: String?=null,
     val admin: Boolean,
     val superAdmin: Boolean
 )
@@ -119,7 +119,7 @@ data class NotificationPreference(
 data class Project(
     val id: String,
     val name: String,
-    val subject: String,
+    val subject: String? = null,
     val department: DepartmentX,//String in Example
     val roles: List<String>?= emptyList(),
     val createdDate: String?= null,
@@ -137,7 +137,7 @@ data class Role(
 data class Permission(
     val id: String,
     val name: String,
-    val type: String,
+    val type: String? = null,
     val module: Module
 )
 

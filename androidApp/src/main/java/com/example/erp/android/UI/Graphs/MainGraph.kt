@@ -6,12 +6,12 @@ import androidx.annotation.RequiresApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.example.erp.android.UI.BottomBarGraph.BottomBarScreen
+import com.example.erp.android.UI.Screens.BottomNavScreens.FilterScreen
+import com.example.erp.android.UI.Screens.BottomNavScreens.Profile
 import com.example.lms.android.Services.ApiViewModel
 
 
@@ -34,7 +34,8 @@ fun MainNavGraph(
     context: Context,
     viewModel: ApiViewModel,
 //  paddingValues: PaddingValues,
-    onBottomNavigationStateChanged: (Boolean) -> Unit
+    onBottomNavigationStateChanged: (Boolean) -> Unit,
+    logout: () -> Unit
 ) {
     val exploreNavController = rememberNavController()
 
@@ -46,7 +47,7 @@ fun MainNavGraph(
     ) {
         BottomBarScreen.Explore.route?.let { it1 ->
             composable(it1) {
-                Text("Explore(mainNavController, viewModel, rootnavController, exploreNavController)")
+                FilterScreen()
             }
         }
 
@@ -67,7 +68,7 @@ fun MainNavGraph(
         }
         BottomBarScreen.Profile.route?.let { it1 ->
             composable(route = it1) {
-                Text("Profile(mainNavController, context, rootnavController)")
+                Profile(mainNavController, context, rootnavController, { logout() })
             }
         }
         BottomBarScreen.AllCategory.route?.let {
