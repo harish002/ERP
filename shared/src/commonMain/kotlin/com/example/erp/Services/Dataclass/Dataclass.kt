@@ -782,7 +782,7 @@ data class VehicleType(
 @Serializable
 data class VehicleTypes(
     val message: String,
-    val data : List<Data>
+    val data : List<Data>? = emptyList()
 )
 
 @Serializable
@@ -804,7 +804,7 @@ data class Data(
 @Serializable
 data class FuelTypes(
     val message: String,
-    val data : List<FuelTypeData>
+    val data : List<FuelTypeData>? = emptyList()
 )
 
 @Serializable
@@ -817,6 +817,154 @@ data class FuelTypeData(
 )
 
 //-----------------------------------------------------------------------------
+
+// Read all States ----------------------------------------------------------
+@Serializable
+data class GetAllStates(
+    val message: String,
+    val data : List<StatesData>? = emptyList()
+)
+
+@Serializable
+data class StatesData(
+    val name: String,
+    val description: String,
+    val id: String,
+    val created_at: String,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+//-----------------------------------------------------------------------------
+
+// Read All City Categorys -----------------------------------------------------
+@Serializable
+data class AllCityCategories(
+    val message: String,
+    val data : List<CityCategoryData>? = emptyList()
+)
+
+@Serializable
+data class CityCategoryData(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val status: Int,
+    val created_at: String? = null
+)
+
+//-----------------------------------------------------------------------------
+
+// Read all Cities -----------------------------------------------------
+@Serializable
+data class AllCities(
+    val message: String,
+    val data : List<CityData>
+)
+
+@Serializable
+data class CityData(
+    val name: String,
+    val description: String,
+    val state_id: String,
+    val city_category_id: String,
+    val id: String,
+    val city_category: CityCategoryFromCityApi,
+    val state: StateFromCityApi,
+    val status: Int,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null
+)
+
+@Serializable
+data class CityCategoryFromCityApi(
+    val name: String,
+    val description: String,
+    val id: String,
+    val status: Int,
+    val created_at: String? = null
+)
+
+@Serializable
+data class StateFromCityApi(
+    val name: String,
+    val description: String,
+    val id: String,
+    val created_at: String,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+//-----------------------------------------------------------------------------
+
+// Read all Insurance Types ---------------------------------------------------
+@Serializable
+data class InsuranceTypes(
+    val message: String,
+    val data : List<InsuranceTypeData>
+)
+
+@Serializable
+data class InsuranceTypeData(
+    val name: String,
+    val description: String,
+    val created_at: String? = null,
+    val id: String,
+    val status: Int
+)
+
+//-----------------------------------------------------------------------------
+
+// Read all Renewal Types ---------------------------------------------------
+@Serializable
+data class RenewalTypes(
+    val message: String,
+    val data : List<RenewalTypeData>
+)
+
+@Serializable
+data class RenewalTypeData(
+    val name: String,
+    val description: String,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+//-----------------------------------------------------------------------------
+
+// Read all Insurer Types ---------------------------------------------------
+@Serializable
+data class InsurerTypes(
+    val message: String,
+    val data : List<InsurerData>
+)
+
+@Serializable
+data class InsurerData(
+    val id: String,
+    val name: String,
+    val status: Int,
+    val description: String,
+    val created_at: String? = null
+)
+
+//-----------------------------------------------------------------------------
+
+
+
 
 //------------------------------------------------------------------------------------
 
