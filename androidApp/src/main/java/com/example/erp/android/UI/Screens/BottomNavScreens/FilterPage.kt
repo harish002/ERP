@@ -1,5 +1,6 @@
 package com.example.erp.android.UI.Screens.BottomNavScreens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LargeTopAppBar
@@ -29,9 +31,11 @@ import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,23 +48,42 @@ import androidx.compose.ui.unit.sp
 import com.example.erp.android.ERPTheme
 import com.example.erp.android.UI.Screens.PolicyListView
 import com.example.erp.android.UI.Screens.SelectionView
+import com.example.lms.Services.Dataclass.InsurerData
+import com.example.lms.android.Services.ApiViewModel
 import com.example.lms.android.Services.Methods
 import com.example.lms.android.ui.Component.Cust_Btn
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun FilterScreen() {
+fun FilterScreen(
+    viewModel: ApiViewModel
+) {
     val context = LocalContext.current
+    var loading by remember {mutableStateOf(true)}
+    val policyRatesList by viewModel.getPolicyRates.collectAsState()
+    val userData by viewModel.getUserdata.collectAsState()
+    val vehiclType by viewModel.getVehicleTypes.collectAsState()
+    val fuelType by viewModel.getFuelTypes.collectAsState()
+    //location Details
+    val allState by viewModel.getAllStates.collectAsState()
+    val cityCategory by viewModel.getAllCityCategory.collectAsState()
+    val allCities by viewModel.getAllCities.collectAsState()
+    //policy Details
+    val allInsuranceTypes by viewModel.getAllInsuranceTypes.collectAsState()
+    val allRenewalTypes by viewModel.getAllRenewalTypes.collectAsState()
+    val allInsurerTypes by viewModel.getAllInsurerTypes.collectAsState()
 
     val sheetState = androidx.compose.material3.rememberModalBottomSheetState()
 
-    var filterSheet by remember { mutableStateOf(false) }
+
+    var filterSheet by remember { mutableStateOf(false)}
 
     // Initialize states for vehicle type and fuel type
     val (vehicleTypeState, vehicleTypeDropdownState) = createSelectionState()
     val (fuelTypeState, fuelTypeDropdownState) = createSelectionState()
     val (ncbState, ncbDropdownState) = createSelectionState()
-
 
     // Location Details
     val (stateState, stateDropdownState) = createSelectionState()
@@ -73,15 +96,15 @@ fun FilterScreen() {
     val (insurerState, insurerDropdownState) = createSelectionState()
 
     // Data for various fields
-    val vehicleTypes = listOf("Car", "Truck", "Motorcycle", "Bicycle")
-    val fuelTypes = listOf("Petrol", "Diesel", "Electric", "Hybrid")
+    val vehicleTypes = vehiclType?.data
+    val fuelTypes = fuelType?.data
     val ncbTypes = listOf("YES", "NO")  // Static for NCB Type
-    val states = listOf("MP", "UP", "HR", "DL")
-    val cityCategories = listOf("Cat A", "Cat B", "Cat C")
-    val cities = listOf("YES", "NO", "Asdf", "NO")
-    val insuranceTypes = listOf("Comprehensive", "Third-Party", "Own Damage")
-    val renewalTypes = listOf("Rollover", "Brand New", "New")
-    val insurers = listOf("Tata", "Bajaj", "Reliance", "ICICI")
+    val states = allState?.data
+    val cityCategories = cityCategory?.data
+    val cities = allCities?.data
+    val insuranceTypes = allInsuranceTypes?.data
+    val renewalTypes = allRenewalTypes?.data
+    val insurers = allInsurerTypes?.data
 
 
     val scrollBehavior =
@@ -97,16 +120,50 @@ fun FilterScreen() {
         focusedIndicatorColor = MaterialTheme.colorScheme.background,
         unfocusedIndicatorColor = Color(0xFFD0D0D0)
     )
+    val coroutineScope = rememberCoroutineScope()
 
-    var loading by remember { mutableStateOf(true) }
+
 
     ERPTheme {
-        LaunchedEffect(context) {
-            Methods().retrieve_Token(context)?.let {
-                loading = false
-            }
+        LaunchedEffect(Unit) {
+            // Launching a coroutine in LaunchedEffect to initialize data
+            coroutineScope.launch {
+                Methods().retrieve_Token(context)?.let {
+                    viewModel.getAllPolicyRates(it)
+                }
+                try {
+                    Methods().retrieve_Token(context)?.let { token ->
+                        // Use async to call multiple suspend functions concurrently
+                        val userDeferred = async { viewModel.getUserWhoLoggedIn(token) }
+                        val vehicleTypesDeferred = async { viewModel.getAllVehicleTypes(token) }
+                        val statesDeferred = async { viewModel.getAllStates(token) }
+                        val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
+                        val allCityCategoryDeferred = async { viewModel.getAllCityCategory(token) }
+                        val allCitiesDeferred = async { viewModel.getAllCities(token) }
+                        val allInsuranceTypesDeferred = async { viewModel.getAllInsuranceTypes(token) }
+                        val allRenewalTypesDeferred = async { viewModel.getAllRenewalTypes(token) }
+                        val allInsurerTypesDeferred = async { viewModel.getAllInsurerTypes(token) }
 
+                        // Await all results
+                        userDeferred.await()
+                        vehicleTypesDeferred.await()
+                        statesDeferred.await()
+                        fuelTypesDeferred.await()
+                        allCitiesDeferred.await()
+                        allCityCategoryDeferred.await()
+                        allInsuranceTypesDeferred.await()
+                        allRenewalTypesDeferred.await()
+                        allInsurerTypesDeferred.await()
+
+                        loading = false
+                    }
+                } catch (e: Exception) {
+                    println("Error occurred: ${e.message}")
+                    loading = false // Handle loading state on error
+                }
+            }
         }
+
 //        val allCategorylist = viewModel.allCourseCate.collectAsState()
 //        val allPublishlist = viewModel.allPublishesCourses.collectAsState()
         Scaffold(
@@ -150,7 +207,7 @@ fun FilterScreen() {
                     },
                     navigationIcon = {
                         if (scrollBehavior.state.collapsedFraction < 1f) {
-                            CircularProfileWithWelcome("Test User")
+                            userData?.username?.let { CircularProfileWithWelcome(it) }
                         }
 //                        CircularProfileWithWelcome("Test User")
                     },
@@ -172,24 +229,13 @@ fun FilterScreen() {
                     .background(MaterialTheme.colorScheme.onBackground)
             ) {
 
-                items(7) {
-                    PolicyListView()
+
+                itemsIndexed(policyRatesList) {index,i->
+                    Log.d("policyRatesList Size",policyRatesList.size.toString())
+                    if (i != null) {
+                        PolicyListView(i,index+1)
+                    }
                 }
-
-                item {
-                    val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
-                    val dropDownViewSelected = remember { mutableStateOf(mapOf<String, Boolean>()) }
-                    val vehicleTypes = listOf("Car", "Truck", "Motorcycle", "Bicycle")
-
-                    SelectionView(
-                        selectionTitle = "Vehicle Type",
-                        staticValue = "Please select a vehicle",
-                        selectedValue = selectedValue,
-                        dropDownViewSelected = dropDownViewSelected,
-                        vehicleTypes = vehicleTypes
-                    )
-                }
-
             }
             if (filterSheet) {
                 ModalBottomSheet(
@@ -228,7 +274,7 @@ fun FilterScreen() {
                                 staticValue = "Please select a vehicle",
                                 selectedValue = vehicleTypeState,
                                 dropDownViewSelected = vehicleTypeDropdownState,
-                                vehicleTypes = vehicleTypes
+                                listTypes = vehicleTypes
                             )
 
                             // Fuel Type SelectionView
@@ -237,7 +283,7 @@ fun FilterScreen() {
                                 staticValue = "Please select a fuel",
                                 selectedValue = fuelTypeState,
                                 dropDownViewSelected = fuelTypeDropdownState,
-                                vehicleTypes = fuelTypes
+                                listTypes = fuelTypes
                             )
 
                             // NCB Type SelectionView
@@ -246,7 +292,7 @@ fun FilterScreen() {
                                 staticValue = "Please select an NCB Type",
                                 selectedValue = ncbState,
                                 dropDownViewSelected = ncbDropdownState,
-                                vehicleTypes = ncbTypes
+                                listTypes = ncbTypes
                             )
 
                             Text(
@@ -260,7 +306,7 @@ fun FilterScreen() {
                                 staticValue = "Please select a state",
                                 selectedValue = stateState,
                                 dropDownViewSelected = stateDropdownState,
-                                vehicleTypes = states
+                                listTypes = states
                             )
 
                             // City Category SelectionView
@@ -269,7 +315,7 @@ fun FilterScreen() {
                                 staticValue = "Please select a city category",
                                 selectedValue = cityCategoryState,
                                 dropDownViewSelected = cityCategoryDropdownState,
-                                vehicleTypes = cityCategories
+                                listTypes = cityCategories
                             )
 
                             // City SelectionView
@@ -278,7 +324,7 @@ fun FilterScreen() {
                                 staticValue = "Please select a city",
                                 selectedValue = cityState,
                                 dropDownViewSelected = cityDropdownState,
-                                vehicleTypes = cities
+                                listTypes = cities
                             )
                             Text(
                                 text = "Policy Details",
@@ -292,7 +338,7 @@ fun FilterScreen() {
                                 staticValue = "Please select an insurance type",
                                 selectedValue = insuranceTypeState,
                                 dropDownViewSelected = insuranceTypeDropdownState,
-                                vehicleTypes = insuranceTypes
+                                listTypes = insuranceTypes
                             )
 
                             // Renewal Type SelectionView
@@ -301,7 +347,7 @@ fun FilterScreen() {
                                 staticValue = "Please select a renewal type",
                                 selectedValue = renewalTypeState,
                                 dropDownViewSelected = renewalTypeDropdownState,
-                                vehicleTypes = renewalTypes
+                                listTypes = renewalTypes
                             )
 
                             // Insurer SelectionView
@@ -310,7 +356,7 @@ fun FilterScreen() {
                                 staticValue = "Please select an insurer",
                                 selectedValue = insurerState,
                                 dropDownViewSelected = insurerDropdownState,
-                                vehicleTypes = insurers
+                                listTypes = insurers
                             )
 
                         }
