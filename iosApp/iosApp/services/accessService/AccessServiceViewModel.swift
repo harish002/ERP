@@ -455,6 +455,47 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Search Policy Rates
+    func searchPolicyRates(token : String, searchPayload : SearchPolicyRatePayload) async throws -> Bool{
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().searchPolicyRateData(token: token, searchData: searchPayload)
+                        if !response.items.isEmpty{
+                            self.policyRatesData = response.items
+                            print("Filtered Policy Rate Data is Fetched!")
+                            continuation.resume(returning: true)
+                        }
+                        else {
+                            print("Filtered Policy Rate Data is empty!")
+                            continuation.resume(returning: false)
+                        }
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
     // Get Single Policy Rate using Policy Rate ID
     @Published var singlePolicyRate : PolicyRateData?
     func getSinglePolicyRate(token : String, id : String) async throws -> PolicyRateData {

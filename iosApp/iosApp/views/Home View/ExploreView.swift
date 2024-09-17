@@ -34,6 +34,8 @@ struct ExploreView: View {
     @State private var showAllPolicyRates : [PolicyRateData] = []
     @State private var policyRateId : String = ""
     
+    @State private var loader = false
+    
     var body: some View {
         
         ZStack{
@@ -111,71 +113,86 @@ struct ExploreView: View {
                 VStack(spacing:0){
                     
                     ScrollView{
-                            
-                        ForEach(showAllPolicyRates, id: \.self){policyRate in
-                                
-                                HStack(alignment:.top,spacing:12){
-                                    Circle()
-                                        .foregroundStyle(Color(hex: "#D9D9D9"))
-                                        .frame(width: 42,height: 42)
-                                        .overlay(content: {
-                                            Image(systemName: "doc")
-                                                .resizable()
-                                                .aspectRatio(contentMode: .fit)
-                                                .frame(width: 16, height: 16)
-                                          
-                                        })
+                        if loader {
+                            ProgressView()
+                                .padding(.top,20)
+                        }
+                        else {
+                            if !showAllPolicyRates.isEmpty {
+                                ForEach(showAllPolicyRates, id: \.self){policyRate in
                                     
-                                    HStack(alignment:.top,spacing:16){
-                                        VStack(alignment:.leading,spacing:4){
-                                            Text("PAYOUT %")
-                                                .font(.custom("Gilroy-Medium", size: 12))
+                                    HStack(alignment:.top,spacing:12){
+                                        Circle()
+                                            .foregroundStyle(Color(hex: "#D9D9D9"))
+                                            .frame(width: 42,height: 42)
+                                            .overlay(content: {
+                                                Image(systemName: "doc")
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fit)
+                                                    .frame(width: 16, height: 16)
+                                                
+                                            })
+                                        
+                                        HStack(alignment:.top,spacing:16){
+                                            VStack(alignment:.leading,spacing:4){
+                                                Text("PAYOUT %")
+                                                    .font(.custom("Gilroy-Medium", size: 12))
+                                                
+                                                Text(policyRate.payouts)
+                                                    .font(.custom("Gilroy-Bold", size: 14))
+                                            }
                                             
-                                            Text(policyRate.payouts)
-                                                .font(.custom("Gilroy-Bold", size: 14))
-                                        }
-                                        
-                                        
-                                        VStack(alignment:.leading,spacing:4){
-                                            Text("INSURER")
-                                                .font(.custom("Gilroy-Medium", size: 12))
                                             
-                                            Text(policyRate.insurer.name)
-                                                .font(.custom("Gilroy-Bold", size: 14))
-                                        }
-                                        
-                                        VStack(alignment:.leading,spacing:4){
-                                            Text("INSURANCE TYPE")
-                                                .font(.custom("Gilroy-Medium", size: 12))
+                                            VStack(alignment:.leading,spacing:4){
+                                                Text("INSURER")
+                                                    .font(.custom("Gilroy-Medium", size: 12))
+                                                
+                                                Text(policyRate.insurer.name)
+                                                    .font(.custom("Gilroy-Bold", size: 14))
+                                            }
                                             
-                                            Text(policyRate.insurance_type.name)
-                                                .font(.custom("Gilroy-Bold", size: 14))
+                                            VStack(alignment:.leading,spacing:4){
+                                                Text("INSURANCE TYPE")
+                                                    .font(.custom("Gilroy-Medium", size: 12))
+                                                
+                                                Text(policyRate.insurance_type.name)
+                                                    .font(.custom("Gilroy-Bold", size: 14))
+                                            }
+                                            
+                                            
                                         }
+                                        .offset(y:2)
                                         
+                                        Spacer()
                                         
+                                        Image(systemName: "arrowshape.right.fill")
                                     }
-                                    .offset(y:2)
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "arrowshape.right.fill")
-                                }
-                                .padding(.vertical,12)
-                                .padding(.horizontal,16)
-                                .contentShape(Rectangle())
-                                .onTapGesture {
-                                    print("Policy Rate Selected")
-                                    withAnimation{
-                                        isPolicyRateSelected = true
-                                        self.policyRateId = policyRate.id
+                                    .padding(.vertical,12)
+                                    .padding(.horizontal,16)
+                                    .contentShape(Rectangle())
+                                    .onTapGesture {
+                                        print("Policy Rate Selected")
+                                        withAnimation{
+                                            isPolicyRateSelected = true
+                                            self.policyRateId = policyRate.id
+                                        }
                                     }
+                                    
+                                    
+                                    Divider()
                                 }
-                               
-                                
-                                Divider()
                             }
+                            else {
+                                Text("No Data Found.")
+                                    .font(.custom("Gilroy-SemiBold", size: 28))
+                                    .padding(.top,20)
+                            }
+                        }
                     }
-                    
+                    .refreshable(action: {
+                        let token = retrieveToken() ?? ""
+                        getPolicyRatesList(token: token)
+                    }) 
                 }
                 
             }
@@ -201,6 +218,7 @@ struct ExploreView: View {
         .background(Color(hex: "#F8F8F8"))
         .onAppear{
             let token = retrieveToken() ?? ""
+            self.loader = true
             Task.init{
                 // Get User Data who is Logged In
                 do
@@ -226,36 +244,49 @@ struct ExploreView: View {
                     print("Data Fetching Failed -> \(description)")
                     snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
                 }
-                
-                // Get Policy Rates
-                do
-                {
-                    let response = try await accessModel.getPolicyRates(token: token)
-                    if !response.isEmpty {
-                        self.showAllPolicyRates = response
-                    }
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-                }
             }
             
-     
+            getPolicyRatesList(token: token)
+            
+        }
+        .onReceive(accessModel.$policyRatesData){data in
+            if !data.isEmpty {
+                showAllPolicyRates = data
+            }
         }
 
         
     }
+    
+    // Get Policy Rates
+    func getPolicyRatesList(token : String){
+        Task.init{
+            
+            do
+            {
+                let response = try await accessModel.getPolicyRates(token: token)
+                if !response.isEmpty {
+                    self.loader = false
+                    self.showAllPolicyRates = response
+                }
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
     
     func extractInitialsAndName(name:String, surname:String){
         

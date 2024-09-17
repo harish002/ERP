@@ -27,6 +27,8 @@ struct ApplyFiltersView: View {
        "Renewal Type" : false,
        "Insurer" : false
     ]
+    
+    
     @State private var selectedValue : [String : String] = [
         "Vehicle Type" : "",
         "Fuel Type" : "",
@@ -38,6 +40,19 @@ struct ApplyFiltersView: View {
         "Renewal Type" : "",
         "Insurer" : ""
     ]
+    
+    @State private var submittingValue : [String : String] = [
+        "Vehicle Type" : "",
+        "Fuel Type" : "",
+        "NCB" : "",
+        "State" : "",
+        "City Category" : "",
+        "City" : "",
+        "Insurance Type" : "",
+        "Renewal Type" : "",
+        "Insurer" : ""
+    ]
+    
     
     let vehicleTypes = ["HE", "Car", "Truck"]
     
@@ -121,6 +136,52 @@ struct ApplyFiltersView: View {
                         isButtonActive: true,
                         buttonTitle: "Apply Filters"
                     ){
+                        let payload = SearchPolicyRatePayload(
+                            state_id: submittingValue["State"] ?? "",
+                            city_id: submittingValue["City"] ?? "",
+                            city_category_id: submittingValue["City Category"] ?? "",
+                            vehicle_type_id: submittingValue["Vehicle Type"] ?? "",
+                            vehicle_model_id: "",
+                            renewal_type_id: submittingValue["Renewal Type"] ?? "",
+                            insurance_type_id: submittingValue["Insurance Type"] ?? "",
+                            insurer_id: submittingValue["Insurer"] ?? "",
+                            fuel_type_id: submittingValue["Fuel Type"] ?? "",
+                            status: Int32(submittingValue["NCB"] ?? "0") ?? 0, page: 1, size: 10
+                        )
+                        print("Apply Filter Payload -> \(payload)")
+                        let token = retrieveToken() ?? ""
+                        
+                        Task.init{
+                            do
+                            {
+                                let result = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
+                                if result {
+                                    applyFiltersViewClosed()
+                                }
+                                else {
+                                    applyFiltersViewClosed()
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                                        snackBar.show(message: "No Data Found, for the filters applied.", title: "No Data", type: .warning)
+                                    })
+                                   
+                                }
+                            }
+                            catch ApiError.networkFailure {
+                                // Handle network failure, e.g., show error Snackbar
+                                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+                            } catch ApiError.lowInternetConnection {
+                                // Handle low internet connection, e.g., show error Snackbar
+                                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+                            } catch ApiError.serverError(let status) {
+                                // Handle server errors, e.g., show error Snackbar
+                                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+                            } catch ApiError.unknownError(let description){
+                                // Handle unknown errors
+                                print("Data Fetching Failed -> \(description)")
+                                snackBar.show(message: description, title: "Error", type: .error)
+                            }
+                            
+                        }
                         
                     }
                     .padding(.vertical,16)
@@ -241,6 +302,7 @@ struct ApplyFiltersView: View {
                         .onTapGesture {
                             withAnimation{
                                 selectedValue[selectionTitle] = ""
+                                submittingValue[selectionTitle] = ""
                                 dropDownViewSelected[selectionTitle] = false
                                 print("\(String(describing: selectedValue[selectionTitle]))")
                             }
@@ -253,47 +315,53 @@ struct ApplyFiltersView: View {
                             switch selectionTitle {
                                 case "Vehicle Type":
                                 if let vehicle = singleList as? VehicleData {
-                                    singleFilterValue(title: selectionTitle, value: vehicle.name)
+                                    singleFilterValue(title: selectionTitle, value: vehicle.name, valueId: vehicle.id)
                                 }
                                 
                                 case "Fuel Type":
                                 if let fuel = singleList as? FuelTypeData {
-                                    singleFilterValue(title: selectionTitle, value: fuel.name)
+                                    singleFilterValue(title: selectionTitle, value: fuel.name, valueId: fuel.id)
                                 }
                                 
                                 case "NCB":
                                 if let ncb = singleList as? String {
-                                    singleFilterValue(title: selectionTitle, value: ncb)
+                                    if ncb == "Yes"{
+                                        singleFilterValue(title: selectionTitle, value: ncb, valueId: "1")
+                                    }
+                                    else {
+                                        singleFilterValue(title: selectionTitle, value: ncb, valueId: "0")
+                                    }
+                                    
                                 }
                                 
                                 case "State":
                                 if let state = singleList as? StatesData {
-                                    singleFilterValue(title: selectionTitle, value: state.name)
+                                    singleFilterValue(title: selectionTitle, value: state.name, valueId: state.id)
                                 }
                                 
                                 case "City Category":
                                 if let cityCategory = singleList as? CityCategoryData {
-                                    singleFilterValue(title: selectionTitle, value: cityCategory.name)
+                                    singleFilterValue(title: selectionTitle, value: cityCategory.name, valueId: cityCategory.id)
                                 }
                                 
                                 case "City":
                                 if let city = singleList as? CityData {
-                                    singleFilterValue(title: selectionTitle, value: city.name)
+                                    singleFilterValue(title: selectionTitle, value: city.name, valueId: city.id)
                                 }
                                 
                                 case "Insurance Type":
                                 if let insurance = singleList as? InsuranceTypeData {
-                                    singleFilterValue(title: selectionTitle, value: insurance.name)
+                                    singleFilterValue(title: selectionTitle, value: insurance.name, valueId: insurance.id)
                                 }
                                 
                                 case "Renewal Type":
                                 if let renewal = singleList as? RenewalTypeData {
-                                    singleFilterValue(title: selectionTitle, value: renewal.name)
+                                    singleFilterValue(title: selectionTitle, value: renewal.name, valueId: renewal.id)
                                 }
                                 
                                 case "Insurer" :
                                 if let insurer = singleList as? InsurerData {
-                                    singleFilterValue(title: selectionTitle, value: insurer.name)
+                                    singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
                                 }
                                 
                                 default :
@@ -328,7 +396,7 @@ struct ApplyFiltersView: View {
     }
     
     @ViewBuilder
-    func singleFilterValue(title: String,value: String) -> some View{
+    func singleFilterValue(title: String,value: String, valueId : String) -> some View{
         HStack{
             Text(value)
                 .font(.custom("Gilroy-Medium", size: 14))
@@ -351,8 +419,9 @@ struct ApplyFiltersView: View {
         .onTapGesture {
             withAnimation{
                 selectedValue[title] = value
+                submittingValue[title] = valueId
                 dropDownViewSelected[title] = false
-                print("\(String(describing: selectedValue[title]))")
+                print("\(String(describing: selectedValue[title])) :\(String(describing: submittingValue[title]))")
             }
         }
     }
