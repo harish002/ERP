@@ -225,6 +225,8 @@ data class VerifyOTP(
 )
 //-----------------------------------------------------------------------------
 
+
+// Module 2 ------------------------------------------------------------------
 // Get In-App Notifications -------------------------------------------------
 // Response Body
 @Serializable
@@ -281,7 +283,7 @@ data class City(
     val city_category_id: String,
     val id: String,
     val city_category: CityCategory,
-    val state: State,
+    val state: States,
     val status: Int,
     val created_at: String? = null,
     val created_by: String? = null,
@@ -293,7 +295,7 @@ data class City(
 data class VehicleModel(
     val id: String,
     val name: String,
-    val description: String?=null,
+    val description: String? = null,
     val vehicle_brand_id: String,
     val vehicle_type_id: String,
     val vehicle_brand: VehicleBrand,
@@ -358,7 +360,7 @@ data class CityCategory(
 )
 
 @Serializable
-data class State(
+data class States(
     val name: String,
     val description: String? = null,
     val id: String,
@@ -452,7 +454,7 @@ data class GetAllStates(
 @Serializable
 data class StatesData(
     val name: String,
-    val description: String?=null,
+    val description: String? = null,
     val id: String,
     val created_at: String,
     val created_by: String? = null,
@@ -492,7 +494,7 @@ data class AllCities(
 @Serializable
 data class CityData(
     val name: String,
-    val description: String?=null,
+    val description: String? = null,
     val state_id: String,
     val city_category_id: String,
     val id: String,
@@ -508,7 +510,7 @@ data class CityData(
 @Serializable
 data class CityCategoryFromCityApi(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val id: String,
     val status: Int,
     val created_at: String? = null
@@ -517,7 +519,7 @@ data class CityCategoryFromCityApi(
 @Serializable
 data class StateFromCityApi(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val id: String,
     val created_at: String,
     val created_by: String? = null,
@@ -539,7 +541,7 @@ data class InsuranceTypes(
 @Serializable
 data class InsuranceTypeData(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val created_at: String? = null,
     val id: String,
     val status: Int
@@ -557,7 +559,7 @@ data class RenewalTypes(
 @Serializable
 data class RenewalTypeData(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val id: String,
     val created_at: String? = null,
     val created_by: String? = null,
@@ -587,9 +589,33 @@ data class InsurerData(
 
 //-----------------------------------------------------------------------------
 
+// Search Policy Rates --------------------------------------------------------
+// Payload
+@Serializable
+data class SearchPolicyRatePayload(
+    val state_id: String,
+    val city_id: String,
+    val city_category_id: String,
+    val vehicle_type_id: String,
+    val vehicle_model_id: String,
+    val renewal_type_id: String,
+    val insurance_type_id: String,
+    val insurer_id: String,
+    val fuel_type_id: String,
+    val status: Int,
+    val page: Int,
+    val size: Int
+)
 
-
-
-//------------------------------------------------------------------------------------
+// Response Body
+@Serializable
+data class SearchPolicyRateData(
+    val items: List<PolicyRateData>,
+    val total: Int,
+    val page: Int,
+    val size: Int,
+    val pages: Int
+)
+//-------------------------------------------------------------------------------
 
 
