@@ -2,22 +2,19 @@ package com.example.lms.Services
 
 import com.example.lms.Services.Dataclass.AllCities
 import com.example.lms.Services.Dataclass.AllCityCategories
-import com.example.lms.Services.Dataclass.AllCourseCategoryResponse
 import com.example.lms.Services.Dataclass.FailedResponse
 import com.example.lms.Services.Dataclass.FuelTypes
 import com.example.lms.Services.Dataclass.GetAllStates
 import com.example.lms.Services.Dataclass.GetNotificationsResponse
 import com.example.lms.Services.Dataclass.GetPolicyRates
-import com.example.lms.Services.Dataclass.GetUserCoursesResponse
 import com.example.lms.Services.Dataclass.GetUserData
 import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
-import com.example.lms.Services.Dataclass.MyCoursesResponse
-import com.example.lms.Services.Dataclass.PublishedCourseResponse
+import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.RefreshToken
 import com.example.lms.Services.Dataclass.RenewalTypes
-import com.example.lms.Services.Dataclass.ShowCourseByCourseId
-import com.example.lms.Services.Dataclass.ShowMyCoursesPayload
+import com.example.lms.Services.Dataclass.SearchPolicyRateData
+import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.example.lms.Services.Dataclass.UserDetails
 import com.example.lms.Services.Dataclass.UserResponse
 import com.example.lms.Services.Dataclass.VehicleTypes
@@ -25,13 +22,10 @@ import com.example.lms.Services.Dataclass.VerifyOTP
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.forms.MultiPartFormDataContent
-import io.ktor.client.request.forms.formData
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
-import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
@@ -342,7 +336,7 @@ class ApiServices {
     // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api
     // Read all Policy Rates
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getPolicyRates(token : String) : List<GetPolicyRates> {
+    suspend fun getPolicyRates(token : String) : GetPolicyRates {
         try {
             val response : HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/")
@@ -350,6 +344,31 @@ class ApiServices {
                 header("Authorization", "Bearer $token")
                 parameter("skip",0)
                 parameter("limit",10)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Get Policy Rates Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Read Policy Rate with Id
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getPolicyRateDataUsingId(token : String, policyRateId : String) : PolicyRateData {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/policy_rates/$policyRateId")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+
             }
             if (response.status.isSuccess()){
                 return response.body()
@@ -410,7 +429,7 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Vehicle Type Error Message ${e.message}")
+            println("Fuel Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -436,7 +455,7 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Vehicle Type Error Message ${e.message}")
+            println("All States Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -460,7 +479,7 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Vehicle Type Error Message ${e.message}")
+            println("City Category Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -484,7 +503,7 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Vehicle Type Error Message ${e.message}")
+            println("Cities Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -510,7 +529,7 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Vehicle Type Error Message ${e.message}")
+            println("Get All Insurance Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -536,7 +555,7 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Get Policy Rates Error Message ${e.message}")
+            println("Get Renewal Types Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -560,7 +579,35 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Vehicle Type Error Message ${e.message}")
+            println("All Insurer Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Search Policy Rate Data
+    @OptIn(InternalAPI::class)
+    suspend fun searchPolicyRateData(token : String, searchData : SearchPolicyRatePayload) : SearchPolicyRateData {
+        try {
+            val response : HttpResponse = client.post{
+                url("${ApiConfig.SALES_TOOL_API}/policy_rates/search")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("page", 1)
+                parameter("size", 50)
+                body = Json.encodeToString(SearchPolicyRatePayload.serializer(),searchData)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+
+        }
+        catch (e: Exception) {
+            println("All Insurer Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }

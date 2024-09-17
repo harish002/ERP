@@ -7,14 +7,20 @@
 //
 
 import SwiftUI
+import shared
 
 struct PolicyRateDetailView: View {
+    
+    @ObservedObject var accessModel : AccessServiceViewModel
+    @ObservedObject var snackBar : SnackbarModel
+    let policyRateId : String
     
     let policyRateDetailViewClosed : () -> Void
     let columns = [
            GridItem(.flexible()),
            GridItem(.flexible()),
     ]
+    @State private var policyRateData : PolicyRateData?
     
     var body: some View {
         VStack(spacing:0){
@@ -36,88 +42,138 @@ struct PolicyRateDetailView: View {
                 VStack(alignment:.leading,spacing:8){
                     Text("PAYOUT %".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    Text("27")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let payout = policyRateData?.payouts {
+                        Text(payout)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("Insurer".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    Text("CARE")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let insurerName = policyRateData?.insurer.name {
+                        Text(insurerName)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
+                   
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("Insurance Type".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    Text("Comprehensive")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let insuranceType = policyRateData?.insurance_type.name {
+                        Text( insuranceType)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("Vehicle Type".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
                     
-                    Text("HE")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let vehicleModel = policyRateData?.vehicle_model.name {
+                        Text(vehicleModel)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
+                  
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("Renewal Type".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
                     
-                    Text("Brand New")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let renewalType = policyRateData?.renewal_type.name {
+                        Text(renewalType)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
+                  
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("Fuel Type".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
                     
-                    Text("PETROL")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let fuelType = policyRateData?.fuel_type.name{
+                        Text(fuelType)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
+                 
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("State".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
                     
-                    Text("HR")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let state = policyRateData?.city.state.name {
+                        Text(state)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
+                   
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("City Category".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
                     
-                    Text("CAT A")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let cityCategory = policyRateData?.city.city_category.name {
+                        Text(cityCategory)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
+                   
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("City".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    Text("Gurugram")
-                        .font(.custom("Gilroy-Bold", size: 16))
+                    if let cityName = policyRateData?.city.name {
+                        Text(cityName)
+                            .font(.custom("Gilroy-Bold", size: 16))
+                    }
+                    else {
+                        ProgressView()
+                    }
+                   
                 }
                 
                 VStack(alignment:.leading,spacing:8){
                     Text("NCB".uppercased())
                         .font(.custom("Gilroy-Medium", size: 12))
                     
-                      
-                    Text("Yes")
-                        .font(.custom("Gilroy-Bold", size: 16))
-                        .foregroundStyle(Color.green)
-
+                    if policyRateData?.status == 1 {
+                        Text("Yes")
+                            .font(.custom("Gilroy-Bold", size: 16))
+                            .foregroundStyle(Color.green)
+                    }
+                    else {
+                        Text("No")
+                            .font(.custom("Gilroy-Bold", size: 16))
+                            .foregroundStyle(Color.red)
+                    }
                     
-                        
-                    
-                   
                       
                 }
 
@@ -133,11 +189,38 @@ struct PolicyRateDetailView: View {
         })
         .padding(.all,8)
         .background(Color.white)
+        .onAppear{
+            let token = retrieveToken() ?? ""
+            print("Policy Rate Id -> \(policyRateId)")
+            Task{
+                do
+                {
+                    let result = try await accessModel.getSinglePolicyRate(token: token, id: policyRateId)
+                    self.policyRateData = result
+                    
+                }
+                catch ApiError.networkFailure {
+                    // Handle network failure, e.g., show error Snackbar
+                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+                } catch ApiError.lowInternetConnection {
+                    // Handle low internet connection, e.g., show error Snackbar
+                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+                } catch ApiError.serverError(let status) {
+                    // Handle server errors, e.g., show error Snackbar
+                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+                } catch ApiError.unknownError(let description){
+                    // Handle unknown errors
+                    print("Data Fetching Failed -> \(description)")
+                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+                }
+            }
+        }
+       
     }
 }
 
 #Preview {
-    PolicyRateDetailView(){
+    PolicyRateDetailView(accessModel: AccessServiceViewModel(), snackBar: SnackbarModel(),policyRateId: ""){
         
     }
 }

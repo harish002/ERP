@@ -24,14 +24,15 @@ struct ExploreView: View {
            GridItem(.flexible()),
     ]
     
-    @State private var categoryList : [AllCourseCategoryResponse] = []
-    @State private var coursesPublished : [PublishedCourseResponse] = []
     
     @State private var userName : String = ""
     @State private var nameInitials  = ""
     
     @State private var isPolicyRateSelected = false
     @State private var isFilterSelected = false
+    
+    @State private var showAllPolicyRates : [PolicyRateData] = []
+    @State private var policyRateId : String = ""
     
     var body: some View {
         
@@ -111,15 +112,18 @@ struct ExploreView: View {
                     
                     ScrollView{
                             
-                            ForEach(1..<20){i in
+                        ForEach(showAllPolicyRates, id: \.self){policyRate in
                                 
                                 HStack(alignment:.top,spacing:12){
                                     Circle()
                                         .foregroundStyle(Color(hex: "#D9D9D9"))
                                         .frame(width: 42,height: 42)
                                         .overlay(content: {
-                                            Text("\(i)")
-                                                .font(.custom("Gilroy-SemiBold", size: 16))
+                                            Image(systemName: "doc")
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 16, height: 16)
+                                          
                                         })
                                     
                                     HStack(alignment:.top,spacing:16){
@@ -127,7 +131,7 @@ struct ExploreView: View {
                                             Text("PAYOUT %")
                                                 .font(.custom("Gilroy-Medium", size: 12))
                                             
-                                            Text("27")
+                                            Text(policyRate.payouts)
                                                 .font(.custom("Gilroy-Bold", size: 14))
                                         }
                                         
@@ -136,7 +140,7 @@ struct ExploreView: View {
                                             Text("INSURER")
                                                 .font(.custom("Gilroy-Medium", size: 12))
                                             
-                                            Text("CARE")
+                                            Text(policyRate.insurer.name)
                                                 .font(.custom("Gilroy-Bold", size: 14))
                                         }
                                         
@@ -144,7 +148,7 @@ struct ExploreView: View {
                                             Text("INSURANCE TYPE")
                                                 .font(.custom("Gilroy-Medium", size: 12))
                                             
-                                            Text("Comprehensive")
+                                            Text(policyRate.insurance_type.name)
                                                 .font(.custom("Gilroy-Bold", size: 14))
                                         }
                                         
@@ -163,6 +167,7 @@ struct ExploreView: View {
                                     print("Policy Rate Selected")
                                     withAnimation{
                                         isPolicyRateSelected = true
+                                        self.policyRateId = policyRate.id
                                     }
                                 }
                                
@@ -177,7 +182,7 @@ struct ExploreView: View {
             .zIndex(0)
             
             if isPolicyRateSelected {
-                PolicyRateDetailView(){
+                PolicyRateDetailView(accessModel: accessModel,snackBar: snackBar, policyRateId: policyRateId){
                     withAnimation{
                         isPolicyRateSelected = false
                     }
@@ -187,7 +192,7 @@ struct ExploreView: View {
             
         }
         .sheet(isPresented: $isFilterSelected, content: {
-            ApplyFiltersView{
+            ApplyFiltersView(accessModel: accessModel, snackBar: snackBar){
                 withAnimation{
                     isFilterSelected = false
                 }
@@ -197,6 +202,7 @@ struct ExploreView: View {
         .onAppear{
             let token = retrieveToken() ?? ""
             Task.init{
+                // Get User Data who is Logged In
                 do
                 {
                     let data = try await accessModel.getUserData(token: token)
@@ -205,6 +211,29 @@ struct ExploreView: View {
                     let surName = data.surname.capitalized
 
                     extractInitialsAndName(name: name, surname: surName)
+                }
+                catch ApiError.networkFailure {
+                    // Handle network failure, e.g., show error Snackbar
+                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+                } catch ApiError.lowInternetConnection {
+                    // Handle low internet connection, e.g., show error Snackbar
+                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+                } catch ApiError.serverError(let status) {
+                    // Handle server errors, e.g., show error Snackbar
+                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+                } catch ApiError.unknownError(let description){
+                    // Handle unknown errors
+                    print("Data Fetching Failed -> \(description)")
+                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+                }
+                
+                // Get Policy Rates
+                do
+                {
+                    let response = try await accessModel.getPolicyRates(token: token)
+                    if !response.isEmpty {
+                        self.showAllPolicyRates = response
+                    }
                 }
                 catch ApiError.networkFailure {
                     // Handle network failure, e.g., show error Snackbar

@@ -411,6 +411,438 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api -----------------------------------------------------
+    // Read all Policy Rates
+    @Published var policyRatesData : [PolicyRateData] = []
+    func getPolicyRates(token : String) async throws -> [PolicyRateData] {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getPolicyRates(token: token)
+                        
+                        if !response.data.isEmpty {
+                            self.policyRatesData = response.data
+                            continuation.resume(returning: response.data)
+                        }
+                        else {
+                            print("Policy Rate Data is empty!")
+                            continuation.resume(returning: [])
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Get Single Policy Rate using Policy Rate ID
+    @Published var singlePolicyRate : PolicyRateData?
+    func getSinglePolicyRate(token : String, id : String) async throws -> PolicyRateData {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getPolicyRateDataUsingId(token: token, policyRateId: id)
+                        self.singlePolicyRate = response
+                        continuation.resume(returning: response)
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+
+    // Read all vehicle types
+    @Published var vehicleTypes : [VehicleData] = []
+    func getVehicleTypes(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getVehicleTypes(token: token)
+                        if ((response.data?.isEmpty) != nil) {
+                            guard let tempList = response.data else {
+                                return
+                            }
+                            self.vehicleTypes = tempList
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Vehicle Type Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Read all Fuel Types
+    @Published var fuelTypes : [FuelTypeData] = []
+    func getFuelTypes(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getFuelTypes(token: token)
+                        if ((response.data?.isEmpty) != nil) {
+                            guard let tempList = response.data else {
+                                return
+                            }
+                            self.fuelTypes = tempList
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Fuel Type Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Read all States Data
+    @Published var getAllStatesData : [StatesData] = []
+    func getAllStates(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllStates(token: token)
+                        if ((response.data?.isEmpty) != nil) {
+                            guard let tempList = response.data else {
+                                return
+                            }
+                            self.getAllStatesData = tempList
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Fuel Type Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    
+    // Read all City Category Data
+    @Published var getAllCityCategories : [CityCategoryData] = []
+    func getAllCityCategories(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllCityCategory(token: token)
+                        if ((response.data?.isEmpty) != nil) {
+                            guard let tempList = response.data else {
+                                return
+                            }
+                            self.getAllCityCategories = tempList
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("City Category Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    
+    // Read all City Data
+    @Published var getAllCites : [CityData] = []
+    func getAllCitiesData(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllCities(token: token)
+                        if (!response.data.isEmpty) {
+                            self.getAllCites = response.data
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Cities Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    
+    // Read all Insurance Types Data
+    @Published var insuranceTypes : [InsuranceTypeData] = []
+    func getAllInsuranceTypes(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllInsuranceTypes(token: token)
+                        if (!response.data.isEmpty) {
+                            self.insuranceTypes = response.data
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Insurances Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Read all Renewal Types Data
+    @Published var renewalTypes : [RenewalTypeData] = []
+    func getAllRenewalTypes(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllRenewalTypes(token: token)
+                        if (!response.data.isEmpty) {
+                            self.renewalTypes = response.data
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Renewal Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    
+    // Read all Insurer Types Data
+    @Published var insurerTypes : [InsurerData] = []
+    func getAllInsurerTypes(token: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllInsurerTypes(token: token)
+                        if (!response.data.isEmpty) {
+                            self.insurerTypes = response.data
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Insurer Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    // ----------------------------------------------------------------------------------------------------------------
     
      
     //---------------------------------------------------------xx----------------------------------------------------------------

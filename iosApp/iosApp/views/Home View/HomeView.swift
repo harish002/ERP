@@ -85,9 +85,114 @@ struct HomeView: View {
                 else {
                     print("NavigationStack is not Empty!")
                 }
+                
+                let token = retrieveToken() ?? ""
+                
+                vehicleTypes(token: token)
+                fuelTypes(token: token)
+                allStates(token: token)
+                cityCategories(token: token)
+
             }
         }
+    
+    func vehicleTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getVehicleTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func fuelTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getFuelTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func allStates(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllStates(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func cityCategories(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllCityCategories(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+
+    
+    
 }
+
 
 #Preview {
     HomeView(

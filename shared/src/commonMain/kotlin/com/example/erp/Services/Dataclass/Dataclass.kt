@@ -227,380 +227,6 @@ data class VerifyOTP(
 
 
 // Module 2 ------------------------------------------------------------------
-// Course Category
-// Give list of all course category
-// All Course Category Response
-@Serializable
-data class AllCourseCategoryResponse(
-    val id : String,
-    val title : String
-)
-
-// Give a list of all Published Courses
-// All Published Courses Response
-@Serializable
-data class PublishedCourseResponse(
-    val id: String,
-    val title: String,
-    val description: String,
-    val thumbnail_id: String? = null,
-    val thumbnail_url: String,
-    val course_category_id: String,
-    val organization_id: String,
-    val project_id: String,
-    val bundle_id: String? = null,
-    val is_draft: Boolean,
-    val is_final: Boolean,
-    val is_published: Boolean,
-    val instructor_id: String,
-    val community_id: String? = null,
-    val course_fee: Int,
-    val currency: String,
-    val is_public: Boolean,
-    val is_encrypted: Boolean,
-    val is_training_course: Boolean,
-    val is_certificate_course: Boolean,
-    val collection_guid: String? = null,
-    val collection_object: String? = null,
-    val is_free: Boolean,
-    val discounted_fee: Int? = null,
-    val course_length: Double,
-    val average_rating: String,
-    val rating_count: Int,
-    val qb_subject_id: String? = null,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null,
-    val instructor: Instructor? = null
-)
-
-@Serializable
-data class Instructor(
-    val id: String? = null,
-    val name: String? = null,
-    val email: String? = null,
-    val phone: String? = null,
-    val project_id: String? = null,
-    val organization_id: String,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null
-)
-
-
-// Give list of course filtered by Course Category ID
-// List of Course Category ID Request
-@Serializable
-data class AllCourseByCategoryIDRequest(
-    val course_category_id : String
-)
-
-// Response for course filtered by course category ID is same as { PublishedCourseResponse }
-
-// Get an object of Course by Course Id -------------------------
-// Response Body
-@Serializable
-data class ShowCourseByCourseId(
-    val id: String,
-    val title: String,
-    val description: String,
-    val thumbnail_id: String? = null,
-    val thumbnail_url: String,
-    val course_category_id: String,
-    val organization_id: String,
-    val project_id: String,
-    val bundle_id: String? = null,
-    val is_draft: Boolean,
-    val is_final: Boolean,
-    val is_published: Boolean,
-    val instructor_id: String,
-    val community_id: String? = null,
-    val course_fee: Int,
-    val currency: String,
-    val is_public: Boolean,
-    val is_encrypted: Boolean,
-    val is_training_course: Boolean,
-    val is_certificate_course: Boolean,
-    val collection_guid: String? = null,
-    val collection_object: String? = null,
-    val is_free: Boolean,
-    val discounted_fee: Int? = null,
-    val course_length: Double,
-    val average_rating: String,
-    val rating_count: Int,
-    val qb_subject_id: String? = null,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null,
-    val sections : List<Section>? = emptyList(),
-    val instructor: Instructor? = null
-)
-
-@Serializable
-data class Section(
-    val id: String,
-    val title: String,
-    val hierarchy: Int,
-    val course_id: String,
-    val qb_chapter_id: String? = null,
-    val section_length: Int,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null,
-    val contents: List<Content>? = emptyList()
-)
-
-@Serializable
-data class Content(
-    val id: String,
-    val title: String,
-    val description: String,
-    val media_id: String? = null,
-    val media_url: String? = null,
-    val thumbnail_id: String? = null,
-    val thumbnail_url:  String? = null,
-    val hierarchy: Int,
-    val course_id: String,
-    val section_id: String,
-    val content_type_id: String,
-    val qb_topic_id: String? = null,
-    val content_length: Int,
-    val created_by:  String? = null,
-    val updated_by:  String? = null,
-    val deleted_by:  String? = null,
-    val created_at:  String? = null,
-    val updated_at:  String? = null,
-    val deleted_at:  String? = null,
-    val remarks:  String? = null
-)
-//-----------------------------------------------------------------------------
-
-
-// Get Courses Assigned to a user -------------------------
-// Response Body
-@Serializable
-data class GetUserCoursesResponse(
-    val id: String,
-    val title: String,
-    val description: String,
-    val thumbnail_id: String? = null,
-    val thumbnail_url: String,
-    val course_category_id: String,
-    val organization_id: String,
-    val project_id: String,
-    val bundle_id: String? = null,
-    val is_draft: Boolean,
-    val is_final: Boolean,
-    val is_published: Boolean,
-    val instructor_id: String,
-    val community_id: String? = null,
-    val course_fee: Int,
-    val currency: String,
-    val is_public: Boolean,
-    val is_encrypted: Boolean,
-    val is_training_course: Boolean,
-    val is_certificate_course: Boolean,
-    val collection_guid: String? = null,
-    val collection_object: String? = null,
-    val is_free: Boolean,
-    val discounted_fee: Int? = null,
-    val course_length: Double,
-    val average_rating: String,
-    val rating_count: Int,
-    val qb_subject_id: String? = null,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null,
-    val first_content: FirstContent,
-    val progress_hours: Double,
-    val instructor: Instructor? = null,
-    val content: List<Content>? = emptyList()
-)
-
-@Serializable
-data class FirstContent(
-    val id: String,
-    val title: String,
-    val description: String,
-    val media_id: String,
-    val media_url: String,
-    val thumbnail_id: String? = null,
-    val thumbnail_url: String? = null,
-    val hierarchy: Int,
-    val course_id: String,
-    val section_id: String,
-    val content_type_id: String,
-    val qb_topic_id: String? = null,
-    val content_length: Int,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null
-)
-//-----------------------------------------------------------------------------
-
-// Give an object of an course using course-Id / My Course Detail Information --------
-// Payload
-@Serializable
-data class ShowMyCoursesPayload(
-    val id : String
-)
-
-// Response Body
-@Serializable
-data class MyCoursesResponse(
-    val id: String,
-    val title: String,
-    val description: String,
-    val thumbnail_id: String? = null,
-    val thumbnail_url: String,
-    val course_category_id: String,
-    val organization_id: String,
-    val project_id: String,
-    val bundle_id: String? = null,
-    val is_draft: Boolean,
-    val is_final: Boolean,
-    val is_published: Boolean,
-    val instructor_id: String,
-    val community_id: String? = null,
-    val course_fee: Int,
-    val currency: String,
-    val is_public: Boolean,
-    val is_encrypted: Boolean,
-    val is_training_course: Boolean,
-    val is_certificate_course: Boolean,
-    val collection_guid: String,
-    val collection_object: String? = null,
-    val is_free: Boolean,
-    val discounted_fee: Int? = null,
-    val course_length: Double,
-    val average_rating: String,
-    val rating_count: Int,
-    val qb_subject_id: String? = null,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null,
-    val sections: List<MyCourse_Section>? = emptyList(),
-    val instructor: MyCoursse_Instructor? = null
-)
-
-@Serializable
-data class MyCourse_Section(
-    val id: String,
-    val title: String,
-    val hierarchy: Int? = null,
-    val course_id: String,
-    val qb_chapter_id: String? = null,
-    val section_length: Int,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null,
-    val contents: List<MyCourse_Content>? = emptyList()
-)
-
-@Serializable
-data class MyCoursse_Instructor(
-    val id: String,
-    val name: String,
-    val email: String,
-    val phone: String,
-    val project_id: String,
-    val organization_id: String,
-    val created_by: String? = null,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null
-)
-
-@Serializable
-data class MyCourse_Content(
-    val id: String,
-    val title: String,
-    val description: String,
-    val media_id: String,
-    val media_url: String,
-    val thumbnail_id: String? = null,
-    val thumbnail_url: String? = null,
-    val hierarchy: Int? = null,
-    val course_id: String,
-    val section_id: String,
-    val content_type_id: String,
-    val qb_topic_id: String? = null,
-    val content_length: Int,
-    val created_by: String,
-    val updated_by: String? = null,
-    val deleted_by: String? = null,
-    val created_at: String? = null,
-    val updated_at: String? = null,
-    val deleted_at: String? = null,
-    val remarks: String? = null,
-    val user_progress: UserProgress? = null,
-    val user_assessment: UserAssessment? = null
-)
-
-@Serializable
-data class UserProgress(
-    val id: String,
-    val user_id: String,
-    val course_id: String,
-    val section_id: String,
-    val content_id: String,
-    val is_completed: Boolean,
-    val progress_hours: Double,
-    val created_at: String? = null,
-    val updated_at: String? = null
-)
-
-@Serializable
-data class UserAssessment(
-    val id: String,
-    val user_id: String,
-    val course_id: String,
-    val section_id: String,
-    val content_id: String,
-    val obtained_marks: Int,
-    val total_marks: Int,
-    val is_completed: Boolean,
-    val created_at: String? = null,
-    val updated_at: String? = null
-)
-
-//-----------------------------------------------------------------------------
-
 // Get In-App Notifications -------------------------------------------------
 // Response Body
 @Serializable
@@ -657,7 +283,7 @@ data class City(
     val city_category_id: String,
     val id: String,
     val city_category: CityCategory,
-    val state: State,
+    val state: States,
     val status: Int,
     val created_at: String? = null,
     val created_by: String? = null,
@@ -669,7 +295,7 @@ data class City(
 data class VehicleModel(
     val id: String,
     val name: String,
-    val description: String,
+    val description: String? = null,
     val vehicle_brand_id: String,
     val vehicle_type_id: String,
     val vehicle_brand: VehicleBrand,
@@ -734,7 +360,7 @@ data class CityCategory(
 )
 
 @Serializable
-data class State(
+data class States(
     val name: String,
     val description: String? = null,
     val id: String,
@@ -782,11 +408,11 @@ data class VehicleType(
 @Serializable
 data class VehicleTypes(
     val message: String,
-    val data : List<Data>? = emptyList()
+    val data : List<VehicleData>? = emptyList()
 )
 
 @Serializable
-data class Data(
+data class VehicleData(
     val name: String,
     val description: String? = null,
     val id: String,
@@ -828,7 +454,7 @@ data class GetAllStates(
 @Serializable
 data class StatesData(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val id: String,
     val created_at: String,
     val created_by: String? = null,
@@ -868,7 +494,7 @@ data class AllCities(
 @Serializable
 data class CityData(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val state_id: String,
     val city_category_id: String,
     val id: String,
@@ -884,7 +510,7 @@ data class CityData(
 @Serializable
 data class CityCategoryFromCityApi(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val id: String,
     val status: Int,
     val created_at: String? = null
@@ -893,7 +519,7 @@ data class CityCategoryFromCityApi(
 @Serializable
 data class StateFromCityApi(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val id: String,
     val created_at: String,
     val created_by: String? = null,
@@ -915,7 +541,7 @@ data class InsuranceTypes(
 @Serializable
 data class InsuranceTypeData(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val created_at: String? = null,
     val id: String,
     val status: Int
@@ -933,7 +559,7 @@ data class RenewalTypes(
 @Serializable
 data class RenewalTypeData(
     val name: String,
-    val description: String,
+    val description: String? = null,
     val id: String,
     val created_at: String? = null,
     val created_by: String? = null,
@@ -957,15 +583,39 @@ data class InsurerData(
     val id: String,
     val name: String,
     val status: Int,
-    val description: String,
+    val description: String? = null,
     val created_at: String? = null
 )
 
 //-----------------------------------------------------------------------------
 
+// Search Policy Rates --------------------------------------------------------
+// Payload
+@Serializable
+data class SearchPolicyRatePayload(
+    val state_id: String,
+    val city_id: String,
+    val city_category_id: String,
+    val vehicle_type_id: String,
+    val vehicle_model_id: String,
+    val renewal_type_id: String,
+    val insurance_type_id: String,
+    val insurer_id: String,
+    val fuel_type_id: String,
+    val status: Int,
+    val page: Int,
+    val size: Int
+)
 
-
-
-//------------------------------------------------------------------------------------
+// Response Body
+@Serializable
+data class SearchPolicyRateData(
+    val items: List<PolicyRateData>,
+    val total: Int,
+    val page: Int,
+    val size: Int,
+    val pages: Int
+)
+//-------------------------------------------------------------------------------
 
 
