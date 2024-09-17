@@ -39,8 +39,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -50,12 +48,24 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.example.erp.android.R
+import com.example.lms.Services.Dataclass.CityCategory
+import com.example.lms.Services.Dataclass.CityCategoryData
+import com.example.lms.Services.Dataclass.CityData
+import com.example.lms.Services.Dataclass.FuelType
+import com.example.lms.Services.Dataclass.FuelTypeData
+import com.example.lms.Services.Dataclass.GetAllStates
+import com.example.lms.Services.Dataclass.InsuranceTypeData
+import com.example.lms.Services.Dataclass.InsurerData
+import com.example.lms.Services.Dataclass.PolicyRateData
+import com.example.lms.Services.Dataclass.RenewalTypeData
+import com.example.lms.Services.Dataclass.StatesData
+import com.example.lms.Services.Dataclass.VehicleData
+import com.example.lms.Services.Dataclass.VehicleType
 import com.example.lms.android.ui.Component.CredentialOption
 
 @Composable
-fun PolicyListView() {
+fun PolicyListView(data: PolicyRateData, index: Int) {
     var showPopup by remember { mutableStateOf(false) }
-
     Row(
         modifier = Modifier
             .clickable { showPopup = !showPopup }
@@ -74,10 +84,11 @@ fun PolicyListView() {
                         radius = 60f
                     )
                 },
-            text = "it1",
+            text = "$index",
         )
 
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -88,18 +99,21 @@ fun PolicyListView() {
                 modifier = Modifier.padding(bottom = 2.dp)
             )
 
-            Text(
-                text = "it1",
-                color = Color.Black,
+            if (data != null) {
+                Text(
+                    text = data.payouts,
+                    color = Color.Black,
 
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom = 2.dp)
+                )
+            }
 
 
         }
         Spacer(modifier = Modifier.padding(4.dp))
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -110,18 +124,21 @@ fun PolicyListView() {
                 modifier = Modifier.padding(bottom = 2.dp)
             )
 
-            Text(
-                text = "it1",
-                color = Color.Black,
-
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
+            data.insurer.name.let {
+                Text(
+                    text = it,
+                    color = Color.Black,
+                    maxLines = 2,
+                    style = MaterialTheme.typography.bodyLarge,
+                    modifier = Modifier.padding(bottom = 2.dp)
+                )
+            }
 
 
         }
         Spacer(modifier = Modifier.padding(4.dp))
         Column(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
@@ -133,7 +150,7 @@ fun PolicyListView() {
             )
 
             Text(
-                text = "it1",
+                text = "${data.insurance_type?.name}",
                 color = Color.Black,
                 style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.padding(bottom = 2.dp)
@@ -155,14 +172,14 @@ fun PolicyListView() {
             )
         ) {
 
-            PolicyToolsGridView { showPopup = false }
+            PolicyToolsGridView (data){ showPopup = false }
         }
     }
 }
 
 
 @Composable
-fun PolicyToolsGridView(onDismiss: () -> Unit) {
+fun PolicyToolsGridView(data: PolicyRateData, onDismiss: () -> Unit) {
     val items = (1..5).toList() // Example data set
     Card(
         modifier = Modifier
@@ -203,34 +220,34 @@ fun PolicyToolsGridView(onDismiss: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item() {
-                GridItem("Payout %", "value")
+                GridItem("Payout %", data.payouts)
             }
             item() {
-                GridItem("Insurer", "value")
+                GridItem("Insurer", data.insurer.name)
             }
             item() {
-                GridItem("Insurance Type", "value")
+                GridItem("Insurance Type", data.insurance_type.name)
             }
             item() {
-                GridItem("Vehicle Type", "value")
+                GridItem("Vehicle Type", data.vehicle_model.vehicle_type.name)
             }
             item() {
-                GridItem("Renewal Type", "value")
+                GridItem("Renewal Type", data.renewal_type.name)
             }
             item() {
-                GridItem("Fuel Type", "value")
+                GridItem("Fuel Type", data.fuel_type.name)
             }
             item() {
-                GridItem("Stare", "value")
+                GridItem("State", data.city.state.name)
             }
             item() {
-                GridItem("City Category", "value")
+                GridItem("City Category", data.city.city_category.name)
             }
             item() {
-                GridItem("City", "value")
+                GridItem("City", data.city.name)
             }
             item() {
-                GridItem("NCB", "value")
+                GridItem("NCB", data.status.toString())
             }
         }
     }
@@ -250,8 +267,16 @@ fun GridItem(key: String, values: String) {
             style = MaterialTheme.typography.bodySmall
         )
         Text(
-            text = values,
-            color = Color.Black,
+            text =  when (values) {
+                "1" -> "Yes"
+                "0" -> "No"
+                else -> values
+            },
+            color = when (values) {
+                "1" -> Color.Green
+                "0" -> Color.Red
+                else -> Color.Black
+            },
             style = MaterialTheme.typography.bodyLarge
         )
 
@@ -346,18 +371,21 @@ fun Selection_View(
     return isEmailIdSelected
 }
 
+
+
 @Composable
 fun SelectionView(
     selectionTitle: String,
     staticValue: String,
     selectedValue: MutableState<Map<String, String>>,
     dropDownViewSelected: MutableState<Map<String, Boolean>>,
-    vehicleTypes: List<String>
+    listTypes: List<Any>?// Keep as List<Any?>
 ) {
     val isSelected = selectedValue.value[selectionTitle].isNullOrEmpty()
     val isDropdownVisible = dropDownViewSelected.value[selectionTitle] ?: false
 
-    Row(verticalAlignment = Alignment.CenterVertically,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .padding(vertical = 4.dp)
@@ -367,16 +395,12 @@ fun SelectionView(
             )
             .border(width = 1.2.dp, color = Color(0xFF949494), shape = RoundedCornerShape(8.dp))
             .clickable {
-                dropDownViewSelected.value = dropDownViewSelected.value
-                    .toMutableMap()
-                    .apply {
-                        put(
-                            selectionTitle,
-                            !(dropDownViewSelected.value[selectionTitle] ?: false)
-                        )
-                    }
+                dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                    put(selectionTitle, !(dropDownViewSelected.value[selectionTitle] ?: false))
+                }
             }
-            .padding(16.dp),){
+            .padding(16.dp),
+    ) {
         Column(
             modifier = Modifier.weight(1f),
             horizontalAlignment = Alignment.Start,
@@ -397,13 +421,11 @@ fun SelectionView(
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text(
-                        text = if (isSelected) staticValue else selectedValue.value[selectionTitle]
-                            ?: "",
+                        text = if (isSelected) staticValue else selectedValue.value[selectionTitle] ?: "",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.Medium,
                         color = Color.Black,
                     )
-
                 }
 
                 if (isDropdownVisible) {
@@ -412,67 +434,151 @@ fun SelectionView(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    selectedValue.value = selectedValue.value
-                                        .toMutableMap()
-                                        .apply {
-                                            put(selectionTitle, "")
-                                        }
+                                    selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                        put(selectionTitle, "")
+                                    }
                                     dropDownViewSelected.value =
-                                        dropDownViewSelected.value
-                                            .toMutableMap()
-                                            .apply {
-                                                put(selectionTitle, false)
-                                            }
+                                        dropDownViewSelected.value.toMutableMap().apply {
+                                            put(selectionTitle, false)
+                                        }
                                 },
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-//                        Text(
-//                            text = staticValue,
-//                            style = MaterialTheme.typography.bodyLarge,
-//                            fontSize = 14.sp
-//                        )
-//
-//                        Spacer(modifier = Modifier.weight(1f))
-
+                            // Optional static value row or any other UI component can be added here
                         }
 
-                        vehicleTypes.forEach { type ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable {
-                                        selectedValue.value =
-                                            selectedValue.value
-                                                .toMutableMap()
-                                                .apply {
-                                                    put(selectionTitle, type)
-                                                }
-                                        dropDownViewSelected.value =
-                                            dropDownViewSelected.value
-                                                .toMutableMap()
-                                                .apply {
-                                                    put(selectionTitle, false)
-                                                }
-                                    },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = type,
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    fontSize = 14.sp,
-                                    color = Color.Black,
-                                    modifier = Modifier.weight(1f)
-                                )
-
-                                if (selectedValue.value[selectionTitle] == type) {
-                                    Box(
-                                        modifier = Modifier.size(16.dp)
-                                    ) {
-                                        Canvas(modifier = Modifier.fillMaxSize()) {
-                                            drawCircle(Color(0xFF3960F6))
-                                            drawCircle(Color(0xFF3960F6), radius = 8.dp.toPx())
+                        // Iterate over the listTypes and handle different types
+                        listTypes?.forEach { item ->
+                            when (item) {
+                                is FuelTypeData -> {
+                                    SelectionRow(
+                                        title = item.name, // Display name for FuelType
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
                                         }
-                                    }
+                                    )
+                                }
+                                is VehicleData -> {
+                                    SelectionRow(
+                                        title = item.name, // Display name for VehicleType
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                is String -> {
+                                    SelectionRow(
+                                        title = item, // Display name for VehicleType
+                                        isSelected = selectedValue.value[selectionTitle] == item,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                is StatesData -> {
+                                    SelectionRow(
+                                        title = item.name
+                                        , // Display name for State
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                is CityCategoryData -> {
+                                    SelectionRow(
+                                        title = item.name, // Display name for CityCategory
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                is CityData -> {
+                                    SelectionRow(
+                                        title = item.name, // Display name for InsuranceType
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                is InsuranceTypeData -> {
+                                    SelectionRow(
+                                        title = item.name, // Display name for InsuranceType
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                is InsurerData -> {
+                                    SelectionRow(
+                                        title = item.name, // Display name for InsuranceType
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                is RenewalTypeData -> {
+                                    SelectionRow(
+                                        title = item.name, // Display name for InsuranceType
+                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        onSelect = {
+                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                                put(selectionTitle, item.name)
+                                            }
+                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                                put(selectionTitle, false)
+                                            }
+                                        }
+                                    )
+                                }
+                                else -> {
+                                    // Handle unexpected item types if needed
                                 }
                             }
                         }
@@ -480,13 +586,191 @@ fun SelectionView(
                 }
             }
         }
+
         Image(
-            painter = painterResource(id = if(isDropdownVisible) R.drawable.union_1 else R.drawable.union_2),
+            painter = painterResource(id = if (isDropdownVisible) R.drawable.union_1 else R.drawable.union_2),
             contentDescription = null,
             modifier = Modifier.padding(top = 5.dp)
         )
     }
 }
+
+@Composable
+fun SelectionRow(
+    title: String,
+    isSelected: Boolean,
+    onSelect: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onSelect() },
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            fontSize = 14.sp,
+            color = Color.Black,
+            modifier = Modifier.weight(1f)
+        )
+
+        if (isSelected) {
+            Box(
+                modifier = Modifier.size(16.dp)
+            ) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    drawCircle(Color(0xFF3960F6))
+                    drawCircle(Color(0xFF3960F6), radius = 8.dp.toPx())
+                }
+            }
+        }
+    }
+}
+
+//test test
+
+//@Composable
+//fun SelectionView(
+//    selectionTitle: String,
+//    staticValue: String,
+//    selectedValue: MutableState<Map<String, String>>,
+//    dropDownViewSelected: MutableState<Map<String, Boolean>>,
+//    vehicleTypes: List<Any?>
+//){
+//    val isSelected = selectedValue.value[selectionTitle].isNullOrEmpty()
+//    val isDropdownVisible = dropDownViewSelected.value[selectionTitle] ?: false
+//
+//    Row(verticalAlignment = Alignment.CenterVertically,
+//        horizontalArrangement = Arrangement.SpaceBetween,
+//        modifier = Modifier
+//            .padding(vertical = 4.dp)
+//            .background(
+//                color = Color.Transparent,
+//                shape = RoundedCornerShape(8.dp)
+//            )
+//            .border(width = 1.2.dp, color = Color(0xFF949494), shape = RoundedCornerShape(8.dp))
+//            .clickable {
+//                dropDownViewSelected.value = dropDownViewSelected.value
+//                    .toMutableMap()
+//                    .apply {
+//                        put(
+//                            selectionTitle,
+//                            !(dropDownViewSelected.value[selectionTitle] ?: false)
+//                        )
+//                    }
+//            }
+//            .padding(16.dp),){
+//        Column(
+//            modifier = Modifier.weight(1f),
+//            horizontalAlignment = Alignment.Start,
+//            verticalArrangement = Arrangement.spacedBy(8.dp)
+//        ) {
+//            Text(
+//                text = selectionTitle,
+//                style = MaterialTheme.typography.bodyMedium,
+//                color = Color.Black,
+//            )
+//
+//            Column(
+//                horizontalAlignment = Alignment.Start,
+//                verticalArrangement = Arrangement.spacedBy(0.dp)
+//            ) {
+//                Row(
+//                    horizontalArrangement = Arrangement.SpaceBetween,
+//                    modifier = Modifier.fillMaxWidth()
+//                ) {
+//                    Text(
+//                        text = if (isSelected) staticValue else selectedValue.value[selectionTitle]
+//                            ?: "",
+//                        style = MaterialTheme.typography.bodyLarge,
+//                        fontWeight = FontWeight.Medium,
+//                        color = Color.Black,
+//                    )
+//
+//                }
+//
+//                if (isDropdownVisible) {
+//                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+//                        Row(
+//                            modifier = Modifier
+//                                .fillMaxWidth()
+//                                .clickable {
+//                                    selectedValue.value = selectedValue.value
+//                                        .toMutableMap()
+//                                        .apply {
+//                                            put(selectionTitle, "")
+//                                        }
+//                                    dropDownViewSelected.value =
+//                                        dropDownViewSelected.value
+//                                            .toMutableMap()
+//                                            .apply {
+//                                                put(selectionTitle, false)
+//                                            }
+//                                },
+//                            verticalAlignment = Alignment.CenterVertically
+//                        ) {
+////                        Text(
+////                            text = staticValue,
+////                            style = MaterialTheme.typography.bodyLarge,
+////                            fontSize = 14.sp
+////                        )
+////
+////                        Spacer(modifier = Modifier.weight(1f))
+//
+//                        }
+//
+//                        vehicleTypes.forEach { type ->
+//                            Row(
+//                                modifier = Modifier
+//                                    .fillMaxWidth()
+//                                    .clickable {
+//                                        selectedValue.value =
+//                                            selectedValue.value
+//                                                .toMutableMap()
+//                                                .apply {
+//                                                    put(selectionTitle, type)
+//                                                }
+//                                        dropDownViewSelected.value =
+//                                            dropDownViewSelected.value
+//                                                .toMutableMap()
+//                                                .apply {
+//                                                    put(selectionTitle, false)
+//                                                }
+//                                    },
+//                                verticalAlignment = Alignment.CenterVertically
+//                            ) {
+//                                Text(
+//                                    text = type,
+//                                    style = MaterialTheme.typography.bodyLarge,
+//                                    fontSize = 14.sp,
+//                                    color = Color.Black,
+//                                    modifier = Modifier.weight(1f)
+//                                )
+//
+//                                if (selectedValue.value[selectionTitle] == type) {
+//                                    Box(
+//                                        modifier = Modifier.size(16.dp)
+//                                    ) {
+//                                        Canvas(modifier = Modifier.fillMaxSize()) {
+//                                            drawCircle(Color(0xFF3960F6))
+//                                            drawCircle(Color(0xFF3960F6), radius = 8.dp.toPx())
+//                                        }
+//                                    }
+//                                }
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//        Image(
+//            painter = painterResource(id = if(isDropdownVisible) R.drawable.union_1 else R.drawable.union_2),
+//            contentDescription = null,
+//            modifier = Modifier.padding(top = 5.dp)
+//        )
+//    }
+//}
 
 
 

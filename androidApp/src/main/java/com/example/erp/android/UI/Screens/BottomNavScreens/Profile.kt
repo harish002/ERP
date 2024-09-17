@@ -26,6 +26,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -37,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.erp.android.ERPTheme
 import com.example.erp.android.UI.Graphs.Graph
+import com.example.lms.android.Services.ApiViewModel
 import com.example.lms.android.Services.Methods
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -44,11 +51,22 @@ import com.example.lms.android.Services.Methods
 fun Profile(
     mainNavController: NavHostController,
     context: Context,
+    viewModel: ApiViewModel,
     rootnavController: NavHostController,
     logout: () -> Unit
     ) {
     val scrollState = rememberScrollState()
+    var loading by remember { mutableStateOf(true) }
+
     ERPTheme {
+        val userData by viewModel.getUserdata.collectAsState()
+        LaunchedEffect(context) {
+            Methods().retrieve_Token(context)?.let {
+                viewModel.getAllPolicyRates(it)
+                viewModel.getUserWhoLoggedIn(it)
+                loading = false
+            }
+        }
         Scaffold(
             modifier = Modifier
                 .fillMaxSize(),
@@ -83,12 +101,14 @@ fun Profile(
                 )
 
 
-                Text(
-                    modifier = Modifier.padding(vertical = 10.dp),
-                    text = "name of user",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.headlineSmall
-                )
+                userData?.userData?.name?.let { it1 ->
+                    Text(
+                        modifier = Modifier.padding(vertical = 10.dp),
+                        text = it1,
+                        color = Color.Black,
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -97,12 +117,14 @@ fun Profile(
                         tint = Color.Blue,
                         contentDescription = "Mail Icon"
                     )
-                    Text(
-                        text = " Mail@mail.com",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyLarge
+                    userData?.email?.let { it1 ->
+                        Text(
+                            text = it1,
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.bodyLarge
 
-                    )
+                        )
+                    }
                 }
                 Column(
                     modifier = Modifier

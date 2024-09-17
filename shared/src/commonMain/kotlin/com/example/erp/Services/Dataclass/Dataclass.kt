@@ -139,6 +139,7 @@ data class CurrentOrganisation(
 data class Project(
     val id: String,
     val name: String,
+    val subject: String? = null,
     val department: DepartmentX?= null,//String in Example
     val roles: List<String>?= emptyList(),
     val createdDate: String?= null,
@@ -645,7 +646,7 @@ data class InsurerData(
     val id: String,
     val name: String,
     val status: Int,
-    val description: String? = null,
+    val description: String,
     val created_at: String? = null
 )
 

@@ -2,6 +2,7 @@ package com.example.lms.Services
 
 import com.example.lms.Services.Dataclass.AllCities
 import com.example.lms.Services.Dataclass.AllCityCategories
+import com.example.lms.Services.Dataclass.AllCourseCategoryResponse
 import com.example.lms.Services.Dataclass.FailedResponse
 import com.example.lms.Services.Dataclass.FuelTypes
 import com.example.lms.Services.Dataclass.GeneralPolicyRatePayload
@@ -1021,6 +1022,7 @@ class ApiServices {
             throw e.message?.let { IOException(it) }!!
         }
     }
+
     // --------------------------------------------------------------------------------------------
 
 

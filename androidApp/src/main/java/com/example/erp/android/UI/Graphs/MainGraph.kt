@@ -47,7 +47,7 @@ fun MainNavGraph(
     ) {
         BottomBarScreen.Explore.route?.let { it1 ->
             composable(it1) {
-                FilterScreen()
+                FilterScreen(viewModel)
             }
         }
 
@@ -68,7 +68,7 @@ fun MainNavGraph(
         }
         BottomBarScreen.Profile.route?.let { it1 ->
             composable(route = it1) {
-                Profile(mainNavController, context, rootnavController, { logout() })
+                Profile(mainNavController, context,viewModel, rootnavController, { logout() })
             }
         }
         BottomBarScreen.AllCategory.route?.let {
