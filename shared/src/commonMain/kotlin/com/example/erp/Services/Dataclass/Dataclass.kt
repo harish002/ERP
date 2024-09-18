@@ -616,6 +616,14 @@ data class SearchPolicyRateData(
     val size: Int,
     val pages: Int
 )
+
+// Get Registration Number from Image
+// Response Body
+
+@Serializable
+data class GetRegistrationNumberResponse(
+    val result : String
+)
 //-------------------------------------------------------------------------------
 
 
