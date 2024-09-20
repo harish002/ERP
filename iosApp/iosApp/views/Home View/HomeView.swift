@@ -40,9 +40,8 @@ struct HomeView: View {
                             .transition(.trailingToLeading)
                             
                         case "Vehicle Number" :
-                            UploadVehicleImageAndNumber()
+                            UploadVehicleImageAndNumber(accessModel: accessModel, snackBar: snackBar)
                             
-
                             
                         case "Profile" :
                             ProfileView(
@@ -95,6 +94,7 @@ struct HomeView: View {
                 fuelTypes(token: token)
                 allStates(token: token)
                 cityCategories(token: token)
+
 
             }
         }

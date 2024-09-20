@@ -9,6 +9,7 @@ import com.example.lms.Services.Dataclass.GetNotificationsResponse
 import com.example.lms.Services.Dataclass.GetPolicyRates
 import com.example.lms.Services.Dataclass.GetRegistrationNumberResponse
 import com.example.lms.Services.Dataclass.GetUserData
+import com.example.lms.Services.Dataclass.GetVehicleDetails
 import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PolicyRateData
@@ -32,6 +33,8 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentDisposition
+import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -595,6 +598,7 @@ class ApiServices {
     }
 
     // Search Policy Rate Data
+    @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
     suspend fun searchPolicyRateData(token : String, searchData : SearchPolicyRatePayload) : SearchPolicyRateData {
         try {
@@ -617,7 +621,7 @@ class ApiServices {
 
         }
         catch (e: Exception) {
-            println("All Insurer Error Message ${e.message}")
+            println("Search Policy Rate Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -627,12 +631,13 @@ class ApiServices {
     suspend fun getRegistrationNumberFromImage(token : String, filePath : String) : GetRegistrationNumberResponse {
         val cioClient = HttpClient(CIO)
         try {
+
             // Create a multipart form data request
             val response: HttpResponse = client.submitFormWithBinaryData(
                 url = "https://sales-tool-api.1click.tech/ocr/vehicle_number",
                 formData = formData {
                     // Use Okio to read the file as a source
-                    val file = FileSystem.SYSTEM.metadata(filePath.toPath())
+//                    val file = FileSystem.SYSTEM.metadata(filePath.toPath())
                     val source = FileSystem.SYSTEM.source(filePath.toPath()).buffer()
 
                     append("file", source.readByteArray(), Headers.build {
@@ -641,7 +646,6 @@ class ApiServices {
                         append("Authorization",token)
                     })
                 }
-
             )
 
             if (response.status.isSuccess()){
@@ -655,7 +659,31 @@ class ApiServices {
 
         }
         catch (e: Exception) {
-            println("All Insurer Error Message ${e.message}")
+            println("Upload Image Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    @OptIn(InternalAPI::class)
+    suspend fun getVehicleDetails(token : String, vehicleNumber : String): GetVehicleDetails {
+        try {
+            val response: HttpResponse = client.post {
+                url("${ApiConfig.SALES_TOOL_API}/ocr")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("vehicle_number", vehicleNumber)
+            }
+                if (response.status.isSuccess()){
+                    return  response.body()
+                }
+                else {
+                    throw IOException(
+                        response.body<String>()
+                    )
+                }
+        }
+        catch (e: Exception) {
+            println("Upload Image Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }

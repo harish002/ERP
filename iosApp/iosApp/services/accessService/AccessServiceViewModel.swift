@@ -14,6 +14,10 @@ enum ApiError: Error {
     case unknownError(description: String)
 }
 
+struct GetRegistrationNumberResponse : Decodable {
+    let result : String
+}
+
 class AccessServiceViewModel : ObservableObject {
     
     
@@ -456,7 +460,7 @@ class AccessServiceViewModel : ObservableObject {
     }
     
     // Search Policy Rates
-    func searchPolicyRates(token : String, searchPayload : SearchPolicyRatePayload) async throws -> Bool{
+    func searchPolicyRates(token : String, searchPayload : SearchPolicyRatePayload) async throws -> (Bool, [PolicyRateData]) {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
@@ -466,11 +470,11 @@ class AccessServiceViewModel : ObservableObject {
                         if !response.items.isEmpty{
                             self.policyRatesData = response.items
                             print("Filtered Policy Rate Data is Fetched!")
-                            continuation.resume(returning: true)
+                            continuation.resume(returning:( true,response.items))
                         }
                         else {
                             print("Filtered Policy Rate Data is empty!")
-                            continuation.resume(returning: false)
+                            continuation.resume(returning: (false, []))
                         }
                     }
                     catch let error as NSError {
@@ -546,6 +550,7 @@ class AccessServiceViewModel : ObservableObject {
                                 return
                             }
                             self.vehicleTypes = tempList
+                            print("Vehicle Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
@@ -591,6 +596,7 @@ class AccessServiceViewModel : ObservableObject {
                                 return
                             }
                             self.fuelTypes = tempList
+                            print("Fuel Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
@@ -636,10 +642,11 @@ class AccessServiceViewModel : ObservableObject {
                                 return
                             }
                             self.getAllStatesData = tempList
+                            print("States Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
-                            print("Fuel Type Data is empty!")
+                            print("All States Data is empty!")
                             continuation.resume(returning: ())
                         }
                         
@@ -682,6 +689,7 @@ class AccessServiceViewModel : ObservableObject {
                                 return
                             }
                             self.getAllCityCategories = tempList
+                            print("City Category Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
@@ -725,6 +733,7 @@ class AccessServiceViewModel : ObservableObject {
                         let response = try await ApiServices().getAllCities(token: token)
                         if (!response.data.isEmpty) {
                             self.getAllCites = response.data
+                            print("Cities Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
@@ -768,6 +777,7 @@ class AccessServiceViewModel : ObservableObject {
                         let response = try await ApiServices().getAllInsuranceTypes(token: token)
                         if (!response.data.isEmpty) {
                             self.insuranceTypes = response.data
+                            print("Insurances Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
@@ -810,6 +820,7 @@ class AccessServiceViewModel : ObservableObject {
                         let response = try await ApiServices().getAllRenewalTypes(token: token)
                         if (!response.data.isEmpty) {
                             self.renewalTypes = response.data
+                            print("Renewal Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
@@ -853,6 +864,7 @@ class AccessServiceViewModel : ObservableObject {
                         let response = try await ApiServices().getAllInsurerTypes(token: token)
                         if (!response.data.isEmpty) {
                             self.insurerTypes = response.data
+                            print("Insurer Data Fetched!")
                             continuation.resume(returning: ())
                         }
                         else {
@@ -883,7 +895,173 @@ class AccessServiceViewModel : ObservableObject {
             }
         }
     }
+    
+    
+    // Get the Registrtaion Number from Image
+    func uploadImage(token: String, filePath: String, completion: @escaping (String?) -> Void) {
+       
+            // Prepare the URL
+            guard let url = URL(string: "https://sales-tool-api.1click.tech/ocr/vehicle_number") else {
+                print("Invalid URL")
+                completion(nil)
+                return
+            }
+            
+            // Create a boundary for the multipart/form-data
+            let boundary = "Boundary-\(UUID().uuidString)"
+            
+            // Create the request
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "accept")
+            request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+            request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+            
+            // Create the multipart body
+            var body = Data()
+            
+            
+            // Append file data
+            let fileURL = URL(fileURLWithPath: filePath)
+            
+            // Check if the file exists
+            let fileManager = FileManager.default
+            if !fileManager.fileExists(atPath: fileURL.path) {
+                print("File does not exist at path: \(fileURL.path)")
+                completion(nil)
+                return
+            }
+            
+            do {
+                let fileData = try Data(contentsOf: fileURL)
+                
+                // Determine the content type based on the file extension
+                let fileExtension = fileURL.pathExtension.lowercased()
+                let contentType: String
+                
+                switch fileExtension {
+                case "png":
+                    contentType = "image/png"
+                case "jpeg":
+                    contentType = "image/jpeg"
+                case "jpg" :
+                    contentType = "image/jpg"
+                case "gif":
+                    contentType = "image/gif"
+                case "heic":
+                    contentType = "image/heic"
+                default:
+                    contentType = "application/octet-stream" // Fallback for unknown types
+                }
+                
+                // Construct the multipart body
+                body.append("--\(boundary)\r\n".data(using: .utf8)!)
+                body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileURL.lastPathComponent)\"\r\n".data(using: .utf8)!)
+                body.append("Content-Type: \(contentType)\r\n\r\n".data(using: .utf8)!)
+                body.append(fileData)
+                body.append("\r\n".data(using: .utf8)!)
+                body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+                
+            } catch {
+                print("Error reading file data: \(error)")
+                completion(nil)
+                return
+            }
+            
+            // Set the request body
+            request.httpBody = body
+            
+            // Perform the network request
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
+                if let error = error {
+                    print("Error during upload: \(error.localizedDescription)")
+                    completion(nil)
+                    return
+                }
+                
+                guard let data = data else {
+                    print("No data received")
+                    completion(nil)
+                    return
+                }
+                
+                // Convert response data to string and return it via completion handler
+                let responseString = String(data: data, encoding: .utf8)
+                print("Response: \(responseString ?? "No response")")
+                do {
+                    // Decode the JSON response to your GetRegistrationNumberResponse model
+                    let decoder = JSONDecoder()
+                    let responseModel = try decoder.decode(GetRegistrationNumberResponse.self, from: data)
+                    
+                    // Extract the result from the decoded response
+                    let result = responseModel.result
+                    print("Result: \(result)")
+                    
+                    DispatchQueue.main.async {
+                       completion(result)
+                    }
+                }
+                catch let decodingError {
+                       print("Error decoding JSON response: \(decodingError.localizedDescription)")
+                       DispatchQueue.main.async {
+                           completion(nil)
+                       }
+                }
+                
+            }
+            
+            task.resume()
+    }
+    
+    
+    // Get Vehicle Details Using Number
+    @Published var getVehicleDetails : GetVehicleDetails? = nil
+    func getVehicleDetails(token: String, number : String) async throws -> GetVehicleDetails {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getVehicleDetails(token: token, vehicleNumber: number)
+                        if response.status == "success" {
+                            self.getVehicleDetails = response
+                            continuation.resume(returning: response)
+                        }
+                        else {
+                            continuation.resume(returning: response)
+                            print("Details failed to fetch!")
+                        }
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+        
+    
+
+    
     // ----------------------------------------------------------------------------------------------------------------
+    
+    
     
      
     //---------------------------------------------------------xx----------------------------------------------------------------

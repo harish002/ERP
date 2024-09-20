@@ -247,6 +247,10 @@ struct ExploreView: View {
             }
             
             getPolicyRatesList(token: token)
+            allCities(token: token)
+            insuranceTypes(token : token)
+            renewalTypes(token : token)
+            insurerTypes(token : token)
             
         }
         .onReceive(accessModel.$policyRatesData){data in
@@ -300,6 +304,98 @@ struct ExploreView: View {
         }
         self.nameInitials = "\(nameInitial)\(surnameInitial)"
         self.userName = nameOfUser
+    }
+    
+    func insuranceTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllInsuranceTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func renewalTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllRenewalTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func insurerTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllInsurerTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func allCities(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllCitiesData(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
     }
 }
 

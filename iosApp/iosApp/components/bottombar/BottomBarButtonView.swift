@@ -35,7 +35,7 @@ struct BottomBarButtonView :View {
 
 #Preview {
     BottomBarButtonView(
-        name: "Explore",
+        name: "Policy Rates",
         imageName: "layout-alt-02",
         isActive: false)
 }
