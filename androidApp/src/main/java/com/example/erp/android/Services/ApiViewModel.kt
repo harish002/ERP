@@ -14,9 +14,9 @@ import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.RenewalTypes
+import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.example.lms.Services.Dataclass.UserData
 import com.example.lms.Services.Dataclass.UserDetails
-import com.example.lms.Services.Dataclass.VehicleData
 import com.example.lms.Services.Dataclass.VehicleTypes
 import com.example.lms.Services.Dataclass.VerifyOTP
 import kotlinx.coroutines.CoroutineScope
@@ -231,7 +231,7 @@ class ApiViewModel : ViewModel() {
                 ApiServices().getPolicyRates(token)
             }
             val response = deferredResponse.await()
-            Log.d("policy Rates", response.toString())
+            Log.d("policy Rates", response.data.toString())
             _getPolicyRates.value = response.data
 
             return response.data
@@ -447,6 +447,33 @@ class ApiViewModel : ViewModel() {
             null // Return null in case of an exception
         }
 
+    }
+
+    private var _getfilterPolicyRateData = MutableStateFlow<List<PolicyRateData?>>(emptyList())
+    val getfilterPolicyRateData: MutableStateFlow<List<PolicyRateData?>> = _getfilterPolicyRateData
+
+    suspend fun filterPolicyRateData(token: String,searchData : SearchPolicyRatePayload)
+    : List<PolicyRateData?> {
+        return try {
+            val deferredResponse = viewModelScope.async {
+                ApiServices().searchPolicyRateData(token,searchData)
+            }
+            val response = deferredResponse.await()
+            Log.d("Success Filter Policy Rate Data", response.toString())
+            _getfilterPolicyRateData.value = response.items
+            return response.items
+        } catch (e: Exception) {
+            Log.e(
+                "lter Policy Rate Data Errorr",
+                e.message ?: "Unknown error"
+            )
+            listOf(null)
+        }.toMutableList()
+    }
+
+    fun updatePolicyRates(filteredData: List<PolicyRateData?>) {
+        // Logic to update the policyRatesList based on filterPolicyRateDatalist
+        _getPolicyRates.value = filteredData // Assuming _policyRatesList is MutableStateFlow
     }
 
 }

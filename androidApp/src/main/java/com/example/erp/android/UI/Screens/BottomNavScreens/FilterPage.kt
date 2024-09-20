@@ -1,6 +1,5 @@
 package com.example.erp.android.UI.Screens.BottomNavScreens
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -43,12 +42,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.erp.android.ERPTheme
 import com.example.erp.android.UI.Screens.PolicyListView
 import com.example.erp.android.UI.Screens.SelectionView
-import com.example.lms.Services.Dataclass.InsurerData
+import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.example.lms.android.Services.ApiViewModel
 import com.example.lms.android.Services.Methods
 import com.example.lms.android.ui.Component.Cust_Btn
@@ -60,9 +60,13 @@ import kotlinx.coroutines.launch
 fun FilterScreen(
     viewModel: ApiViewModel
 ) {
+
     val context = LocalContext.current
-    var loading by remember {mutableStateOf(true)}
+    var loading by remember { mutableStateOf(true) }
     val policyRatesList by viewModel.getPolicyRates.collectAsState()
+
+    val filterPolicyRateDatalist by viewModel.getfilterPolicyRateData.collectAsState()
+
     val userData by viewModel.getUserdata.collectAsState()
     val vehiclType by viewModel.getVehicleTypes.collectAsState()
     val fuelType by viewModel.getFuelTypes.collectAsState()
@@ -77,8 +81,7 @@ fun FilterScreen(
 
     val sheetState = androidx.compose.material3.rememberModalBottomSheetState()
 
-
-    var filterSheet by remember { mutableStateOf(false)}
+    var filterSheet by remember { mutableStateOf(false) }
 
     // Initialize states for vehicle type and fuel type
     val (vehicleTypeState, vehicleTypeDropdownState) = createSelectionState()
@@ -122,9 +125,11 @@ fun FilterScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
-
-
     ERPTheme {
+        LaunchedEffect(filterPolicyRateDatalist) {
+            // Update policyRatesList based on filterPolicyRateDatalist
+            viewModel.updatePolicyRates(filterPolicyRateDatalist)
+        }
         LaunchedEffect(Unit) {
             // Launching a coroutine in LaunchedEffect to initialize data
             coroutineScope.launch {
@@ -140,11 +145,13 @@ fun FilterScreen(
                         val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
                         val allCityCategoryDeferred = async { viewModel.getAllCityCategory(token) }
                         val allCitiesDeferred = async { viewModel.getAllCities(token) }
-                        val allInsuranceTypesDeferred = async { viewModel.getAllInsuranceTypes(token) }
+                        val allInsuranceTypesDeferred =
+                            async { viewModel.getAllInsuranceTypes(token) }
                         val allRenewalTypesDeferred = async { viewModel.getAllRenewalTypes(token) }
                         val allInsurerTypesDeferred = async { viewModel.getAllInsurerTypes(token) }
 
                         // Await all results
+
                         userDeferred.await()
                         vehicleTypesDeferred.await()
                         statesDeferred.await()
@@ -229,140 +236,215 @@ fun FilterScreen(
                     .background(MaterialTheme.colorScheme.onBackground)
             ) {
 
+//                itemsIndexed(policyRatesList) { index, i ->
+//                    if (i != null) {
+//                        PolicyListView(i, index + 1)
+//                    }
+//                }
+                if (policyRatesList.isEmpty()) {
+                    item {
+                        // Display a message when there are no items
 
-                itemsIndexed(policyRatesList) {index,i->
-                    Log.d("policyRatesList Size",policyRatesList.size.toString())
-                    if (i != null) {
-                        PolicyListView(i,index+1)
+                        Text(
+                            text = "No Data Available",
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(16.dp), // Add some padding for better appearance
+                            style = MaterialTheme.typography.labelMedium, // Use appropriate text style
+                            color = MaterialTheme.colorScheme.onSurface // Adjust color as needed
+                        )
+                    }
+                } else {
+                    // If there are items, display them in the list
+                    itemsIndexed(policyRatesList) { index, item ->
+                        if (item != null) {
+                            PolicyListView(item, index + 1)
+                        }
                     }
                 }
+
             }
-            if (filterSheet) {
-                ModalBottomSheet(
-                    onDismissRequest = {
-                        filterSheet = false
-                    },
-                    sheetState = sheetState
+
+
+        }
+        if (filterSheet) {
+            ModalBottomSheet(
+                onDismissRequest = {
+                    filterSheet = false
+                },
+                sheetState = sheetState
+            ) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp, horizontal = 4.dp)
                 ) {
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 16.dp, horizontal = 4.dp)
-                    ) {
-                        item {
-                            Row(
-                                Modifier.fillMaxWidth(1f),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Cust_Btn(text = "Reset", isSplit = true) {
+                    item {
+                        Row(
+                            Modifier.fillMaxWidth(1f),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Cust_Btn(text = "Reset", isSplit = true) {
+                                val filterpayload = SearchPolicyRatePayload(
+                                    state_id = "",
+                                    city_id = "",
+                                    city_category_id = "",
+                                    vehicle_type_id = "",
+                                    vehicle_model_id = "",
+                                    renewal_type_id = "",
+                                    insurance_type_id = "",
+                                    insurer_id = "",
+                                    fuel_type_id = "",
+                                    status = 0,
+                                    page = 1,
+                                    size = 20
+                                )
+                                coroutineScope.launch {
+                                    Methods().retrieve_Token(context)?.let { it1 ->
+                                        viewModel.filterPolicyRateData(
+                                            it1, filterpayload
+                                        )
+                                    }
                                 }
-                                Spacer(modifier = Modifier.padding(2.dp))
-                                Cust_Btn(text = "Apply", isblue = true) {
+                                coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        filterSheet = false
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.padding(2.dp))
+                            Cust_Btn(text = "Apply", isblue = true) {
+                                val filterpayload = SearchPolicyRatePayload(
+                                    state_id = stateState.value["id"] ?: "",
+                                    city_id = cityState.value["id"] ?: "",
+                                    city_category_id = cityCategoryState.value["id"] ?: "",
+                                    vehicle_type_id = vehicleTypeState.value["id"] ?: "",
+                                    vehicle_model_id = "",
+                                    renewal_type_id = renewalTypeState.value["id"] ?: "",
+                                    insurance_type_id = insuranceTypeState.value["id"] ?: "",
+                                    insurer_id = insurerState.value["id"] ?: "",
+                                    fuel_type_id = fuelTypeState.value["id"] ?: "",
+                                    status = if (ncbState.value["name"] == "YES") 1 else 0,
+                                    page = 1,
+                                    size = 20
+                                )
+                                coroutineScope.launch {
+                                    Methods().retrieve_Token(context)?.let { it1 ->
+                                        viewModel.filterPolicyRateData(
+                                            it1, filterpayload
+                                        )
+                                    }
+                                }
+                                coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        filterSheet = false
+                                    }
                                 }
                             }
                         }
-                        item {
-                            Text(
-                                text = "Vehicle Details",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 16.dp)
-                            )
-
-                            // Vehicle Type SelectionView
-                            SelectionView(
-                                selectionTitle = "Vehicle Type",
-                                staticValue = "Please select a vehicle",
-                                selectedValue = vehicleTypeState,
-                                dropDownViewSelected = vehicleTypeDropdownState,
-                                listTypes = vehicleTypes
-                            )
-
-                            // Fuel Type SelectionView
-                            SelectionView(
-                                selectionTitle = "Fuel Type",
-                                staticValue = "Please select a fuel",
-                                selectedValue = fuelTypeState,
-                                dropDownViewSelected = fuelTypeDropdownState,
-                                listTypes = fuelTypes
-                            )
-
-                            // NCB Type SelectionView
-                            SelectionView(
-                                selectionTitle = "NCB Type",
-                                staticValue = "Please select an NCB Type",
-                                selectedValue = ncbState,
-                                dropDownViewSelected = ncbDropdownState,
-                                listTypes = ncbTypes
-                            )
-
-                            Text(
-                                text = "Loction Details",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 16.dp)
-                            )
-                            // State SelectionView
-                            SelectionView(
-                                selectionTitle = "State",
-                                staticValue = "Please select a state",
-                                selectedValue = stateState,
-                                dropDownViewSelected = stateDropdownState,
-                                listTypes = states
-                            )
-
-                            // City Category SelectionView
-                            SelectionView(
-                                selectionTitle = "City Category",
-                                staticValue = "Please select a city category",
-                                selectedValue = cityCategoryState,
-                                dropDownViewSelected = cityCategoryDropdownState,
-                                listTypes = cityCategories
-                            )
-
-                            // City SelectionView
-                            SelectionView(
-                                selectionTitle = "City",
-                                staticValue = "Please select a city",
-                                selectedValue = cityState,
-                                dropDownViewSelected = cityDropdownState,
-                                listTypes = cities
-                            )
-                            Text(
-                                text = "Policy Details",
-                                style = MaterialTheme.typography.labelMedium,
-                                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 16.dp)
-                            )
-//                            Divider(modifier = Modifier.padding(), color = Color.Black, thickness = 1.dp)
-                            // Insurance Type SelectionView
-                            SelectionView(
-                                selectionTitle = "Insurance Type",
-                                staticValue = "Please select an insurance type",
-                                selectedValue = insuranceTypeState,
-                                dropDownViewSelected = insuranceTypeDropdownState,
-                                listTypes = insuranceTypes
-                            )
-
-                            // Renewal Type SelectionView
-                            SelectionView(
-                                selectionTitle = "Renewal Type",
-                                staticValue = "Please select a renewal type",
-                                selectedValue = renewalTypeState,
-                                dropDownViewSelected = renewalTypeDropdownState,
-                                listTypes = renewalTypes
-                            )
-
-                            // Insurer SelectionView
-                            SelectionView(
-                                selectionTitle = "Insurer",
-                                staticValue = "Please select an insurer",
-                                selectedValue = insurerState,
-                                dropDownViewSelected = insurerDropdownState,
-                                listTypes = insurers
-                            )
-
-                        }
                     }
+                    item {
+                        Text(
+                            text = "Vehicle Details",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 16.dp)
+                        )
 
+                        // Vehicle Type SelectionView
+                        SelectionView(
+                            selectionTitle = "Vehicle Type",
+                            staticValue = "Please select a vehicle",
+                            selectedValue = vehicleTypeState,
+                            dropDownViewSelected = vehicleTypeDropdownState,
+                            listTypes = vehicleTypes
+                        )
+
+                        // Fuel Type SelectionView
+                        SelectionView(
+                            selectionTitle = "Fuel Type",
+                            staticValue = "Please select a fuel",
+                            selectedValue = fuelTypeState,
+                            dropDownViewSelected = fuelTypeDropdownState,
+                            listTypes = fuelTypes
+                        )
+
+                        // NCB Type SelectionView
+                        SelectionView(
+                            selectionTitle = "NCB Type",
+                            staticValue = "Please select an NCB Type",
+                            selectedValue = ncbState,
+                            dropDownViewSelected = ncbDropdownState,
+                            listTypes = ncbTypes
+                        )
+
+                        Text(
+                            text = "Loction Details",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 16.dp)
+                        )
+                        // State SelectionView
+                        SelectionView(
+                            selectionTitle = "State",
+                            staticValue = "Please select a state",
+                            selectedValue = stateState,
+                            dropDownViewSelected = stateDropdownState,
+                            listTypes = states
+                        )
+
+
+                        // City Category SelectionView
+                        SelectionView(
+                            selectionTitle = "City Category",
+                            staticValue = "Please select a city category",
+                            selectedValue = cityCategoryState,
+                            dropDownViewSelected = cityCategoryDropdownState,
+                            listTypes = cityCategories
+                        )
+
+
+                        // City SelectionView
+                        SelectionView(
+                            selectionTitle = "City",
+                            staticValue = "Please select a city",
+                            selectedValue = cityState,
+                            dropDownViewSelected = cityDropdownState,
+                            listTypes = cities
+                        )
+                        Text(
+                            text = "Policy Details",
+                            style = MaterialTheme.typography.labelMedium,
+                            modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 16.dp)
+                        )
+//                            Divider(modifier = Modifier.padding(), color = Color.Black, thickness = 1.dp)
+                        // Insurance Type SelectionView
+                        SelectionView(
+                            selectionTitle = "Insurance Type",
+                            staticValue = "Please select an insurance type",
+                            selectedValue = insuranceTypeState,
+                            dropDownViewSelected = insuranceTypeDropdownState,
+                            listTypes = insuranceTypes
+                        )
+
+                        // Renewal Type SelectionView
+                        SelectionView(
+                            selectionTitle = "Renewal Type",
+                            staticValue = "Please select a renewal type",
+                            selectedValue = renewalTypeState,
+                            dropDownViewSelected = renewalTypeDropdownState,
+                            listTypes = renewalTypes
+                        )
+                        // Insurer SelectionView
+                        SelectionView(
+                            selectionTitle = "Insurer",
+                            staticValue = "Please select an insurer",
+                            selectedValue = insurerState,
+                            dropDownViewSelected = insurerDropdownState,
+                            listTypes = insurers
+                        )
+                    }
                 }
+
             }
         }
     }
