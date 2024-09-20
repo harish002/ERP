@@ -146,7 +146,7 @@ struct ApplyFiltersView: View {
                             insurance_type_id: submittingValue["Insurance Type"] ?? "",
                             insurer_id: submittingValue["Insurer"] ?? "",
                             fuel_type_id: submittingValue["Fuel Type"] ?? "",
-                            status: Int32(submittingValue["NCB"] ?? "0") ?? 0, page: 1, size: 10
+                            status: submittingValue["NCB"] ?? "0", page: 1, size: 50
                         )
                         print("Apply Filter Payload -> \(payload)")
                         let token = retrieveToken() ?? ""
@@ -154,7 +154,7 @@ struct ApplyFiltersView: View {
                         Task.init{
                             do
                             {
-                                let result = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
+                                let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
                                 if result {
                                     applyFiltersViewClosed()
                                 }
@@ -193,10 +193,7 @@ struct ApplyFiltersView: View {
         }
         .onAppear{
             let token = retrieveToken() ?? ""
-            allCities(token: token)
-            insuranceTypes(token : token)
-            renewalTypes(token : token)
-            insurerTypes(token : token)
+
         }
         .onReceive(accessModel.$vehicleTypes, perform: {values in
             if !values.isEmpty{
@@ -451,97 +448,7 @@ struct ApplyFiltersView: View {
         }
     }
     
-    func insuranceTypes(token : String){
-        Task.init {
-            do
-            {
-                try await accessModel.getAllInsuranceTypes(token: token)
-            }
-            catch ApiError.networkFailure {
-                // Handle network failure, e.g., show error Snackbar
-                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-            } catch ApiError.lowInternetConnection {
-                // Handle low internet connection, e.g., show error Snackbar
-                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-            } catch ApiError.serverError(let status) {
-                // Handle server errors, e.g., show error Snackbar
-                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-            } catch ApiError.unknownError(let description){
-                // Handle unknown errors
-                print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-            }
-        }
-    }
-    
-    func renewalTypes(token : String){
-        Task.init {
-            do
-            {
-                try await accessModel.getAllRenewalTypes(token: token)
-            }
-            catch ApiError.networkFailure {
-                // Handle network failure, e.g., show error Snackbar
-                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-            } catch ApiError.lowInternetConnection {
-                // Handle low internet connection, e.g., show error Snackbar
-                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-            } catch ApiError.serverError(let status) {
-                // Handle server errors, e.g., show error Snackbar
-                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-            } catch ApiError.unknownError(let description){
-                // Handle unknown errors
-                print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-            }
-        }
-    }
-    
-    func insurerTypes(token : String){
-        Task.init {
-            do
-            {
-                try await accessModel.getAllInsurerTypes(token: token)
-            }
-            catch ApiError.networkFailure {
-                // Handle network failure, e.g., show error Snackbar
-                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-            } catch ApiError.lowInternetConnection {
-                // Handle low internet connection, e.g., show error Snackbar
-                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-            } catch ApiError.serverError(let status) {
-                // Handle server errors, e.g., show error Snackbar
-                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-            } catch ApiError.unknownError(let description){
-                // Handle unknown errors
-                print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-            }
-        }
-    }
-    
-    func allCities(token : String){
-        Task.init {
-            do
-            {
-                try await accessModel.getAllCitiesData(token: token)
-            }
-            catch ApiError.networkFailure {
-                // Handle network failure, e.g., show error Snackbar
-                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-            } catch ApiError.lowInternetConnection {
-                // Handle low internet connection, e.g., show error Snackbar
-                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-            } catch ApiError.serverError(let status) {
-                // Handle server errors, e.g., show error Snackbar
-                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-            } catch ApiError.unknownError(let description){
-                // Handle unknown errors
-                print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-            }
-        }
-    }
+  
 }
 
 #Preview {

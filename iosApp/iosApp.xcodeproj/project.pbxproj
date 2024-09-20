@@ -79,6 +79,7 @@
 		25791C5E2C9341E600B1079B /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791C5D2C9341E500B1079B /* ProfileView.swift */; };
 		25791C612C943F7F00B1079B /* PolicyRateDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791C602C943F7F00B1079B /* PolicyRateDetailView.swift */; };
 		25791C652C94584600B1079B /* ApplyFiltersView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791C642C94584600B1079B /* ApplyFiltersView.swift */; };
+		25791C672C9ACC2200B1079B /* UploadVehicleImageAndNumber.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791C662C9ACC2200B1079B /* UploadVehicleImageAndNumber.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
@@ -167,6 +168,7 @@
 		25791C5D2C9341E500B1079B /* ProfileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		25791C602C943F7F00B1079B /* PolicyRateDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolicyRateDetailView.swift; sourceTree = "<group>"; };
 		25791C642C94584600B1079B /* ApplyFiltersView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplyFiltersView.swift; sourceTree = "<group>"; };
+		25791C662C9ACC2200B1079B /* UploadVehicleImageAndNumber.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UploadVehicleImageAndNumber.swift; sourceTree = "<group>"; };
 		7555FF7B242A565900829871 /* iosApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iosApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -232,6 +234,7 @@
 				25791BD72C9337C300B1079B /* ExploreView.swift */,
 				25791C5B2C9340AB00B1079B /* NotificationView.swift */,
 				25791C5D2C9341E500B1079B /* ProfileView.swift */,
+				25791C662C9ACC2200B1079B /* UploadVehicleImageAndNumber.swift */,
 			);
 			path = "Home View";
 			sourceTree = "<group>";
@@ -613,6 +616,7 @@
 				25791BD22C93374700B1079B /* MatchedView.swift in Sources */,
 				25791C5C2C9340AB00B1079B /* NotificationView.swift in Sources */,
 				25791C0C2C93392900B1079B /* LMSCustomButton.swift in Sources */,
+				25791C672C9ACC2200B1079B /* UploadVehicleImageAndNumber.swift in Sources */,
 				25791BD12C93374700B1079B /* LMSSignInView.swift in Sources */,
 				25791C442C933E1E00B1079B /* AnyTransition.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,

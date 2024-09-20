@@ -30,7 +30,7 @@ struct HomeView: View {
                     if let (viewName,_) = navigationState.currentView {
                         switch viewName {
                             
-                        case "Explore" :
+                        case "Policy Rates" :
                             ExploreView(
                                 accessModel: accessModel,
                                 snackBar: snackBar,
@@ -39,7 +39,9 @@ struct HomeView: View {
                             )
                             .transition(.trailingToLeading)
                             
-
+                        case "Vehicle Number" :
+                            UploadVehicleImageAndNumber(accessModel: accessModel, snackBar: snackBar)
+                            
                             
                         case "Profile" :
                             ProfileView(
@@ -80,7 +82,7 @@ struct HomeView: View {
             .onAppear{
                 print("Current Active View -> \(navigationState.activeViewName) ")
                 if navigationState.navigationStack.isEmpty {
-                    navigationState.push(viewName: "Explore")
+                    navigationState.push(viewName: "Policy Rates")
                 }
                 else {
                     print("NavigationStack is not Empty!")
@@ -92,6 +94,7 @@ struct HomeView: View {
                 fuelTypes(token: token)
                 allStates(token: token)
                 cityCategories(token: token)
+
 
             }
         }

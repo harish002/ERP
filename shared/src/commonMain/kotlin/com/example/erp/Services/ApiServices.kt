@@ -7,7 +7,9 @@ import com.example.lms.Services.Dataclass.FuelTypes
 import com.example.lms.Services.Dataclass.GetAllStates
 import com.example.lms.Services.Dataclass.GetNotificationsResponse
 import com.example.lms.Services.Dataclass.GetPolicyRates
+import com.example.lms.Services.Dataclass.GetRegistrationNumberResponse
 import com.example.lms.Services.Dataclass.GetUserData
+import com.example.lms.Services.Dataclass.GetVehicleDetails
 import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PolicyRateData
@@ -21,14 +23,21 @@ import com.example.lms.Services.Dataclass.VehicleTypes
 import com.example.lms.Services.Dataclass.VerifyOTP
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.forms.formData
+import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentDisposition
+import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentType
+import io.ktor.http.Headers
+import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -38,6 +47,10 @@ import io.ktor.utils.io.errors.IOException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import okio.FileSystem
+import okio.Path.Companion.toPath
+import okio.SYSTEM
+import okio.buffer
 import kotlin.coroutines.cancellation.CancellationException
 
 @Serializable
@@ -549,6 +562,7 @@ class ApiServices {
     }
 
     // Search Policy Rate Data
+    @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
     suspend fun searchPolicyRateData(token : String,
         searchData : SearchPolicyRatePayload): SearchPolicyRateData {
@@ -572,7 +586,69 @@ class ApiServices {
 
         }
         catch (e: Exception) {
-            println("All Insurer Error Message ${e.message}")
+            println("Search Policy Rate Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Get Registration Number from Image
+    @OptIn(InternalAPI::class)
+    suspend fun getRegistrationNumberFromImage(token : String, filePath : String) : GetRegistrationNumberResponse {
+        val cioClient = HttpClient(CIO)
+        try {
+
+            // Create a multipart form data request
+            val response: HttpResponse = client.submitFormWithBinaryData(
+                url = "https://sales-tool-api.1click.tech/ocr/vehicle_number",
+                formData = formData {
+                    // Use Okio to read the file as a source
+//                    val file = FileSystem.SYSTEM.metadata(filePath.toPath())
+                    val source = FileSystem.SYSTEM.source(filePath.toPath()).buffer()
+
+                    append("file", source.readByteArray(), Headers.build {
+                        append(HttpHeaders.Accept,ContentType.Application.Json)
+                        append(HttpHeaders.ContentType, "multipart/form-data")
+                        append("Authorization",token)
+                    })
+                }
+            )
+
+            if (response.status.isSuccess()){
+                return  response.body()
+            }
+            else {
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+
+        }
+        catch (e: Exception) {
+            println("Upload Image Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    @OptIn(InternalAPI::class)
+    suspend fun getVehicleDetails(token : String, vehicleNumber : String): GetVehicleDetails {
+        try {
+            val response: HttpResponse = client.post {
+                url("${ApiConfig.SALES_TOOL_API}/ocr")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("vehicle_number", vehicleNumber)
+            }
+                if (response.status.isSuccess()){
+                    return  response.body()
+                }
+                else {
+                    throw IOException(
+                        response.body<String>()
+                    )
+                }
+        }
+        catch (e: Exception) {
+            println("Upload Image Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }

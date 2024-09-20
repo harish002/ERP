@@ -26,15 +26,15 @@ struct Bottombar: View {
             // Explore -----
             Button{
                     withAnimation{
-                        navigationState.push(viewName: "Explore")
+                        navigationState.push(viewName: "Policy Rates")
                     }
                 }
             label: {
                 ZStack{
                     BottomBarButtonView(
-                        name: "Explore",
+                        name: "Policy Rates",
                         imageName: "layout-alt-02",
-                        isActive: navigationState.activeViewName == "Explore"
+                        isActive: navigationState.activeViewName == "Policy Rates"
                     )
                 }
             }
@@ -43,15 +43,15 @@ struct Bottombar: View {
             // Notification -----
             Button{
                     withAnimation{
-                        navigationState.push(viewName: "Notification")
+                        navigationState.push(viewName: "Vehicle Number")
                     }
                 }
             label: {
                 ZStack{
                     BottomBarButtonView(
-                        name: "Notification",
+                        name: "Vehicle Number",
                         imageName: "bell-02",
-                        isActive: navigationState.activeViewName == "Notification"
+                        isActive: navigationState.activeViewName == "Vehicle Number"
                     )
                 }
             }
