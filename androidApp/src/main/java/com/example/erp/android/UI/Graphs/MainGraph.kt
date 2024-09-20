@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -12,6 +13,8 @@ import androidx.navigation.compose.rememberNavController
 import com.example.erp.android.UI.BottomBarGraph.BottomBarScreen
 import com.example.erp.android.UI.Screens.BottomNavScreens.FilterScreen
 import com.example.erp.android.UI.Screens.BottomNavScreens.Profile
+import com.example.erp.android.UI.Screens.BottomNavScreens.VehicleNumber
+import com.example.lms.Services.Dataclass.VehicleTypes
 import com.example.lms.android.Services.ApiViewModel
 
 
@@ -58,7 +61,7 @@ fun MainNavGraph(
         }
         BottomBarScreen.Search.route?.let { it1 ->
             composable(route = it1) {
-                Text("Search(mainNavController, viewModel, rootnavController, exploreNavController)")
+                VehicleNumber(context)
             }
         }
         BottomBarScreen.Progress.route?.let { it1 ->

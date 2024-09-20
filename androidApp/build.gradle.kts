@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
 //    alias(libs.plugins.compose.compiler)
+    id ("kotlin-kapt")
     kotlin("plugin.serialization") version "1.9.20"
 
 }
@@ -56,6 +57,7 @@ dependencies {
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.material3.android)
+    implementation(libs.androidx.appcompat)
     debugImplementation(libs.compose.ui.tooling)
 
     implementation(libs.androidx.compose.animation)
@@ -80,4 +82,18 @@ dependencies {
     //flowLayout
     implementation (libs.foundation.v143)
 
+    implementation (libs.androidx.camera.camera2)
+    implementation (libs.androidx.camera.lifecycle)
+    implementation (libs.androidx.camera.view)
+    // Coil
+    implementation (libs.coil.compose.v140)
+
+    implementation(platform("com.google.firebase:firebase-bom:33.3.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation ("com.google.firebase:firebase-messaging")
+    implementation("androidx.compose.material3:material3:1.3.0-beta04")
+
+
+    implementation ("com.github.bumptech.glide:glide:4.14.2") // Use the latest version
+//    kapt ("com.github.bumptech.glide:compiler:4.14.2") // For annotation processing
 }

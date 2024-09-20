@@ -13,6 +13,8 @@ import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.RefreshToken
 import com.example.lms.Services.Dataclass.RenewalTypes
+import com.example.lms.Services.Dataclass.SearchPolicyRateData
+import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.example.lms.Services.Dataclass.UserDetails
 import com.example.lms.Services.Dataclass.UserResponse
 import com.example.lms.Services.Dataclass.VehicleTypes
@@ -548,7 +550,8 @@ class ApiServices {
 
     // Search Policy Rate Data
     @OptIn(InternalAPI::class)
-    suspend fun searchPolicyRateData(token : String, searchData : SearchPolicyRatePayload) : SearchPolicyRateData {
+    suspend fun searchPolicyRateData(token : String,
+        searchData : SearchPolicyRatePayload): SearchPolicyRateData {
         try {
             val response : HttpResponse = client.post{
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/search")

@@ -382,6 +382,7 @@ fun SelectionView(
     listTypes: List<Any>?// Keep as List<Any?>
 ) {
     val isSelected = selectedValue.value[selectionTitle].isNullOrEmpty()
+    var selectedId = ""
     val isDropdownVisible = dropDownViewSelected.value[selectionTitle] ?: false
 
     Row(
@@ -455,21 +456,26 @@ fun SelectionView(
                                         title = item.name, // Display name for FuelType
                                         isSelected = selectedValue.value[selectionTitle] == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+//                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+//                                                put(selectionTitle, item.name)
+//                                            }
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
+
                                             dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
                                                 put(selectionTitle, false)
                                             }
                                         }
                                     )
+
                                 }
                                 is VehicleData -> {
                                     SelectionRow(
                                         title = item.name, // Display name for VehicleType
                                         isSelected = selectedValue.value[selectionTitle] == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
                                             dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
@@ -477,6 +483,7 @@ fun SelectionView(
                                             }
                                         }
                                     )
+
                                 }
                                 is String -> {
                                     SelectionRow(
@@ -491,28 +498,34 @@ fun SelectionView(
                                             }
                                         }
                                     )
+
                                 }
                                 is StatesData -> {
+
                                     SelectionRow(
-                                        title = item.name
-                                        , // Display name for State
-                                        isSelected = selectedValue.value[selectionTitle] == item.name,
+                                        title = item.name,
+                                        // Display name for State
+                                        isSelected = selectedValue.value[selectionTitle]
+                                                == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
-                                            dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
+                                            dropDownViewSelected.value = dropDownViewSelected.value
+                                                .toMutableMap().apply {
                                                 put(selectionTitle, false)
                                             }
                                         }
                                     )
+
+
                                 }
                                 is CityCategoryData -> {
                                     SelectionRow(
                                         title = item.name, // Display name for CityCategory
                                         isSelected = selectedValue.value[selectionTitle] == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
                                             dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
@@ -520,13 +533,14 @@ fun SelectionView(
                                             }
                                         }
                                     )
+
                                 }
                                 is CityData -> {
                                     SelectionRow(
                                         title = item.name, // Display name for InsuranceType
                                         isSelected = selectedValue.value[selectionTitle] == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
                                             dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
@@ -534,17 +548,18 @@ fun SelectionView(
                                             }
                                         }
                                     )
+
                                 }
                                 is InsuranceTypeData -> {
                                     SelectionRow(
                                         title = item.name, // Display name for InsuranceType
                                         isSelected = selectedValue.value[selectionTitle] == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
                                             dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
-                                                put(selectionTitle, false)
+                                                put(item.id, false)
                                             }
                                         }
                                     )
@@ -554,7 +569,7 @@ fun SelectionView(
                                         title = item.name, // Display name for InsuranceType
                                         isSelected = selectedValue.value[selectionTitle] == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
                                             dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
@@ -562,13 +577,14 @@ fun SelectionView(
                                             }
                                         }
                                     )
+
                                 }
                                 is RenewalTypeData -> {
                                     SelectionRow(
                                         title = item.name, // Display name for InsuranceType
                                         isSelected = selectedValue.value[selectionTitle] == item.name,
                                         onSelect = {
-                                            selectedValue.value = selectedValue.value.toMutableMap().apply {
+                                            selectedValue.value = mapOf("id" to item.id, "name" to item.name).toMutableMap().apply {
                                                 put(selectionTitle, item.name)
                                             }
                                             dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
@@ -576,6 +592,7 @@ fun SelectionView(
                                             }
                                         }
                                     )
+
                                 }
                                 else -> {
                                     // Handle unexpected item types if needed
@@ -588,7 +605,8 @@ fun SelectionView(
         }
 
         Image(
-            painter = painterResource(id = if (isDropdownVisible) R.drawable.union_1 else R.drawable.union_2),
+            painter = painterResource(id = if (isDropdownVisible)
+                R.drawable.union_1 else R.drawable.union_2),
             contentDescription = null,
             modifier = Modifier.padding(top = 5.dp)
         )

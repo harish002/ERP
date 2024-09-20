@@ -169,8 +169,8 @@ sealed class BottomBarScreen(
     )
     // Search
     data object Search: BottomBarScreen(
-        route = "Search",
-        title = "Search",
+        route = "Vehicle Number",
+        title = "Vehicle Number",
         icon =  R.drawable.lock_01,
     )
 
