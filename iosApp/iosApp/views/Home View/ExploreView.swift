@@ -289,7 +289,7 @@ struct ExploreView: View {
             } catch ApiError.unknownError(let description){
                 // Handle unknown errors
                 print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+                snackBar.show(message: description, title: "Error", type: .error)
             }
         }
     }
