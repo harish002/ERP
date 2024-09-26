@@ -44,6 +44,7 @@ struct UploadVehicleImageAndNumber: View {
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var snackBar : SnackbarModel
     
+    // Photo Picker and Image Picker - Variables
     @State private var isImagePickerPresented: Bool = false
     @State private var isCameraPresented: Bool = false
     @State private var selectedImage: Image? = nil
@@ -54,12 +55,15 @@ struct UploadVehicleImageAndNumber: View {
     @State private var vehicleNumber : String = ""
     @State private var filePath : String? = nil
     
+    // All the loaders along the code
     @State private var loader = false
     @State private var vehicleNumberLoader = false
     @State private var policyRateLoader = false
+    @State private var applyFilterLoader = false
     
     @State private var getVehicleDetails : GetVehicleDetails?
     
+    // Filter Objects - Variables
     @State private var vehicleType : VehicleData?
     @State private var fuelType : FuelTypeData?
     @State private var statesData : StatesData?
@@ -69,6 +73,56 @@ struct UploadVehicleImageAndNumber: View {
     @State private var renewalTypes : RenewalTypeData?
     @State private var insurerType : InsurerData?
     
+    // Filter Lists - Variables
+    @State private var vehicleTypeList : [VehicleData] = []
+    @State private var fuelTypeList : [FuelTypeData] = []
+    @State private var statesDataList : [StatesData] = []
+    @State private var cityCategoriesList : [CityCategoryData] = []
+    @State private var cityDataList : [CityData] = []
+    @State private var insuranceTypesList : [InsuranceTypeData] = []
+    @State private var renewalTypesList : [RenewalTypeData] = []
+    @State private var insurerTypeList : [InsurerData] = []
+    let NCBTypes : [String] = ["Yes", "No"]
+    
+    
+    @State private var dropDownViewSelected : [String : Bool] = [
+       "Vehicle Type" : false,
+       "Fuel Type" : false,
+       "NCB" : false,
+       "State" : false,
+       "City Category" : false,
+       "City" : false,
+       "Insurance Type" : false,
+       "Renewal Type" : false,
+       "Insurer" : false
+    ]
+    
+    // Value Selected from the Filter
+    @State private var selectedValue : [String : String] = [
+        "Vehicle Type" : "",
+        "Fuel Type" : "",
+        "NCB" : "",
+        "State" : "",
+        "City Category" : "",
+        "City" : "",
+        "Insurance Type" : "",
+        "Renewal Type" : "",
+        "Insurer" : ""
+    ]
+    
+    @State private var submittingValue : [String : String] = [
+        "Vehicle Type" : "",
+        "Fuel Type" : "",
+        "NCB" : "",
+        "State" : "",
+        "City Category" : "",
+        "City" : "",
+        "Insurance Type" : "",
+        "Renewal Type" : "",
+        "Insurer" : ""
+    ]
+    
+    // Policy Rate Data Variables
     @State private var showAllPolicyRates : [PolicyRateData] = []
     @State private var policyRateId : String = ""
     @State private var isPolicyRateSelected = false
@@ -88,160 +142,275 @@ struct UploadVehicleImageAndNumber: View {
                 ScrollView{
                     VStack(spacing:12){
                         
-                        Text("Upload Vehicle Image")
-                            .font(.custom("Gilroy-SemiBold", size: 22))
-                            .foregroundStyle(Color(hex: "#4E4E4E"))
-                        
-                        if let selectedImage = selectedImage {
-                            selectedImage
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 200, height: 200)
-                        } else {
-                            Rectangle()
-                                .frame(width: 200, height: 200)
-                                .foregroundStyle(Color.gray.opacity(0.3))
-                                .overlay(content: {
-                                    Image(systemName: "camera.aperture")
+                        VStack(spacing:0){
+                            VStack(spacing:12){
+                                Text("Upload Vehicle Image")
+                                    .font(.custom("Gilroy-SemiBold", size: 18))
+                                    .foregroundStyle(Color(hex: "#4E4E4E"))
+                                    .padding(.top,5)
+                                
+                                if let selectedImage = selectedImage {
+                                    selectedImage
                                         .resizable()
-                                        .aspectRatio(contentMode: .fit)
-                                        .frame(width: 24,height: 24)
-                                })
-                        }
-                        
-                        Button("Select Image") {
-                            requestPhotoLibraryAccess()
-                        }
-                        
-                        Text("OR")
-                        
-                        Button("Capture Image Using Camera") {
-                            requestCameraAccess()
-                        }
-                        
-                        if imageName.isEmpty {
-                            Text("No image selected")
-                        } else {
-                            Text("File Selected: \(imageName)")
-                                .font(.custom("Gilroy-SemiBold", size: 14))
-                                .lineLimit(1)
-                        }
-                        
-                        
-                        
-                        Button(action: {
-                            withAnimation{
-                                self.loader = true
-                            }
-                            if let filePath = filePath {
-                                let token = retrieveToken() ?? ""
-                                
-                                // Use this filePath in your API request
-                                print("File path for upload: \(filePath)")
-                                
-                                // Call your API upload function here with filePath
-                                Task.init {
-                                    accessModel.uploadImage(token: token, filePath: filePath) { result in
-                                        if let message = result {
-                                            if !message.isEmpty{
-                                                withAnimation{
-                                                    self.loader = false
-                                                    vehicleNumber = message
-                                                }
-                                                snackBar.show(message: "Data Fetched Successfully.", title: "Success", type: .success)
-                                            }
-                                        } else {
-                                            snackBar.show(message: "Failed to upload image.", title: "Error", type: .error)
-                                        }
-                                    }
+                                        .scaledToFit()
+                                        .frame(width: 200, height: 150)
+                                } else {
+                                    Rectangle()
+                                        .frame(width: 200, height: 150)
+                                        .foregroundStyle(Color.gray.opacity(0.3))
+                                        .overlay(content: {
+                                            Image(systemName: "camera.aperture")
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fit)
+                                                .frame(width: 24,height: 24)
+                                        })
                                 }
-                            } else {
-                                print("No file path available.")
-                                snackBar.show(message: "No file selected.", title: "Error", type: .error)
+                                
+                                
                             }
+                        
                             
-                        },
-                               label: {
-                            ZStack{
-                                RoundedRectangle(cornerRadius: 5)
-                                    .stroke(Color(hex: "#D0D0D0"),lineWidth: 1)
-                                    .frame(maxWidth: .infinity, minHeight: 45 )
-                                    .overlay(content: {
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .foregroundStyle(Color("button_background_2"))
-                                        
-                                    })
-                                if loader {
-                                    ProgressView()
-                                        .tint(.white)
+                            HStack(spacing:12){
+                                Button("Select Image") {
+                                    requestPhotoLibraryAccess()
                                 }
-                                else {
-                                    Text("Upload Image")
-                                        .font(.custom("Gilroy-SemiBold", size: 16))
-                                        .foregroundStyle(Color(hex: "#FFFFFF"))
+                                
+                                Text("OR")
+                                
+                                Button("Capture Image") {
+                                    requestCameraAccess()
+                                }
+                                
+                            }
+                            .padding(.vertical,16)
+                        }
+                        .padding(.horizontal,16)
+                        
+                        HStack{
+                            
+                            VStack(spacing:0){
+                                if imageName.isEmpty {
+                                    Text("No image selected")
+                                } else {
+                                    Text("\(imageName)")
+                                        .font(.custom("Gilroy-SemiBold", size: 14))
+                                        .lineLimit(3)
                                 }
                             }
                             .padding(.horizontal,16)
                             
-                        })
-                        
-                    }
-                    .padding(.vertical,12)
-                    
-                    VStack{
-                        Text("Enter Vehicle Number")
-                            .font(.custom("Gilroy-SemiBold", size: 22))
-                            .foregroundStyle(Color(hex: "#4E4E4E"))
-                        
-                        TextField("Vehicle Number", text: $vehicleNumber)
-                            .padding()
-                            .overlay(content: {
-                                RoundedRectangle(cornerRadius: 5)
-                                    .stroke(.black, lineWidth: 1)
-                                
-                            })
-                            .overlay(alignment: .trailing, content: {
-                                Button(action: {
-                                    withAnimation{
-                                        self.vehicleNumberLoader = true
-                                    }
+                            Spacer()
+                            
+                            
+                            Button(action: {
+                                withAnimation{
+                                    self.loader = true
+                                }
+                                if let filePath = filePath {
                                     let token = retrieveToken() ?? ""
-                                    Task.init{
-                                        let result = try await accessModel.getVehicleDetails(token: token, number: vehicleNumber)
-                                        
-                                        if result.status == "success"{
-                                            self.vehicleNumberLoader = false
-                                            snackBar.show(message: "Vehicle number submitted successfully.", title: "Success", type: .success)
-                                            
-                                            self.policyRateLoader = true
-                                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                                let payload = SearchPolicyRatePayload(
-                                                    state_id: statesData?.id ?? "",
-                                                    city_id: cityData?.id ?? "",
-                                                    city_category_id: cityCategories?.id ?? "",
-                                                    vehicle_type_id: vehicleType?.id ?? "",
-                                                    vehicle_model_id: "",
-                                                    renewal_type_id: renewalTypes?.id ?? "",
-                                                    insurance_type_id: "",
-                                                    insurer_id: insurerType?.id ?? "",
-                                                    fuel_type_id:fuelType?.id  ?? "",
-                                                    status: "0", page: 1, size: 50
-                                                )
-                                                print("Vehicle Number Filter Payload -> \(payload)")
-                                                getPolicyRatesList(token: token, payload: payload)
+                                    
+                                    // Use this filePath in your API request
+                                    print("File path for upload: \(filePath)")
+                                    
+                                    // Call your API upload function here with filePath
+                                    Task.init {
+                                        accessModel.uploadImage(token: token, filePath: filePath) { result in
+                                            if let message = result {
+                                                if !message.isEmpty{
+                                                    withAnimation{
+                                                        self.loader = false
+                                                        vehicleNumber = message
+                                                    }
+                                                    snackBar.show(message: "Data Fetched Successfully.", title: "Success", type: .success)
+                                                }
+                                            } else {
+                                                snackBar.show(message: "Failed to upload image.", title: "Error", type: .error)
                                             }
                                         }
-                                        else {
-                                            self.vehicleNumberLoader = true
-                                            snackBar.show(message: result.message, title: "Error", type: .error)
+                                    }
+                                } else {
+                                    print("No file path available.")
+                                    self.loader = false
+                                    snackBar.show(message: "No file selected.", title: "Error", type: .error)
+                                }
+                                
+                            },
+                                   label: {
+                                ZStack{
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(Color(hex: "#D0D0D0"),lineWidth: 1)
+                                        .frame(maxWidth: 100, minHeight: 40 )
+                                        .overlay(content: {
+                                            RoundedRectangle(cornerRadius: 5)
+                                                .foregroundStyle(Color("button_background_2"))
+                                            
+                                        })
+                                    if loader {
+                                        ProgressView()
+                                            .tint(.white)
+                                    }
+                                    else {
+                                        Text("Upload")
+                                            .font(.custom("Gilroy-SemiBold", size: 14))
+                                            .foregroundStyle(Color(hex: "#FFFFFF"))
+                                    }
+                                }
+                                .padding(.horizontal,16)
+                                
+                            })
+                            
+                        }
+                        
+                    }
+                    .padding(.vertical,8)
+                    .padding(.bottom,8)
+                    
+                    VStack(alignment:.leading,spacing: 8){
+                        Text("Enter Vehicle Number")
+                            .font(.custom("Gilroy-SemiBold", size: 14))
+                            .foregroundStyle(Color(hex: "#4E4E4E"))
+                            .padding(.horizontal,16)
+                        
+                        HStack{
+                            TextField("Vehicle Number", text: $vehicleNumber)
+                                .padding(.vertical,8)
+                                .padding(.horizontal,12)
+                                .overlay(content: {
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(.black, lineWidth: 0.5)
+                                    
+                                })
+                            
+                            Button(action: {
+                                withAnimation{
+                                    self.vehicleNumberLoader = true
+                                }
+                                let token = retrieveToken() ?? ""
+                                Task.init{
+                                    let result = try await accessModel.getVehicleDetails(token: token, number: vehicleNumber)
+                                    
+                                    if result.status == "success"{
+                                        self.vehicleNumberLoader = false
+                                        snackBar.show(message: "Vehicle number submitted successfully.", title: "Success", type: .success)
+                                        
+                                        self.policyRateLoader = true
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                            let payload = SearchPolicyRatePayload(
+                                                state_id: statesData?.id ?? "",
+                                                city_id: cityData?.id ?? "",
+                                                city_category_id: cityCategories?.id ?? "",
+                                                vehicle_type_id: vehicleType?.id ?? "",
+                                                vehicle_model_id: "",
+                                                renewal_type_id: renewalTypes?.id ?? "",
+                                                insurance_type_id: "",
+                                                insurer_id: insurerType?.id ?? "",
+                                                fuel_type_id:fuelType?.id  ?? "",
+                                                status: "0", page: 1, size: 50
+                                            )
+                                            print("Vehicle Number Filter Payload -> \(payload)")
+                                            getPolicyRatesList(token: token, payload: payload)
                                         }
                                     }
+                                    else {
+                                        self.vehicleNumberLoader = false
+                                        snackBar.show(message: result.message, title: "Error", type: .error)
+                                    }
+                                }
+                            },
+                            label: {
+                                ZStack{
+                                    RoundedRectangle(cornerRadius: 5)
+                                        .stroke(Color(hex: "#D0D0D0"),lineWidth: 0.5)
+                                        .frame(width: 100, height: 40 )
+                                        .overlay(content: {
+                                            RoundedRectangle(cornerRadius: 5)
+                                                .foregroundStyle(Color("button_background_2"))
+                                            
+                                        })
+                                    if vehicleNumberLoader {
+                                        ProgressView()
+                                            .tint(.white)
+                                    }
+                                    else {
+                                        Text("Submit")
+                                            .font(.custom("Gilroy-SemiBold", size: 14))
+                                            .foregroundStyle(Color(hex: "#FFFFFF"))
+                                    }
+                                }
+                                .padding(.trailing,5)
+                                
+                            })
+                        }
+                        .padding(.horizontal,16)
+                    
+                        if !vehicleNumber.isEmpty {
+                            Text("Please verify the vehicle number before continuing")
+                                .font(.custom("Gilroy-SemiBold", size: 16))
+                                .foregroundStyle(Color.indigo)
+                                .padding(.top,8)
+                                .padding(.leading,16)
+                        }
+                        
+                        
+                        VStack(spacing:0){
+                            
+                            ScrollView(.horizontal,showsIndicators: false){
+                                
+                                HStack{
+                                    HStack{
+                                        selectionView(selectionTitle: "Vehicle Type", staticValue: "Vehicle Type")
+                                        
+                                        selectionView(selectionTitle: "Fuel Type", staticValue: "Fuel Type")
+                                        
+                                        selectionView(selectionTitle: "NCB", staticValue: "Status")
+                                    }
+                                    
+                                    
+                                    HStack{
+                                        selectionView(selectionTitle: "State", staticValue: "State")
+                                        
+                                        selectionView(selectionTitle: "City Category", staticValue: "City Category")
+                                        
+                                        selectionView(selectionTitle: "City", staticValue: "City")
+                                    }
+                                    
+                                    HStack{
+                                        selectionView(selectionTitle: "Insurance Type", staticValue: "Insurance Type")
+                                        
+                                        selectionView(selectionTitle: "Renewal Type", staticValue: "Renewal Type")
+                                        
+                                        selectionView(selectionTitle: "Insurer", staticValue: "Insurer")
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                            }
+                            
+                            HStack{
+                                
+                                Button(action: {
+                                    self.policyRateLoader = false
+                                    let payload = SearchPolicyRatePayload(
+                                        state_id: submittingValue["State"] ?? "",
+                                        city_id: submittingValue["City"] ?? "",
+                                        city_category_id: submittingValue["City Category"] ?? "",
+                                        vehicle_type_id: submittingValue["Vehicle Type"] ?? "",
+                                        vehicle_model_id: "",
+                                        renewal_type_id: submittingValue["Renewal Type"] ?? "",
+                                        insurance_type_id: submittingValue["Insurance Type"] ?? "",
+                                        insurer_id: submittingValue["Insurer"] ?? "",
+                                        fuel_type_id: submittingValue["Fuel Type"] ?? "",
+                                        status: submittingValue["NCB"] ?? "0", page: 1, size: 50
+                                    )
+                                    print("Apply Filter Payload -> \(payload)")
+                                    let token = retrieveToken() ?? ""
+                                    getPolicyRatesList(token: token, payload: payload)
                                 },
-                                       label: {
+                                label: {
                                     ZStack{
                                         RoundedRectangle(cornerRadius: 5)
-                                            .stroke(Color(hex: "#D0D0D0"),lineWidth: 1)
-                                            .frame(width: 100, height: 45 )
+                                            .stroke(Color(hex: "#D0D0D0"),lineWidth: 0.5)
+                                            .frame(width: 100, height: 40 )
                                             .overlay(content: {
                                                 RoundedRectangle(cornerRadius: 5)
                                                     .foregroundStyle(Color("button_background_2"))
@@ -252,30 +421,30 @@ struct UploadVehicleImageAndNumber: View {
                                                 .tint(.white)
                                         }
                                         else {
-                                            Text("Submit")
-                                                .font(.custom("Gilroy-SemiBold", size: 16))
+                                            Text("Apply Filter")
+                                                .font(.custom("Gilroy-SemiBold", size: 14))
                                                 .foregroundStyle(Color(hex: "#FFFFFF"))
                                         }
                                     }
                                     .padding(.trailing,5)
                                     
                                 })
-                            })
+                               
+                                
+                                Spacer()
+
+                            }
+                            .padding(.top,8)
                             .padding(.horizontal,16)
-                        
-                        if !vehicleNumber.isEmpty {
-                            Text("Please verify the vehicle number before continuing")
-                                .font(.custom("Gilroy-SemiBold", size: 16))
-                                .foregroundStyle(Color.indigo)
-                                .padding(.top,8)
+                    
                         }
+                        .padding(.top,8)
                         
                         Divider()
                             .padding(.vertical,12)
                         
                         
-                        VStack{
-                            
+                        VStack(alignment:.center){
                             
                             if policyRateLoader {
                                 ProgressView()
@@ -347,9 +516,14 @@ struct UploadVehicleImageAndNumber: View {
                                     }
                                 }
                                 else {
-                                    Text("No Data Available..")
-                                        .font(.custom("Gilroy-SemiBold", size: 20))
-                                        .padding(.top,12)
+                                    HStack{
+                                        Spacer()
+                                        Text("No Data Available..")
+                                            .font(.custom("Gilroy-SemiBold", size: 20))
+                                            .padding(.top,12)
+                                        Spacer()
+                                    }
+                                   
                                 }
                             }
                         }
@@ -366,6 +540,9 @@ struct UploadVehicleImageAndNumber: View {
                 }
                 .zIndex(1)
             }
+        }
+        .onAppear{
+            print("\(selectedValue.values)")
         }
         .sheet(isPresented: $isImagePickerPresented) {
             PhotoPicker(imageData: $imageData, isPresented: $isImagePickerPresented, selectedImage: $selectedImage, imageName: $imageName, uiImage: $uiImage, imageURL: $imageURL, filePath: $filePath )
@@ -384,46 +561,96 @@ struct UploadVehicleImageAndNumber: View {
                 vehicleType(accessModel: accessModel)
                 cities(accessModel: accessModel)
                 cityCategories(accessModel: accessModel)
-                renewalType(accessModel: accessModel)
             }
             
+        })
+        .onReceive(accessModel.$vehicleTypes, perform: {values in
+            if !values.isEmpty{
+                self.vehicleTypeList = values
+            }
+        })
+        .onReceive(accessModel.$fuelTypes, perform: {values in
+            if !values.isEmpty{
+                self.fuelTypeList = values
+            }
+        })
+        .onReceive(accessModel.$getAllStatesData, perform: {values in
+            if !values.isEmpty{
+                self.statesDataList = values
+            }
+        })
+        .onReceive(accessModel.$getAllCityCategories, perform: {values in
+            if !values.isEmpty{
+                self.cityCategoriesList = values
+            }
+        })
+        .onReceive(accessModel.$getAllCites, perform: {values in
+            if !values.isEmpty{
+                self.cityDataList = values
+            }
+        })
+        .onReceive(accessModel.$insuranceTypes, perform: {values in
+            if !values.isEmpty{
+                self.insuranceTypesList = values
+            }
+        })
+        .onReceive(accessModel.$renewalTypes, perform: {values in
+            if !values.isEmpty{
+                self.renewalTypesList = values
+            }
+        })
+        .onReceive(accessModel.$insurerTypes, perform: {values in
+            if !values.isEmpty{
+                self.insurerTypeList = values
+            }
         })
        
     }
     
     func statesData(accessModel : AccessServiceViewModel){
-        let state = accessModel.getAllStatesData.filter{state in
-            state.name.lowercased() == getVehicleDetails?.result?.state_code
+        let state = accessModel.getAllStatesData.filter{data in
+            data.name.lowercased() == getVehicleDetails?.result?.state_code?.lowercased()
         }
         self.statesData = state.first
+        selectedValue["State"] = state.first?.name
+        submittingValue["State"] = state.first?.id
     }
     
     func fuelType(accessModel : AccessServiceViewModel){
-        let fuel = accessModel.fuelTypes.filter{fuel in
-            fuelType?.name.lowercased() == getVehicleDetails?.result?.fuel_descr.lowercased()
+        let fuel = accessModel.fuelTypes.filter{data in
+            data.name.lowercased() == getVehicleDetails?.result?.fuel_descr?.lowercased()
         }
         self.fuelType = fuel.first
+        print("Fuel -> \(fuel.first?.name ?? "Empty Fuel Type")")
+        selectedValue["Fuel Type"] = fuel.first?.name
+        submittingValue["Fuel Type"] = fuel.first?.id
     }
     
     func insurerType(accessModel : AccessServiceViewModel){
         let insurer = accessModel.insurerTypes.filter{data in
-            data.name.lowercased() == getVehicleDetails?.result?.vehicle_insurance_details.insurance_company_name.lowercased()
+            data.name.lowercased() == getVehicleDetails?.result?.vehicle_insurance_details?.insurance_company_name.lowercased()
         }
         self.insurerType = insurer.first
+        selectedValue["Insurer"] = insurer.first?.name
+        submittingValue["Insurer"] = insurer.first?.id
     }
     
     func vehicleType(accessModel : AccessServiceViewModel){
         let vehicle = accessModel.vehicleTypes.filter{data in
-            data.name.lowercased() == getVehicleDetails?.result?.vehicle_type.lowercased()
+            data.name.lowercased() == getVehicleDetails?.result?.vehicle_type?.lowercased()
         }
         self.vehicleType = vehicle.first
+        selectedValue["Vehicle Type"] = vehicle.first?.name
+        submittingValue["Vehicle Type"] = vehicle.first?.id
     }
     
     func cities(accessModel : AccessServiceViewModel){
         let city = accessModel.getAllCites.filter{data in
-            data.name.lowercased() == getVehicleDetails?.result?.permanent_district_name.lowercased()
+            data.name.lowercased() == getVehicleDetails?.result?.permanent_district_name?.lowercased()
         }
         self.cityData = city.first
+        selectedValue["City"] = city.first?.name
+        submittingValue["City"] = city.first?.id
     }
     
     func cityCategories(accessModel : AccessServiceViewModel){
@@ -431,6 +658,8 @@ struct UploadVehicleImageAndNumber: View {
             category.id.lowercased() == cityData?.city_category_id.lowercased()
         }
         self.cityCategories = cityCategory.first
+        selectedValue["City Category"] = cityCategory.first?.name
+        submittingValue["City Category"] = cityCategory.first?.id
     }
     
     func renewalType(accessModel : AccessServiceViewModel){
@@ -481,6 +710,7 @@ struct UploadVehicleImageAndNumber: View {
                 let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
                 if !result {
                     self.policyRateLoader = false
+                    self.showAllPolicyRates = response
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                         snackBar.show(message: "No Data Found, for the filters applied.", title: "No Data", type: .warning)
                     })
@@ -547,6 +777,220 @@ struct UploadVehicleImageAndNumber: View {
                     }
                 }
             }
+    }
+    
+    
+    @ViewBuilder
+    func selectionView(selectionTitle : String, staticValue : String) -> some View {
+        
+        let filters = getFilterList(for: selectionTitle)
+        
+        VStack(alignment:.leading,spacing:8){
+            
+            VStack(alignment:.leading,spacing:0){
+                HStack(spacing:0){
+                    
+                    if selectedValue[selectionTitle] == "" {
+                        Text(staticValue)
+                            .font(.custom("Gilroy-Medium", size: 12))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    else {
+                        if let value = selectedValue[selectionTitle]  {
+                            Text(value)
+                                .font(.custom("Gilroy-Medium", size: 12))
+                                .onAppear{
+                                    print("\(selectionTitle) -> \(value)")
+                                }
+                        }
+                        else {
+                            Text(staticValue)
+                                .font(.custom("Gilroy-Medium", size: 12))
+                                .lineLimit(1)
+                                .minimumScaleFactor(0.7)
+                        }
+                       
+                    }
+                    
+                    Spacer()
+                    
+                    Image("union-1")
+                        .resizable()
+                        .frame(width: 12,height: 8)
+                        .padding(.top,1)
+                }
+                
+                
+                if dropDownViewSelected[selectionTitle] ?? false {
+                    VStack(alignment:.leading,spacing:16){
+                        HStack{
+                            Text(staticValue)
+                                .font(.custom("Gilroy-Medium", size: 12))
+                           
+                            Spacer()
+                            
+                            if selectedValue[selectionTitle] == "" {
+                                Circle()
+                                    .fill(Color(hex: "#3960F6"))
+                                    .frame(width: 6, height: 6)
+                                    .overlay(content: {
+                                        Circle()
+                                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
+                                            .frame(width: 12,height: 12)
+                                    })
+                                    
+                            }
+                        }
+                        .padding(.top,8)
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation{
+                                selectedValue[selectionTitle] = ""
+                                submittingValue[selectionTitle] = ""
+                                dropDownViewSelected[selectionTitle] = false
+                                print("\(String(describing: selectedValue[selectionTitle]))")
+                            }
+                        }
+                        
+                      
+                        ForEach(filters.indices,id: \.self){i in
+                            let singleList = filters[i]
+                            
+                            switch selectionTitle {
+                                case "Vehicle Type":
+                                if let vehicle = singleList as? VehicleData {
+                                    singleFilterValue(title: selectionTitle, value: vehicle.name, valueId: vehicle.id)
+                                }
+                                
+                                case "Fuel Type":
+                                if let fuel = singleList as? FuelTypeData {
+                                    singleFilterValue(title: selectionTitle, value: fuel.name, valueId: fuel.id)
+                                }
+                                
+                                case "NCB":
+                                if let ncb = singleList as? String {
+                                    if ncb == "Yes"{
+                                        singleFilterValue(title: selectionTitle, value: ncb, valueId: "1")
+                                    }
+                                    else {
+                                        singleFilterValue(title: selectionTitle, value: ncb, valueId: "0")
+                                    }
+                                    
+                                }
+                                
+                                case "State":
+                                if let state = singleList as? StatesData {
+                                    singleFilterValue(title: selectionTitle, value: state.name, valueId: state.id)
+                                }
+                                
+                                case "City Category":
+                                if let cityCategory = singleList as? CityCategoryData {
+                                    singleFilterValue(title: selectionTitle, value: cityCategory.name, valueId: cityCategory.id)
+                                }
+                                
+                                case "City":
+                                if let city = singleList as? CityData {
+                                    singleFilterValue(title: selectionTitle, value: city.name, valueId: city.id)
+                                }
+                                
+                                case "Insurance Type":
+                                if let insurance = singleList as? InsuranceTypeData {
+                                    singleFilterValue(title: selectionTitle, value: insurance.name, valueId: insurance.id)
+                                }
+                                
+                                case "Renewal Type":
+                                if let renewal = singleList as? RenewalTypeData {
+                                    singleFilterValue(title: selectionTitle, value: renewal.name, valueId: renewal.id)
+                                }
+                                
+                                case "Insurer" :
+                                if let insurer = singleList as? InsurerData {
+                                    singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
+                                }
+                                
+                                default :
+                                    EmptyView()
+                            }
+                            
+                            
+                        }
+                        
+                    }
+                    .padding(.top,8)
+                    
+                }
+                
+            }
+            .padding(.horizontal,10)
+            .padding(.vertical,12)
+            .background(
+                RoundedRectangle(cornerRadius: 5)
+                    .stroke(Color(hex: "#949494"),lineWidth: 1)
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation{
+                    dropDownViewSelected[selectionTitle]?.toggle()
+                }
+            }
+        }
+    }
+    
+    @ViewBuilder
+    func singleFilterValue(title: String,value: String, valueId : String) -> some View{
+        HStack{
+            Text(value)
+                .font(.custom("Gilroy-Medium", size: 12))
+            
+            Spacer()
+            
+            
+            if selectedValue[title] == value {
+                Circle()
+                    .fill(Color(hex: "#3960F6"))
+                    .frame(width: 6, height: 6)
+                    .overlay(content: {
+                        Circle()
+                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
+                            .frame(width: 12,height: 12)
+                    })
+            }
+        }
+        .contentShape(Rectangle())
+        .onTapGesture {
+            withAnimation{
+                selectedValue[title] = value
+                submittingValue[title] = valueId
+                dropDownViewSelected[title] = false
+                print("\(String(describing: selectedValue[title])) :\(String(describing: submittingValue[title]))")
+            }
+        }
+    }
+    
+    func getFilterList(for selectionTitle: String) -> [Any] {
+        switch selectionTitle {
+        case "Vehicle Type":
+            return vehicleTypeList  // Returning the full array of `VehicleData` objects
+        case "Fuel Type":
+            return fuelTypeList  // Returning the full array of `FuelTypeData` objects
+        case "NCB":
+            return NCBTypes  // Still strings, as these are not custom objects
+        case "State":
+            return statesDataList  // Returning the full array of `StatesData` objects
+        case "City Category":
+            return cityCategoriesList  // Returning the full array of `CityCategoryData` objects
+        case "City":
+            return cityDataList  // Returning the full array of `CityData` objects
+        case "Insurance Type":
+            return insuranceTypesList  // Returning the full array of `InsuranceTypeData` objects
+        case "Renewal Type":
+            return renewalTypesList  // Returning the full array of `RenewalTypeData` objects
+        case "Insurer":
+            return insurerTypeList  // Returning the full array of `InsurerData` objects
+        default:
+            return []
+        }
     }
 }
 

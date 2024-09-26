@@ -11,6 +11,11 @@ import shared
 
 struct ExploreView: View {
     
+    let userName : String
+    let nameInitials : String
+    
+    @EnvironmentObject var appDelegate: AppDelegate
+    
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var snackBar : SnackbarModel
     @ObservedObject var router : Router
@@ -24,10 +29,6 @@ struct ExploreView: View {
            GridItem(.flexible()),
     ]
     
-    
-    @State private var userName : String = ""
-    @State private var nameInitials  = ""
-    
     @State private var isPolicyRateSelected = false
     @State private var isFilterSelected = false
     
@@ -35,6 +36,8 @@ struct ExploreView: View {
     @State private var policyRateId : String = ""
     
     @State private var loader = false
+    
+    @State private var granted = false
     
     var body: some View {
         
@@ -54,13 +57,12 @@ struct ExploreView: View {
                                                 .font(.custom("Gilroy-SemiBold", size: 13))
                                         })
                                     
-                                    VStack(alignment:.leading,spacing:8){
-                                        Text("Welcome, \(userName)")
+                                    VStack(alignment:.leading,spacing:6){
+                                        Text("Welcome ")
                                             .font(.custom("Gilroy-SemiBold", size: 13))
                                         
-                                        Text("Edit Profile")
+                                        Text("\(userName)")
                                             .font(.custom("Gilroy-SemiBold", size: 13))
-                                            .foregroundStyle(Color(hex:"#3960F6"))
                                         
                                     }
                                 }
@@ -124,12 +126,12 @@ struct ExploreView: View {
                                     HStack(alignment:.top,spacing:12){
                                         Circle()
                                             .foregroundStyle(Color(hex: "#D9D9D9"))
-                                            .frame(width: 42,height: 42)
+                                            .frame(width: 35,height: 35)
                                             .overlay(content: {
                                                 Image(systemName: "doc")
                                                     .resizable()
                                                     .aspectRatio(contentMode: .fit)
-                                                    .frame(width: 16, height: 16)
+                                                    .frame(width: 12, height: 12)
                                                 
                                             })
                                         
@@ -181,11 +183,24 @@ struct ExploreView: View {
                                     
                                     Divider()
                                 }
+                                .onAppear{
+                                    withAnimation{
+                                        self.loader = false
+                                    }
+                                }
+                               
                             }
                             else {
                                 Text("No Data Found.")
                                     .font(.custom("Gilroy-SemiBold", size: 28))
                                     .padding(.top,20)
+                                    .onAppear{
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                                            withAnimation{
+                                                self.loader = false
+                                            }
+                                        }
+                                    }
                             }
                         }
                     }
@@ -217,55 +232,70 @@ struct ExploreView: View {
         })
         .background(Color(hex: "#F8F8F8"))
         .onAppear{
+            
             let token = retrieveToken() ?? ""
             self.loader = true
-            Task.init{
-                // Get User Data who is Logged In
-                do
-                {
-                    let data = try await accessModel.getUserData(token: token)
-
-                    let name = data.name.capitalized
-                    let surName = data.surname.capitalized
-
-                    extractInitialsAndName(name: name, surname: surName)
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-                }
-            }
+                    
             
-            getPolicyRatesList(token: token)
             allCities(token: token)
             insuranceTypes(token : token)
             renewalTypes(token : token)
             insurerTypes(token : token)
+            vehicleTypes(token: token)
+            fuelTypes(token: token)
+            allStates(token: token)
+            cityCategories(token: token)
             
         }
         .onReceive(accessModel.$policyRatesData){data in
             if !data.isEmpty {
+                self.loader = false
                 showAllPolicyRates = data
             }
         }
+        .onReceive(appDelegate.$fcmToken, perform: {token in
+            print("FCM Token After Authorization -> \(token)")
+            if !token.isEmpty {
+                registerDeviceWithKMM(fcmToken: token, accessModel: accessModel)
+            }
+        })
 
-        
     }
     
+    // Register Device for Push Notification
+    func registerDeviceWithKMM(fcmToken: String, accessModel : AccessServiceViewModel) {
+        guard let id = accessModel.userSpecs?.id else {
+            print("UserId is empty while registering device..")
+            return
+        }
+        let token = retrieveToken() ?? ""
+        let projectId = "0d98736c-5f90-41b4-b689-1b1935aab762"
+        Task{
+            do
+            {
+                try await accessModel.registerDeviceForNotification(userId: id, token: token, projectId: projectId, deviceToken: fcmToken)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+        
     // Get Policy Rates
     func getPolicyRatesList(token : String){
         Task.init{
-            
+            self.loader = true
             do
             {
                 let response = try await accessModel.getPolicyRates(token: token)
@@ -290,21 +320,99 @@ struct ExploreView: View {
             }
         }
     }
-    
-    
-    func extractInitialsAndName(name:String, surname:String){
-        
-        let nameOfUser = "\(name) \(surname)"
-        
-        guard let nameInitial = name.first else {
-            return
+ 
+    func vehicleTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getVehicleTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
         }
-        guard let surnameInitial = surname.first else {
-            return
-        }
-        self.nameInitials = "\(nameInitial)\(surnameInitial)"
-        self.userName = nameOfUser
     }
+    
+    func fuelTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getFuelTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func allStates(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllStates(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func cityCategories(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllCityCategories(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+ 
     
     func insuranceTypes(token : String){
         Task.init {
@@ -397,6 +505,7 @@ struct ExploreView: View {
             }
         }
     }
+    
 }
 
 struct ViewOffsetKey: PreferenceKey {
@@ -432,9 +541,11 @@ struct NotificationBellView : View {
 
 #Preview {
     ExploreView(
+        userName:"userName",
+        nameInitials: "nameInitials",
         accessModel: AccessServiceViewModel(),
         snackBar: SnackbarModel(),
-        router: Router(), 
+        router: Router(),
         navigationState: NavigationState()
     )
 }

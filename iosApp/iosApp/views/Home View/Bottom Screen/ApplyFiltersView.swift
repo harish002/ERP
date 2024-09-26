@@ -264,6 +264,10 @@ struct ApplyFiltersView: View {
                             Text(value)
                                 .font(.custom("Gilroy-Medium", size: 14))
                         }
+                        else {
+                            Text(staticValue)
+                                .font(.custom("Gilroy-Medium", size: 14))
+                        }
                        
                     }
                     

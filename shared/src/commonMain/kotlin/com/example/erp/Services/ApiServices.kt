@@ -14,6 +14,7 @@ import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.RefreshToken
+import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.example.lms.Services.Dataclass.RenewalTypes
 import com.example.lms.Services.Dataclass.SearchPolicyRateData
 import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
@@ -60,7 +61,10 @@ class ApiConfig {
         @SerialName("ACCESS_API")
         const val  UAT_ACCESS_API = "https://api.1click.tech/api/access"
         const val ACCESS_API = "https://api.1clicktech.in/api/access"
+
         const val COURSE_MANAGEMENT_API = "https://ccm-api.1clicktech.in/api"
+
+        const val  UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications"
         const val NOTIFICATION_MANAGEMENT = "https://api.1clicktech.in/api/notifications"
         const val SALES_TOOL_API = "https://sales-tool-api.1click.tech"
     }
@@ -326,7 +330,7 @@ class ApiServices {
             List<GetNotificationsResponse> {
         try {
             val response : HttpResponse = client.get {
-                url("${ApiConfig.NOTIFICATION_MANAGEMENT}/notifications/appNotifications")
+                url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/notifications/appNotifications")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
                 parameter("projectId",projectId)
@@ -345,6 +349,9 @@ class ApiServices {
             throw e.message?.let { IOException(it) }!!
         }
     }
+
+    // Register Device to activate the push notification using Unique FCM Token
+
 
     // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api
     // Read all Policy Rates
@@ -627,6 +634,7 @@ class ApiServices {
     }
 
     // Get Registration Number from Image
+    @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
     suspend fun getRegistrationNumberFromImage(token : String, filePath : String) : GetRegistrationNumberResponse {
         val cioClient = HttpClient(CIO)
@@ -664,6 +672,8 @@ class ApiServices {
         }
     }
 
+    // Get Vehicle Details for the Vehicle Number
+    @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
     suspend fun getVehicleDetails(token : String, vehicleNumber : String): GetVehicleDetails {
         try {
@@ -688,6 +698,36 @@ class ApiServices {
         }
     }
 
+
+    // Register Device for Enabling Push Notification
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun registerDeviceForNotification(token : String, projectId : String, userId : String,deviceToken : String) :
+            RegisteredDeviceResponse {
+        try {
+            val response : HttpResponse = client.post {
+                url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/notifications/registeredDevices/register")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("userId",userId)
+                parameter("projectId",projectId)
+                parameter("deviceToken",deviceToken)
+            }
+
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Register Device error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
     // --------------------------------------------------------------------------------------------
+
 
 }

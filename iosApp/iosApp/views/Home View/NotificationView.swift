@@ -47,12 +47,11 @@ struct NotificationView: View {
                 Spacer()
                 
                 
-                Image(systemName: "envelope")
+                Rectangle()
                     .frame(width: 16,height: 16)
                     .contentShape(Rectangle())
-                    .onTapGesture {
-                        
-                    }
+                    .foregroundStyle(Color(hex: "#F8F8F8"))
+                    
             }
             .padding(.vertical,12)
             .padding(.horizontal,16)

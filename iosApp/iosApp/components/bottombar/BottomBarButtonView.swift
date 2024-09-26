@@ -16,11 +16,13 @@ struct BottomBarButtonView :View {
     
     var body: some View {
 
-            VStack(spacing:5){
+            VStack(spacing:8){
                 Rectangle()
                     .frame(height: 0)
                 
-                Image(imageName)
+                Image(systemName: imageName)
+                    .resizable()
+                    .frame(width: 24,height: 24)
                     .foregroundStyle(isActive ? Color(hex: "#3960F6") : Color(hex: "#949494"))
                 
                 Text(name)
@@ -36,6 +38,6 @@ struct BottomBarButtonView :View {
 #Preview {
     BottomBarButtonView(
         name: "Policy Rates",
-        imageName: "layout-alt-02",
+        imageName: "book.pages",
         isActive: false)
 }

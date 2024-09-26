@@ -70,14 +70,14 @@ struct ProfileView: View {
                                 .padding(.horizontal,16)
 
                             
-                            AccountOptions(optionTitle: "About LMS")
+                            AccountOptions(optionTitle: "About 1Click Policy ERP")
                             
                             Text("Help and Support")
                                 .font(.custom("Gilroy-SemiBold", size: 16))
                                 .foregroundStyle(Color(hex: "4E4E4E"))
                                 .padding(.horizontal,16)
                             
-                            Text("Share the LMS app")
+                            Text("Share the 1 Click Policy ERP app")
                                 .font(.custom("Gilroy-SemiBold", size: 16))
                                 .foregroundStyle(Color(hex: "4E4E4E"))
                                 .padding(.horizontal,16)
@@ -106,7 +106,7 @@ struct ProfileView: View {
                         router.navigateTo(to: .startscreen)
                     }
                 
-                Text("1Click Tech LMS v1.0.0")
+                Text("1Click Policy ERP v1.0.0")
                     .font(.custom("Gilroy-Medium", size: 14))
                     .padding(.vertical,12)
                

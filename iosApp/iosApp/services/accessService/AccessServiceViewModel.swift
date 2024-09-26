@@ -25,7 +25,7 @@ class AccessServiceViewModel : ObservableObject {
     @Published var loginWithOtpCredential : String = ""
     @Published var specificCourseId : String = ""       // Used in Course Detail Screen for Fetching Details about the course --> /course/show
     @Published var myCourseId : String = ""             // Used in Course Start View for Getting Course Information --> /my_courses/show
-    
+    @Published var fcmToken : String = ""
     // Fix Variable Values
     let projectId : String = "c319ab33-dbf1-45e7-b566-521cfecfb3e5"
     
@@ -1055,6 +1055,44 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Register Device to activate Push Notifications
+    func registerDeviceForNotification(userId : String, token: String, projectId : String, deviceToken : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().registerDeviceForNotification(token: token, projectId: projectId, userId: userId, deviceToken: deviceToken)
+                        
+                        if !response.deviceTokens.isEmpty {
+                            print("Device Registered Successfully -> \(deviceToken)")
+                        }
+                        else {
+                            print("Device Failed to Register!")
+                        }
+                    }
+                    catch let error as NSError {
+                        print("Register Device Sent Error", error.code)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
         
     
 

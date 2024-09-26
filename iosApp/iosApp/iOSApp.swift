@@ -3,6 +3,9 @@ import SwiftUI
 @main
 struct iOSApp: App {
     
+    // Initialize the Firebase when the app launches
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     @ObservedObject var router = Router()
     @ObservedObject var selectedTab = GetSelectedTab()
     @StateObject var accessViewModel = AccessServiceViewModel()
@@ -73,6 +76,7 @@ struct iOSApp: App {
                 
             }
             .snackbar(isPresented: $snackBarManager.showSnackbar, type: snackBarManager.snackBarType, title: snackBarManager.snackBarTitle, message: snackBarManager.snackBarMessage)
+            .environmentObject(appDelegate)
             
         }
 	}
