@@ -6,6 +6,7 @@ plugins {
 //    alias(libs.plugins.compose.compiler)
     id ("kotlin-kapt")
     kotlin("plugin.serialization") version "1.9.20"
+    alias(libs.plugins.googleGmsGoogleServices)
 
 }
 
@@ -14,7 +15,6 @@ android {
     lint{
         abortOnError = false
     }
-
     namespace = "com.example.erp.android"
     compileSdk = 34
     defaultConfig {
@@ -95,5 +95,6 @@ dependencies {
 
 
     implementation ("com.github.bumptech.glide:glide:4.14.2") // Use the latest version
+    implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
 //    kapt ("com.github.bumptech.glide:compiler:4.14.2") // For annotation processing
 }

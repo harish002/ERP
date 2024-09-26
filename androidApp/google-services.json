@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "670785237856",
+    "project_id": "click-policy-sales-tool",
+    "storage_bucket": "click-policy-sales-tool.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:670785237856:android:95a119be49acc167a12405",
+        "android_client_info": {
+          "package_name": "com.example.erp.android"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiClgeRuXlRfNWhqK50RXmP1fqgRira6I"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

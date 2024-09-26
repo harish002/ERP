@@ -18,7 +18,11 @@
     <application
         android:allowBackup="false"
         android:supportsRtl="true"
+        android:name=".App"
+        android:icon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme">
+
+
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_launcher_foreground" />
@@ -27,18 +31,19 @@
             android:resource="@color/teal_200" />
         <activity
             android:name=".MainActivity"
+            android:label="Sales Tool"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<!--        <service android:name=".MyFirebaseMessageReceiver"-->
-<!--            android:exported="false">-->
-<!--            <intent-filter>-->
-<!--                <action android:name="com.google.firebase.MESSAGING_EVENT" />-->
-<!--            </intent-filter>-->
-<!--        </service>-->
+        <service android:name=".MyFirebaseMessageReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
 
         <provider
             android:name="androidx.core.content.FileProvider"
