@@ -41,8 +41,8 @@ class AppDelegate: NSObject, UIApplicationDelegate,UNUserNotificationCenterDeleg
     // These function receives an token which is an unique identifier for the user or device
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         
+        self.fcmToken = ""
         print("FCM Token : \(fcmToken ?? "Empty Token")")
-        
         if let rcvdToken = fcmToken {
             DispatchQueue.main.async {
                 self.fcmToken = rcvdToken

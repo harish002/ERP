@@ -705,7 +705,7 @@ class ApiServices {
             RegisteredDeviceResponse {
         try {
             val response : HttpResponse = client.post {
-                url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/notifications/registeredDevices/register")
+                url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/registeredDevices/register")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
                 parameter("userId",userId)
@@ -723,7 +723,7 @@ class ApiServices {
             }
         }
         catch (e: Exception) {
-            println("Register Device error Message ${e.message}")
+            println("Register Device error Message ${e.cause?.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }

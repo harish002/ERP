@@ -49,6 +49,9 @@ class AccessServiceViewModel : ObservableObject {
                         let authRefreshToken = response.refreshToken
                         saveRefreshToken(refreshToken: authRefreshToken)
                         
+                        let userId = response.id
+                        saveUserId(userId: userId)
+                        
                         let userData = UserData(
                             id: response.userData.id,
                             name: response.userData.name, 
@@ -114,6 +117,9 @@ class AccessServiceViewModel : ObservableObject {
                     do
                     {
                         let response = try await ApiServices().getUserWhoLoggedIn(token: token)
+                        
+                        let userId = response.id
+                        saveUserId(userId: userId)
                         
                         let userData = UserData(
                             id: response.userData.id,
@@ -1072,7 +1078,7 @@ class AccessServiceViewModel : ObservableObject {
                         }
                     }
                     catch let error as NSError {
-                        print("Register Device Sent Error", error.code)
+                        print("Register Device Sent Error -> \(String(describing: error.localizedFailureReason?.description))" )
                          if error.domain == NSURLErrorDomain {
                              switch error.code {
                              case NSURLErrorNotConnectedToInternet :

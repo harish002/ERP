@@ -39,6 +39,8 @@ struct ExploreView: View {
     
     @State private var granted = false
     
+    @State private var fcmToken = ""
+    
     var body: some View {
         
         ZStack{
@@ -255,21 +257,21 @@ struct ExploreView: View {
         }
         .onReceive(appDelegate.$fcmToken, perform: {token in
             print("FCM Token After Authorization -> \(token)")
-            if !token.isEmpty {
+            if !token.isEmpty{
                 registerDeviceWithKMM(fcmToken: token, accessModel: accessModel)
             }
         })
+    
 
     }
     
     // Register Device for Push Notification
     func registerDeviceWithKMM(fcmToken: String, accessModel : AccessServiceViewModel) {
-        guard let id = accessModel.userSpecs?.id else {
-            print("UserId is empty while registering device..")
-            return
-        }
+    
         let token = retrieveToken() ?? ""
+        let id = retrieveUserId() ?? ""
         let projectId = "0d98736c-5f90-41b4-b689-1b1935aab762"
+        
         Task{
             do
             {

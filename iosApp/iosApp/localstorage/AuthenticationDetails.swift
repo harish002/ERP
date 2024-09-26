@@ -42,6 +42,22 @@ func clearRefreshToken(){
     UserDefaults.standard.removeObject(forKey: "RefreshToken")
 }
 
+//Locally Saving the UserId and use it to extend the time span of the token
+
+func saveUserId(userId:String){
+    clearUserId()
+    UserDefaults.standard.set(userId, forKey: "UserId")
+}
+
+func retrieveUserId() -> String? {
+    let id = UserDefaults.standard.string(forKey: "UserId")
+    return id
+}
+
+func clearUserId(){
+    UserDefaults.standard.removeObject(forKey: "UserId")
+}
+
 
 // In-App Navigation Screening
 
