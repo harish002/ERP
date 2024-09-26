@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.platform.LocalContext
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
 import java.io.File
@@ -46,24 +45,51 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MyFirebaseMessageReceiver().subscribeToTopic("weather")
+        MyFirebaseMessageReceiver().subscribeToTopic("test")
+
+        val requestNotificationPermissionLauncher =
+            registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+                if (isGranted) {
+                    // Permission granted, proceed with notifications
+                } else {
+                    // Permission denied, handle accordingly
+                }
+            }
 
         setContent {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                when {
+                    ContextCompat.checkSelfPermission
+                        (this, Manifest.permission.POST_NOTIFICATIONS)
+                            == PackageManager.PERMISSION_GRANTED -> {
+                        // Permission is granted, proceed with sending notifications
+                    }
 
-            val rootnavController = rememberNavController()
-            val authNavController = rememberNavController()
-            val mainNavController = rememberNavController()
-            ERPTheme {
-                RootNavGraph(
-                    rootnavController,
-                    authNavController,
-                    mainNavController,
-                    LocalContext.current,
-                )
+                    else -> {
+                        // Request the permission
+                        requestNotificationPermissionLauncher
+                            .launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                }
+            } else {
+
+                val rootnavController = rememberNavController()
+                val authNavController = rememberNavController()
+                val mainNavController = rememberNavController()
+                ERPTheme {
+                    RootNavGraph(
+                        rootnavController,
+                        authNavController,
+                        mainNavController,
+                        LocalContext.current,
+                    )
+                }
             }
         }
+
+
     }
-
-
 }
 
 @Composable

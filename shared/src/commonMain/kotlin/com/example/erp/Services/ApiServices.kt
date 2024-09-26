@@ -12,7 +12,6 @@ import com.example.lms.Services.Dataclass.GetUserData
 import com.example.lms.Services.Dataclass.GetVehicleDetails
 import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
-import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.RefreshToken
 import com.example.lms.Services.Dataclass.RenewalTypes
 import com.example.lms.Services.Dataclass.SearchPolicyRateData
@@ -33,8 +32,6 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.ContentDisposition
-import io.ktor.http.ContentDisposition.Companion.File
 import io.ktor.http.ContentType
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
@@ -199,11 +196,11 @@ class ApiServices {
     @Throws(IOException::class, CancellationException::class)
     suspend fun loginApi(user: UserDetails): UserResponse {
         try {
-            val response: HttpResponse = client.post{
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/login")
                 contentType(ContentType.Application.Json)
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-                header("Referer","https://api.1click.tech")
+                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("Referer", "https://api.1click.tech")
                 body = Json.encodeToString(UserDetails.serializer(), user)
             }
             if (response.status.isSuccess()) {
@@ -232,7 +229,7 @@ class ApiServices {
             }
             if (response.status.isSuccess()) {
                 return true
-            }else{
+            } else {
                 throw IOException(
                     "${response.status}"
                 )
@@ -269,17 +266,17 @@ class ApiServices {
 
     // Get user who logged In
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getUserWhoLoggedIn(token : String) : GetUserData{
+    suspend fun getUserWhoLoggedIn(token: String): GetUserData {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.UAT_ACCESS_API}/users")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-                header("Referer","https://api.1click.tech")
+                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("Referer", "https://api.1click.tech")
             }
 
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
             } else {
                 throw IOException(
@@ -346,7 +343,7 @@ class ApiServices {
     // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api
     // Read all Policy Rates
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getPolicyRates(token : String) : GetPolicyRates {
+    suspend fun getPolicyRates(token: String): GetPolicyRates {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/")
@@ -410,8 +407,7 @@ class ApiServices {
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Fuel Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -435,8 +431,7 @@ class ApiServices {
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All States Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -458,8 +453,7 @@ class ApiServices {
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("City Category Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -481,8 +475,7 @@ class ApiServices {
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Cities Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -506,8 +499,7 @@ class ApiServices {
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Get All Insurance Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -521,8 +513,8 @@ class ApiServices {
                 url("${ApiConfig.SALES_TOOL_API}/renewal_type/")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
-                parameter("skip",0)
-                parameter("limit",10)
+                parameter("skip", 0)
+                parameter("limit", 10)
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -531,8 +523,7 @@ class ApiServices {
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Get Renewal Types Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -554,8 +545,7 @@ class ApiServices {
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All Insurer Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -564,39 +554,42 @@ class ApiServices {
     // Search Policy Rate Data
     @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
-    suspend fun searchPolicyRateData(token : String,
-        searchData : SearchPolicyRatePayload): SearchPolicyRateData {
+    suspend fun searchPolicyRateData(
+        token: String,
+        searchData: SearchPolicyRatePayload
+    ): SearchPolicyRateData {
         try {
-            val response : HttpResponse = client.post{
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/search")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
                 parameter("page", 1)
                 parameter("size", 50)
-                body = Json.encodeToString(SearchPolicyRatePayload.serializer(),searchData)
+                body = Json.encodeToString(SearchPolicyRatePayload.serializer(), searchData)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
 
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Search Policy Rate Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
 
     // Get Registration Number from Image
+    @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
-    suspend fun getRegistrationNumberFromImage(token : String, filePath : String) : GetRegistrationNumberResponse {
+    suspend fun getRegistrationNumberFromImage(
+        token: String,
+        filePath: String
+    ): GetRegistrationNumberResponse {
         val cioClient = HttpClient(CIO)
         try {
-
             // Create a multipart form data request
             val response: HttpResponse = client.submitFormWithBinaryData(
                 url = "https://sales-tool-api.1click.tech/ocr/vehicle_number",
@@ -606,31 +599,30 @@ class ApiServices {
                     val source = FileSystem.SYSTEM.source(filePath.toPath()).buffer()
 
                     append("file", source.readByteArray(), Headers.build {
-                        append(HttpHeaders.Accept,ContentType.Application.Json)
+//                        append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, "multipart/form-data")
-                        append("Authorization",token)
+                        append("Authorization", token)
                     })
                 }
             )
-
-            if (response.status.isSuccess()){
-                return  response.body()
-            }
-            else {
+            if (response.status.isSuccess()) {
+                return response.body()
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
 
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Upload Image Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
 
+    @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
-    suspend fun getVehicleDetails(token : String, vehicleNumber : String): GetVehicleDetails {
+    suspend fun getVehicleDetails(token: String,
+                                  vehicleNumber: String): GetVehicleDetails {
         try {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.SALES_TOOL_API}/ocr")
@@ -638,16 +630,14 @@ class ApiServices {
                 header("Authorization", "Bearer $token")
                 parameter("vehicle_number", vehicleNumber)
             }
-                if (response.status.isSuccess()){
-                    return  response.body()
-                }
-                else {
-                    throw IOException(
-                        response.body<String>()
-                    )
-                }
-        }
-        catch (e: Exception) {
+            if (response.status.isSuccess()) {
+                return response.body()
+            } else {
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        } catch (e: Exception) {
             println("Upload Image Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }

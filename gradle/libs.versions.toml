@@ -34,6 +34,8 @@ okio = "3.9.0"
 xmaterialccp = "2.1"
 material3Android = "1.2.1"
 appcompat = "1.7.0"
+googleGmsGoogleServices = "4.4.2"
+firebaseMessaging = "24.0.1"
 
 [libraries]
 android-driver = { module = "app.cash.sqldelight:android-driver", version.ref = "androidDriver" }
@@ -80,6 +82,7 @@ okio = { module = "com.squareup.okio:okio", version.ref = "okio" }
 xmaterialccp = { module = "com.github.TuleSimon:xMaterialccp", version.ref = "xmaterialccp" }
 androidx-material3-android = { group = "androidx.compose.material3", name = "material3-android", version.ref = "material3Android" }
 androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging", version.ref = "firebaseMessaging" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
@@ -87,3 +90,4 @@ androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinAndroid = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinCocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
+googleGmsGoogleServices = { id = "com.google.gms.google-services", version.ref = "googleGmsGoogleServices" }

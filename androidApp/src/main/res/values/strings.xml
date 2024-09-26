@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Sales Tool</string>
+    <string name="notification_channel">low Channel</string>
+    <string name="notification_channel2">high Channel</string>
+</resources>
