@@ -781,6 +781,23 @@ data class LatestTaxDetails(
     val collected_by: String,
     val rcpt_no: String
 )
+
+// Register Devices for Push Notification
+// Response
+@Serializable
+data class RegisteredDeviceResponse(
+    val id: String? = null,
+    val remarks: String? = null,
+    val createdDate: String? = null,
+    val createdBy: String? = null,
+    val lastModifiedDate: String? = null,
+    val lastModifiedBy: String? = null,
+    val version: Int? = null,
+    val projectId: String? = null,
+    val userId: String? = null,
+    val deviceTokens: List<String>? = emptyList()
+)
+
 //--------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
 

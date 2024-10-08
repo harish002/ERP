@@ -11,10 +11,12 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.lms.android.Services.Methods
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -22,9 +24,11 @@ import com.google.firebase.messaging.RemoteMessage
 
 class MyFirebaseMessageReceiver : FirebaseMessagingService() {
 
+
     // Override onNewToken to get new token
     override fun onNewToken(token: String) {
         super.onNewToken(token)
+        Methods().save_DToken(token,this.baseContext)
         Log.d("device Token", token)
     }
 
@@ -190,9 +194,9 @@ class App: Application() {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             // Create the NotificationChannel.
-            val name = getString(R.string.notification_channel)
+            val name = getString(R.string.notification_channel2)
             val descriptionText = "getString(R.string.channel_description)"
-            val importance = NotificationManager.IMPORTANCE_DEFAULT
+            val importance = NotificationManager.IMPORTANCE_HIGH
 
             val mChannel = NotificationChannel(channel_ID, name, importance)
             mChannel.description = descriptionText

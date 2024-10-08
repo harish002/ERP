@@ -15,6 +15,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.navigation.compose.rememberNavController
@@ -58,39 +59,40 @@ class MainActivity : ComponentActivity() {
             }
 
         setContent {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                when {
-                    ContextCompat.checkSelfPermission
-                        (this, Manifest.permission.POST_NOTIFICATIONS)
-                            == PackageManager.PERMISSION_GRANTED -> {
-                        // Permission is granted, proceed with sending notifications
-                    }
-
-                    else -> {
-                        // Request the permission
-                        requestNotificationPermissionLauncher
-                            .launch(Manifest.permission.POST_NOTIFICATIONS)
-                    }
-                }
-            } else {
 
                 val rootnavController = rememberNavController()
                 val authNavController = rememberNavController()
                 val mainNavController = rememberNavController()
                 ERPTheme {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        when {
+                            ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.POST_NOTIFICATIONS
+                            ) == PackageManager.PERMISSION_GRANTED -> {
+                                // Permission is granted, proceed with sending notifications
+                            }
+
+                            else -> {
+                                // Request the permission
+                                requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                        }
+                    }
                     RootNavGraph(
                         rootnavController,
                         authNavController,
                         mainNavController,
                         LocalContext.current,
                     )
+//                    Text("Test Test TEst", color = Color.White)
                 }
             }
         }
 
 
     }
-}
+
 
 @Composable
 fun GreetingView(text: String) {

@@ -13,6 +13,7 @@ import com.example.lms.Services.Dataclass.GetVehicleDetails
 import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.RefreshToken
+import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.example.lms.Services.Dataclass.RenewalTypes
 import com.example.lms.Services.Dataclass.SearchPolicyRateData
 import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
@@ -55,6 +56,7 @@ class ApiConfig {
     companion object {
 
         @SerialName("ACCESS_API")
+        const val  UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications"
         const val UAT_ACCESS_API = "https://api.1click.tech/api/access"
         const val ACCESS_API = "https://api.1clicktech.in/api/access"
         const val COURSE_MANAGEMENT_API = "https://ccm-api.1clicktech.in/api"
@@ -222,10 +224,11 @@ class ApiServices {
     suspend fun loginWithPhone(phone: String): Boolean {
         try {
             val response: HttpResponse = client.post {
-                url("${ApiConfig.ACCESS_API}/auth/login/send-otp?")
+                url("${ApiConfig.UAT_ACCESS_API}/auth/login/send-otp")
                 contentType(ContentType.Application.Json)
 //                header("Referer","https://api.1clicktech.in")
                 parameter("input", phone)
+                parameter("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
             }
             if (response.status.isSuccess()) {
                 return true
@@ -245,9 +248,10 @@ class ApiServices {
     suspend fun authenticateLoginOTP(phone: String, otp: String): UserResponse {
         try {
             val response: HttpResponse = client.post {
-                url("${ApiConfig.ACCESS_API}/auth/login/authenticate-otp?")
+                url("${ApiConfig.UAT_ACCESS_API}/auth/login/authenticate-otp")
                 contentType(ContentType.Application.Json)
-                header("Referer", "https://api.1clicktech.in")
+                header("Referer", "https://api.1click.tech/")
+                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
                 parameter("input", phone)
                 parameter("otp", otp)
             }
@@ -565,6 +569,7 @@ class ApiServices {
                 header("Authorization", "Bearer $token")
                 parameter("page", 1)
                 parameter("size", 50)
+                header("Referer", "https://sales-tool-ui.1click.tech/")
                 body = Json.encodeToString(SearchPolicyRatePayload.serializer(), searchData)
             }
             if (response.status.isSuccess()) {
@@ -621,8 +626,10 @@ class ApiServices {
 
     @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
-    suspend fun getVehicleDetails(token: String,
-                                  vehicleNumber: String): GetVehicleDetails {
+    suspend fun getVehicleDetails(
+        token: String,
+        vehicleNumber: String
+    ): GetVehicleDetails {
         try {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.SALES_TOOL_API}/ocr")
@@ -643,6 +650,95 @@ class ApiServices {
         }
     }
 
+
     // --------------------------------------------------------------------------------------------
+
+    // Register Device for Enabling Push Notification
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun setregisterDeviceForNotification(
+        token: String,
+        projectId: String,
+        userId: String,
+        deviceToken: String
+    ): RegisteredDeviceResponse {
+        try {
+            val response: HttpResponse = client.post {
+                url(
+                    ApiConfig.UAT_NOTIFICATION_MANAGEMENT +
+                        "/registeredDevices/register")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("userId", userId)
+                parameter("projectId", projectId)
+                parameter("deviceToken", deviceToken)
+            }
+            if (response.status.isSuccess()) {
+                return response.body()
+            } else {
+                throw IOException(
+                    response.status.value.toString()
+                )
+            }
+        } catch (e: Exception) {
+            println("Register Device error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+
+    // Send Token to Mail to Reset Password
+    @OptIn(InternalAPI::class)
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun resetPassword(email: String) : String {
+        try {
+            val response : HttpResponse = client.post {
+                url("${ApiConfig.UAT_ACCESS_API}/auth/resetPassword")
+                contentType(ContentType.Application.Json)
+                parameter("email",email)
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("reset password error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+
+    // Change Password with the received Token
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun changePasswordWithToken(token: String, newPassword: String) : String {
+        try {
+            val response : HttpResponse = client.post {
+
+                url("${ApiConfig.UAT_ACCESS_API}/auth/changePasswordWithToken")
+                contentType(ContentType.Application.Json)
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+                parameter("token",token)
+                parameter("newPassword",newPassword)
+
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("change Password error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
 
 }

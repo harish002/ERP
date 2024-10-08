@@ -1,5 +1,6 @@
 package com.example.erp.android.ui.screens.bottomNavScreens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -50,11 +51,13 @@ import com.example.erp.android.ui.screens.PolicyListView
 import com.example.erp.android.ui.screens.SelectionView
 import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.example.erp.android.apiServices.ApiViewModel
+import com.example.erp.android.apiServices.project_id
 import com.example.lms.android.Services.Methods
 import com.example.erp.android.ui.component.CustBtn
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
+@SuppressLint("SuspiciousIndentation")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterScreen(
@@ -98,6 +101,34 @@ fun FilterScreen(
     val (renewalTypeState, renewalTypeDropdownState) = createSelectionState()
     val (insurerState, insurerDropdownState) = createSelectionState()
 
+    fun resetAllStates():SearchPolicyRatePayload {
+        vehicleTypeState.value = mapOf("id" to "", "name" to "")
+        fuelTypeState.value = mapOf("id" to "", "name" to "")
+        ncbState.value = mapOf("name" to "")
+
+        stateState.value = mapOf("id" to "", "name" to "")
+        cityCategoryState.value = mapOf("id" to "", "name" to "")
+        cityState.value = mapOf("id" to "", "name" to "")
+
+        insuranceTypeState.value = mapOf("id" to "", "name" to "")
+        renewalTypeState.value = mapOf("id" to "", "name" to "")
+        insurerState.value = mapOf("id" to "", "name" to "")
+
+        return SearchPolicyRatePayload(
+            state_id = stateState.value["id"] ?: "",
+            city_id = cityState.value["id"] ?: "",
+            city_category_id = cityCategoryState.value["id"] ?: "",
+            vehicle_type_id = vehicleTypeState.value["id"] ?: "",
+            vehicle_model_id = "",
+            renewal_type_id = renewalTypeState.value["id"] ?: "",
+            insurance_type_id = insuranceTypeState.value["id"] ?: "",
+            insurer_id = insurerState.value["id"] ?: "",
+            fuel_type_id = fuelTypeState.value["id"] ?: "",
+            status = if(ncbState.value["name"].isNullOrEmpty()){""}else{ if (ncbState.value["name"] == "YES") "1" else "0" },
+            page = 1,
+            size = 20
+        )
+    }
     // Data for various fields
     val vehicleTypes = vehiclType?.data
     val fuelTypes = fuelType?.data
@@ -125,10 +156,27 @@ fun FilterScreen(
     )
     val coroutineScope = rememberCoroutineScope()
 
+
     ERPTheme {
+
         LaunchedEffect(filterPolicyRateDatalist) {
             // Update policyRatesList based on filterPolicyRateDatalist
             viewModel.updatePolicyRates(filterPolicyRateDatalist)
+            Methods().retrieve_DToken(context)?.let {
+                Methods().retrieve_Token(context)?.let { it1 ->
+
+                    Methods().retrieve_userID(context)?.let { it2 ->
+                        viewModel.registerDeviceForNotification(
+                            token = it1,
+                            projectId = project_id,
+                            userId = it2,
+                            deviceToken = it
+                        )
+                    }
+
+                }
+            }
+
         }
         LaunchedEffect(Unit) {
             // Launching a coroutine in LaunchedEffect to initialize data
@@ -280,70 +328,7 @@ fun FilterScreen(
                         .fillMaxWidth()
                         .padding(vertical = 16.dp, horizontal = 4.dp)
                 ) {
-                    item {
-                        Row(
-                            Modifier.fillMaxWidth(1f),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            CustBtn(text = "Reset", isSplit = true) {
-                                val filterpayload = SearchPolicyRatePayload(
-                                    state_id = "",
-                                    city_id = "",
-                                    city_category_id = "",
-                                    vehicle_type_id = "",
-                                    vehicle_model_id = "",
-                                    renewal_type_id = "",
-                                    insurance_type_id = "",
-                                    insurer_id = "",
-                                    fuel_type_id = "",
-                                    status = "0",
-                                    page = 1,
-                                    size = 20
-                                )
-                                coroutineScope.launch {
-                                    Methods().retrieve_Token(context)?.let { it1 ->
-                                        viewModel.filterPolicyRateData(
-                                            it1, filterpayload
-                                        )
-                                    }
-                                }
-                                coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
-                                    if (!sheetState.isVisible) {
-                                        filterSheet = false
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.padding(2.dp))
-                            CustBtn(text = "Apply", isblue = true) {
-                                val filterpayload = SearchPolicyRatePayload(
-                                    state_id = stateState.value["id"] ?: "",
-                                    city_id = cityState.value["id"] ?: "",
-                                    city_category_id = cityCategoryState.value["id"] ?: "",
-                                    vehicle_type_id = vehicleTypeState.value["id"] ?: "",
-                                    vehicle_model_id = "",
-                                    renewal_type_id = renewalTypeState.value["id"] ?: "",
-                                    insurance_type_id = insuranceTypeState.value["id"] ?: "",
-                                    insurer_id = insurerState.value["id"] ?: "",
-                                    fuel_type_id = fuelTypeState.value["id"] ?: "",
-                                    status = if (ncbState.value["name"] == "YES") "1" else "0",
-                                    page = 1,
-                                    size = 20
-                                )
-                                coroutineScope.launch {
-                                    Methods().retrieve_Token(context)?.let { it1 ->
-                                        viewModel.filterPolicyRateData(
-                                            it1, filterpayload
-                                        )
-                                    }
-                                }
-                                coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
-                                    if (!sheetState.isVisible) {
-                                        filterSheet = false
-                                    }
-                                }
-                            }
-                        }
-                    }
+
                     item {
                         Text(
                             text = "Vehicle Details",
@@ -444,6 +429,59 @@ fun FilterScreen(
                         )
 
                     }
+                    item {
+                        Row(
+                            Modifier.fillMaxWidth(1f),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            CustBtn(text = "Reset", isSplit = true) {
+                              val filterpayload = resetAllStates()
+
+
+                                coroutineScope.launch {
+                                    Methods().retrieve_Token(context)?.let { it1 ->
+                                        viewModel.filterPolicyRateData(
+                                            it1, filterpayload
+                                        )
+                                    }
+                                }
+                                coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        filterSheet = false
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.padding(2.dp))
+                            CustBtn(text = "Apply", isblue = true) {
+                                val filterpayload = SearchPolicyRatePayload(
+                                    state_id = stateState.value["id"] ?: "",
+                                    city_id = cityState.value["id"] ?: "",
+                                    city_category_id = cityCategoryState.value["id"] ?: "",
+                                    vehicle_type_id = vehicleTypeState.value["id"] ?: "",
+                                    vehicle_model_id = "",
+                                    renewal_type_id = renewalTypeState.value["id"] ?: "",
+                                    insurance_type_id = insuranceTypeState.value["id"] ?: "",
+                                    insurer_id = insurerState.value["id"] ?: "",
+                                    fuel_type_id = fuelTypeState.value["id"] ?: "",
+                                    status = if(ncbState.value["name"].isNullOrEmpty()){""}else{ if (ncbState.value["name"] == "YES") "1" else "0" },
+                                    page = 1,
+                                    size = 20
+                                )
+                                coroutineScope.launch {
+                                    Methods().retrieve_Token(context)?.let { it1 ->
+                                        viewModel.filterPolicyRateData(
+                                            it1, filterpayload
+                                        )
+                                    }
+                                }
+                                coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        filterSheet = false
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -494,6 +532,7 @@ fun CircularProfileWithWelcome(userName: String) {
         }
     }
 }
+
 
 
 @Composable

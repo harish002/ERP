@@ -35,7 +35,7 @@ fun RootNavGraph(
 ) {
     val viewModel = ApiViewModel()
     val context= LocalContext.current
-    val encodedLogo = Uri.encode("https://picsum.photos/300/300")
+    val encodedLogo = Uri.encode("https://hellopolicy.com/images/1clickpolicy_logo.svg")
     val cName = "1 Click Policy ERP"
     Surface(
         modifier = Modifier.fillMaxSize(),

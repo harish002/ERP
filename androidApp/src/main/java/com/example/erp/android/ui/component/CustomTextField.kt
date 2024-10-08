@@ -84,15 +84,15 @@ fun CustomTextInput(
             shape = RoundedCornerShape(20),
             onValueChange = {
                 onValueChange(it)
-                isValid = ERValidation().isValidText(it, label)
+//                isValid = ERValidation().isValidText(it, label)
                 if(label == "Username"){
                     if(isValid){
                         isLoading = true
                         scope.launch {
-                            isUsernameAvailable = viewModel.checkUsername(it) == true
-                            isValid =
-                                isUsernameAvailable == true // Update isValid based on the response
-                            isLoading = false // Stop loading after getting the response
+//                            isUsernameAvailable = viewModel.checkUsername(it) == true
+//                            isValid =
+//                                isUsernameAvailable == true // Update isValid based on the response
+//                            isLoading = false // Stop loading after getting the response
                         }
                     }
                 }

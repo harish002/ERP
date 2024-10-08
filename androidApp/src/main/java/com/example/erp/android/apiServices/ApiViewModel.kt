@@ -14,6 +14,7 @@ import com.example.lms.Services.Dataclass.GetVehicleDetails
 import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PolicyRateData
+import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.example.lms.Services.Dataclass.RenewalTypes
 import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.example.lms.Services.Dataclass.UserData
@@ -39,7 +40,7 @@ import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-val project_id = "c319ab33-dbf1-45e7-b566-521cfecfb3e5"
+val project_id = "0d98736c-5f90-41b4-b689-1b1935aab762"
 
 class ApiViewModel : ViewModel() {
     var userSpecs: UserData? = null
@@ -60,6 +61,7 @@ class ApiViewModel : ViewModel() {
             Methods().save_Token(authToken, context)
             val authRefreshToken = response.refreshToken
             Methods().save_RefreshToken(context, authRefreshToken)
+            Methods().save_userID(response.id, context)
             val userData = UserData(
                 id = response.userData.id,
                 name = response.userData.name,
@@ -121,6 +123,8 @@ class ApiViewModel : ViewModel() {
             Methods().save_Token(authToken, context)
             val authRefreshToken = response.refreshToken
             Methods().save_RefreshToken(context, authRefreshToken)
+            val userID = response.userData.id
+            Methods().save_userID(userID,context)
             val userData = UserData(
                 id = response.userData.id,
                 name = response.userData.name,
@@ -468,12 +472,12 @@ class ApiViewModel : ViewModel() {
                 ApiServices().searchPolicyRateData(token, searchData)
             }
             val response = deferredResponse.await()
-            Log.d("Success Filter Policy Rate Data", response.toString())
+            Log.d("Succexx Policy Rate Data", response.toString())
             _getfilterPolicyRateData.value = response.items
             return response.items
         } catch (e: Exception) {
             Log.e(
-                "lter Policy Rate Data Errorr",
+                "lter Policy Rate Data Erorr",
                 e.message ?: "Unknown error"
             )
             listOf(null)
@@ -588,5 +592,60 @@ class ApiViewModel : ViewModel() {
             "null"
         }
     }
+
+
+    private var _deviceRegiestration = MutableStateFlow<RegisteredDeviceResponse?>(null)
+    val deviceRegiestration: MutableStateFlow<RegisteredDeviceResponse?> = _deviceRegiestration
+
+    suspend fun registerDeviceForNotification(
+        token: String,
+        projectId: String,
+        userId: String,
+        deviceToken: String
+    ):String {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                ApiServices().setregisterDeviceForNotification(
+                    token,
+                    projectId, userId, deviceToken
+                )
+            }
+            Log.d("Success registerDeviceForNotification", response.toString())
+            _deviceRegiestration.value = response
+            return "Success"
+        } catch (e: Exception) {
+            Log.e(
+                "registerDeviceForNotification Error",
+                e.localizedMessage ?: "Unknown error"
+            )
+            e.message.toString()
+        }
+    }
+
+
+    private var _resetPassword = MutableStateFlow<String?>(null)
+    val resetPassword: MutableStateFlow<String?> = _resetPassword
+
+    suspend fun resetPassword(
+        email: String,
+    ):String {
+        return try {
+            val response = withContext(Dispatchers.IO) {
+                ApiServices().resetPassword(
+                    email
+                )
+            }
+            Log.d("Success resetPassword Sent", response)
+            _resetPassword.value = response
+            return "Success"
+        } catch (e: Exception) {
+            Log.e(
+                "reset Password Error",
+                e.localizedMessage ?: "Unknown error"
+            )
+            e.message.toString()
+        }
+    }
+
 
 }

@@ -117,7 +117,7 @@ fun Login_Screen(
     val flag = uname.isNotBlank() && password.isNotBlank()
     val termAndConditionText = buildAnnotatedString {
         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.onSecondary)){
-            append("By logging in I accept 1 Click Tech LMS ")
+            append("By logging in I accept 1 Click Tech ERP ")
         }
         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.background)){
             append("Terms of Service, Privacy Policy")
@@ -174,7 +174,7 @@ fun Login_Screen(
                 textAlign = TextAlign.Start,
                 style = MaterialTheme.typography.titleLarge
             )
-            Image(painter = painterResource(id = R.drawable.union_1),
+            Image(painter = painterResource(id = R.drawable.close_btn),
                 modifier = Modifier.clickable {
                     scope.launch {sheetState.hide()}.invokeOnCompletion {
                         if (!sheetState.isVisible) {
@@ -213,18 +213,18 @@ fun Login_Screen(
                 withContext(Dispatchers.Main) {
                     if (status) {
                         Toast.makeText(
-                            context, "Logged In Successfully IT Should navigate to VerifyAccount",
+                            context, "Logged In Successfully",
                             Toast.LENGTH_SHORT
                         ).show()
-                        if(viewModel.userSpec.value?.verifications?.isEmpty() == true){
-                            authnavController.navigate("${AuthScreen.Verify_Account.route}/login")
-                        }else{
+//                        if(viewModel.userSpec.value?.verifications?.isEmpty() == true){
+//                            authnavController.navigate("${AuthScreen.Verify_Account.route}/login")
+//                        }else{
                             navController.navigate(Graph.MAIN) {
                                 popUpTo(Graph.AUTH) {
                                     inclusive = true
                                 }
                             }
-                        }
+//                        }
                     } else {
                         Toast.makeText(
                             context, result.toString(),

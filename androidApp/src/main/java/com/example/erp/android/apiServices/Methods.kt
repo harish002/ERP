@@ -5,7 +5,8 @@ import android.content.Context
 
 //Locally Saving the details/Tokens and Use it Overall in the Project
 // Save token
-class Methods{
+class Methods {
+
     fun save_Token(token: String, context: Context) {
         clearToken(context)
         val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
@@ -50,7 +51,53 @@ class Methods{
         editor.remove("RefreshToken")
         editor.apply()
     }
+    ////////////////////
+    fun save_userID(userID: String, context: Context) {
+        clear_UserID(context)
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("UserId", userID)
+        editor.apply()
+    }
 
+    // Retrieve token
+    fun retrieve_userID(context: Context): String? {
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("UserId", null)
+    }
+
+    // Clear token
+    fun clear_UserID(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.remove("UserId")
+        editor.apply()
+    }
+
+    //////////////////////////////
+    fun save_DToken(token: String, context: Context) {
+        clearDToken(context)
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("DeviceToken", token)
+        editor.apply()
+    }
+
+    // Retrieve token
+    fun retrieve_DToken(context: Context): String? {
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("DeviceToken", null)
+    }
+
+    // Clear token
+    fun clearDToken(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.remove("DeviceToken")
+        editor.apply()
+    }
+
+    /////////////////////////////
     // seconds to hrs function
     @SuppressLint("DefaultLocale")
     fun convertSecondsToHrs(seconds: Double): String {

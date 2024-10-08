@@ -218,7 +218,7 @@ fun CustDropdown(
 
 
 @Composable
-fun SelectionView(label: MutableState<String>): Boolean {
+fun SelectionView(label: MutableState<String>, isforgot: String): Boolean {
     var isContentVisible by remember { mutableStateOf(false) }
     var isEmailIdSelected by remember { mutableStateOf(true) }
 
@@ -270,25 +270,39 @@ fun SelectionView(label: MutableState<String>): Boolean {
         if (isContentVisible) {
             Spacer(modifier = Modifier.padding(10.dp))
 
-            Credential_Option(
-                text = "Email ID",
-                isSelected = isEmailIdSelected,
-                onClick = {
-                    isEmailIdSelected = true
-                    label.value = "Enter Email ID"
-                    isContentVisible = false
-                }
-            )
+            if(isforgot == "forgot"){
+                Credential_Option(
+                    text = "Email ID",
+                    isSelected = isEmailIdSelected,
+                    onClick = {
+                        isEmailIdSelected = true
+                        label.value = "Enter Email ID"
+                        isContentVisible = false
+                    }
+                )
+            }else{
+                Credential_Option(
+                    text = "Email ID",
+                    isSelected = isEmailIdSelected,
+                    onClick = {
+                        isEmailIdSelected = true
+                        label.value = "Enter Email ID"
+                        isContentVisible = false
+                    }
+                )
 
-            Credential_Option(
-                text = "Phone Number",
-                isSelected = !isEmailIdSelected,
-                onClick = {
-                    isEmailIdSelected = false
-                    label.value = "Enter Phone Number"
-                    isContentVisible = false
-                }
-            )
+
+
+                Credential_Option(
+                    text = "Phone Number",
+                    isSelected = !isEmailIdSelected,
+                    onClick = {
+                        isEmailIdSelected = false
+                        label.value = "Enter Phone Number"
+                        isContentVisible = false
+                    }
+                )
+            }
         }
     }
     return isEmailIdSelected

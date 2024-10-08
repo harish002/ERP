@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -103,6 +104,9 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
     var imageBitmap by remember { mutableStateOf<android.graphics.Bitmap?>(null) }
     val vehicleNumber by viewModel.getRegistrationNumberFromImage.collectAsState() // ViewModel for retrieving vehicle number
 
+    val vechiclepolicyRatesList by viewModel.getfilterPolicyRateData.collectAsState()
+
+
     val userData by viewModel.getUserdata.collectAsState()
     val vehiclType by viewModel.getVehicleTypes.collectAsState()
     val fuelType by viewModel.getFuelTypes.collectAsState()
@@ -117,7 +121,6 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
 
     // Assuming getVehicleDetails is provided by some data source
     val getVehicleDetails by viewModel.getVehicleDetails.collectAsState()
-
 
 
     // Data for various fields
@@ -208,8 +211,6 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
     //Filter api to get the values in chips
 
 
-
-
     fun loadFuelType(accessModel: ApiViewModel) {
         // Get the fuel type from vehicle details
         val fuelType = getVehicleDetails?.result?.fuel_descr?.uppercase()
@@ -219,7 +220,9 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
         val fuelTypeDataList = accessModel.getFuelTypes.value?.data
 
         Log.d("fuelTypeDataList resp:", fuelTypeDataList.toString())
-        val fuel = fuelTypeDataList?.firstOrNull { it.name.uppercase().equals(fuelType, ignoreCase = true) }
+        val fuel = fuelTypeDataList?.firstOrNull {
+            it.name.uppercase().equals(fuelType, ignoreCase = true)
+        }
 
 
         fuel?.name?.let { Log.d("fuelType Value:", it) }
@@ -256,7 +259,8 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
             // Update the selection state with the state's name
             stateState.value = mapOf(
                 "id" to state.id,
-                "name" to state.name)
+                "name" to state.name
+            )
                 .toMutableMap().apply {
                     put("State", state.name)
                 }
@@ -269,7 +273,8 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
 
     fun loadInsurerType(accessModel: ApiViewModel) {
         // Get the insurer name from vehicle details
-        val insurerName = getVehicleDetails?.result?.vehicle_insurance_details?.insurance_company_name
+        val insurerName =
+            getVehicleDetails?.result?.vehicle_insurance_details?.insurance_company_name
         Log.d("insurerName from submit resp:", insurerName.toString())
 
         // Retrieve the list of insurer types
@@ -277,14 +282,16 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
         Log.d("insurerTypeDataList resp:", insurerTypeDataList.toString())
 
         // Find the matching insurer type
-        val insurer = insurerTypeDataList?.firstOrNull { it.name.equals(insurerName, ignoreCase = true) }
+        val insurer =
+            insurerTypeDataList?.firstOrNull { it.name.equals(insurerName, ignoreCase = true) }
 
         if (insurer != null) {
             insurer_Type = insurer // Set the found insurer type to insurer_Type
             // Update the selection state with the insurer's name
-            insurerState.value =mapOf(
+            insurerState.value = mapOf(
                 "id" to insurer.id,
-                "name" to insurer.name)
+                "name" to insurer.name
+            )
                 .toMutableMap().apply {
                     put("Insurer", insurer.name)
                 }
@@ -306,7 +313,8 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
         Log.d("vehicleTypeDataList resp:", vehicleTypeDataList.toString())
 
         // Find the matching vehicle type
-        val vehicle = vehicleTypeDataList?.firstOrNull { it.name.equals(vehicleType, ignoreCase = true) }
+        val vehicle =
+            vehicleTypeDataList?.firstOrNull { it.name.equals(vehicleType, ignoreCase = true) }
 
         // Log the found vehicle type name if it exists
         vehicle?.name?.let { Log.d("vehicleType Value:", it) }
@@ -318,7 +326,7 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
             // Update the selection state with the vehicle type's name
             vehicleTypeState.value = mapOf("name" to vehicle.name)
 
-            Log.d("value func",vehicleTypeState.toString())
+            Log.d("value func", vehicleTypeState.toString())
             vehicleTypeState.value = mapOf(
                 "id" to vehicle.id,
                 "name" to vehicle.name
@@ -343,7 +351,9 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
         Log.d("citiesDataList resp:", citiesDataList.toString())
 
         // Find the matching city
-        val city = citiesDataList?.firstOrNull { it.name.lowercase().equals(districtName, ignoreCase = true) }
+        val city = citiesDataList?.firstOrNull {
+            it.name.lowercase().equals(districtName, ignoreCase = true)
+        }
 
         if (city != null) {
             city_Data = city // Set the found city to city_Data
@@ -351,7 +361,8 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
             // Update the selection state with the city's name
             cityState.value = mapOf(
                 "id" to city.id,
-                "name" to city.name)
+                "name" to city.name
+            )
                 .toMutableMap().apply {
                     put("City", city.name)
                 }
@@ -362,7 +373,7 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
         }
     }
 
-    fun loadCityCategories(accessModel: ApiViewModel){
+    fun loadCityCategories(accessModel: ApiViewModel) {
         // Get city category ID from selected city data if available
         val cityCategoryId = city_Data?.city_category_id
 //            ?.city_category_id?.lowercase()
@@ -373,7 +384,9 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
         Log.d("cityCategoryDataList resp:", cityCategoryDataList.toString())
 
         // Find matching city category by ID
-        val cityCategory = cityCategoryDataList?.firstOrNull { it.id.lowercase().equals(cityCategoryId, ignoreCase = true) }
+        val cityCategory = cityCategoryDataList?.firstOrNull {
+            it.id.lowercase().equals(cityCategoryId, ignoreCase = true)
+        }
 
         if (cityCategory != null) {
             city_Categories = cityCategory  // Set found category to variable
@@ -381,7 +394,8 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
             // Update selection state with category's name
             cityCategoryState.value = mapOf(
                 "id" to cityCategory.id,
-                "name" to cityCategory.name)
+                "name" to cityCategory.name
+            )
                 .toMutableMap().apply {
                     put("City Category", cityCategory.name)
                 }
@@ -416,7 +430,8 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
                 renewal_Types = matchedRenewalType
 
                 renewal_Types?.let {
-                    renewalTypeState.value = mapOf("name" to it.name) // Assuming you want to store it in a map
+                    renewalTypeState.value =
+                        mapOf("name" to it.name) // Assuming you want to store it in a map
                 }
             }
         }
@@ -573,7 +588,7 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
                             Box(
                                 modifier = Modifier.fillMaxWidth(),
                                 contentAlignment = Alignment.Center
-                            ){
+                            ) {
                                 CircularProgressIndicator(
                                     color = Color.Blue,
                                     modifier = Modifier.size(20.dp)
@@ -718,6 +733,39 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
 
                 }
                 item {
+
+                    Text(
+                        "Apply",
+                        modifier = Modifier.fillMaxWidth()
+                            .padding(start = 16.dp,end = 16.dp,bottom=8.dp)
+                            .clickable {
+                                val filterpayload = SearchPolicyRatePayload(
+                                    state_id = stateState.value["id"] ?: "",
+                                    city_id = cityState.value["id"] ?: "",
+                                    city_category_id = cityCategoryState.value["id"] ?: "",
+                                    vehicle_type_id = vehicleTypeState.value["id"] ?: "",
+                                    vehicle_model_id = "",
+                                    renewal_type_id = renewalTypeState.value["id"] ?: "",
+                                    insurance_type_id = insuranceTypeState.value["id"] ?: "",
+                                    insurer_id = insurerState.value["id"] ?: "",
+                                    fuel_type_id = fuelTypeState.value["id"] ?: "",
+                                    status = if(ncbState.value["name"].isNullOrEmpty()){""}else{ if (ncbState.value["name"] == "YES") "1" else "0" },
+                                    page = 1,
+                                    size = 20
+                                )
+                                coroutineScope.launch {
+                                    Methods().retrieve_Token(context)?.let { it1 ->
+                                        viewModel.filterPolicyRateData(
+                                            it1, filterpayload
+                                        )
+                                    }
+                                }
+                            },
+                        textAlign = TextAlign.End,
+                        color = Color.Blue,
+                        style = MaterialTheme.typography.titleSmall
+                    )
+
                     LazyRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
@@ -807,7 +855,7 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
                     }
                 }
 
-                if (xyzdata.isEmpty()) {
+                if (vechiclepolicyRatesList.isEmpty()) {
                     item {
                         // Display a message when there are no items
 
@@ -823,7 +871,7 @@ fun CameraPreviewApp(context: Context, viewModel: ApiViewModel) {
                     }
                 } else {
                     // If there are items, display them in the list
-                    itemsIndexed(xyzdata) { index, item ->
+                    itemsIndexed(vechiclepolicyRatesList) { index, item ->
                         if (item != null) {
                             PolicyListView(item, index + 1)
                         }
