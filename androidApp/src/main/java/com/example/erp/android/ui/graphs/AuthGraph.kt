@@ -18,6 +18,7 @@ import com.example.erp.android.ui.screens.auth.Login.Login_Screen
 import com.example.erp.android.ui.screens.auth.Login.OtpSent_Screen
 import com.example.erp.android.ui.screens.auth.Login.Reset_Password
 import com.example.erp.android.ui.screens.auth.Otp_Screen
+import com.example.lms.android.ui.Screens.Auth.Verify_Account
 import kotlinx.coroutines.CoroutineScope
 
 
@@ -113,25 +114,25 @@ fun AuthNav_Graph(
             Reset_Password(navController = authNavController, sheetState, scope)
             { onDismiss() }
         }
-//        composable(route = "${AuthScreen.Verify_Account.route}/{verifyType}",
-//            arguments = listOf(
-//                //as the Verify page is common in Register and Login Flow
-//                navArgument("verifyType") {
-//                    type = NavType.StringType
-//                }
-//            )) {backStackEntry ->
-//            val verifyType = backStackEntry.arguments?.getString("verifyType") ?: ""
-//
-//            Verify_Account(
-//                navController = authNavController,
-//                sheetState = sheetState,
-//                scope = scope,
-//                viewModel = viewModel,
-//                verifyType=verifyType
-//            ) {
-//
-//            }
-//        }
+        composable(route = "${AuthScreen.Verify_Account.route}/{verifyType}",
+            arguments = listOf(
+                //as the Verify page is common in Register and Login Flow
+                navArgument("verifyType") {
+                    type = NavType.StringType
+                }
+            )) {backStackEntry ->
+            val verifyType = backStackEntry.arguments?.getString("verifyType") ?: ""
+
+            Verify_Account(
+                navController = authNavController,
+                sheetState = sheetState,
+                scope = scope,
+                viewModel = viewModel,
+                verifyType = verifyType
+            ) {
+
+            }
+        }
 
     }
 }

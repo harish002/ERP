@@ -96,5 +96,7 @@ dependencies {
 
     implementation ("com.github.bumptech.glide:glide:4.14.2") // Use the latest version
     implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
+    implementation("com.airbnb.android:lottie-compose:5.0.3")
+
 //    kapt ("com.github.bumptech.glide:compiler:4.14.2") // For annotation processing
 }

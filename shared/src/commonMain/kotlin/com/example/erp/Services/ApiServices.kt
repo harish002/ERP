@@ -22,7 +22,6 @@ import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.PolicySegmentResponse
 import com.example.lms.Services.Dataclass.ProductResponse
 import com.example.lms.Services.Dataclass.RefreshToken
-import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.example.lms.Services.Dataclass.RenewalTypes
 import com.example.lms.Services.Dataclass.SearchPolicyRateData
 import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
@@ -1023,7 +1022,96 @@ class ApiServices {
         }
     }
 
+
     // --------------------------------------------------------------------------------------------
 
+
+    // Register Device for Enabling Push Notification
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun setregisterDeviceForNotification(
+        token: String,
+        projectId: String,
+        userId: String,
+        deviceToken: String
+    ): RegisteredDeviceResponse {
+        try {
+            val response: HttpResponse = client.post {
+                url(
+                    ApiConfig.UAT_NOTIFICATION_MANAGEMENT +
+                        "/registeredDevices/register")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("userId", userId)
+                parameter("projectId", projectId)
+                parameter("deviceToken", deviceToken)
+            }
+            if (response.status.isSuccess()) {
+                return response.body()
+            } else {
+                throw IOException(
+                    response.status.value.toString()
+                )
+            }
+        } catch (e: Exception) {
+            println("Register Device error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+
+    // Send Token to Mail to Reset Password
+    @OptIn(InternalAPI::class)
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun resetPassword(email: String) : String {
+        try {
+            val response : HttpResponse = client.post {
+                url("${ApiConfig.UAT_ACCESS_API}/auth/resetPassword")
+                contentType(ContentType.Application.Json)
+                parameter("email",email)
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("reset password error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+
+    // Change Password with the received Token
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun changePasswordWithToken(token: String, newPassword: String) : String {
+        try {
+            val response : HttpResponse = client.post {
+
+                url("${ApiConfig.UAT_ACCESS_API}/auth/changePasswordWithToken")
+                contentType(ContentType.Application.Json)
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+                parameter("token",token)
+                parameter("newPassword",newPassword)
+
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("change Password error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
 
 }

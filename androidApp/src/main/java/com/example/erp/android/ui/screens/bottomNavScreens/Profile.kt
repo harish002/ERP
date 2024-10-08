@@ -1,6 +1,7 @@
 package com.example.erp.android.ui.screens.bottomNavScreens
 
 import android.content.Context
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -145,9 +146,14 @@ fun Profile(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
-                            text = "About LMS",
+                            text = "About Sales Tools",
                             color = Color.Black,
                             modifier = Modifier
+                                .clickable {
+                                    Toast
+                                        .makeText(context, "Yet to Redirect", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
                                 .clip(RoundedCornerShape(8.dp))
                                 .wrapContentWidth()
                                 .clickable { }
@@ -167,23 +173,28 @@ fun Profile(
                         color = Color.Black,
                         modifier = Modifier
                             .clip(RoundedCornerShape(8.dp))
+                            .clickable {
+                                Toast
+                                    .makeText(context, "Yet to Redirect", Toast.LENGTH_SHORT)
+                                    .show()
+                            }
                             .wrapContentWidth()
                             .clickable { }
                             .padding(vertical = 18.dp),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.bodyLarge
                     )
-                    Text(
-                        text = "Share the LMS app",
-                        color = Color.Black,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(8.dp))
-                            .wrapContentWidth()
-                            .clickable { }
-                            .padding(vertical = 18.dp),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
+//                    Text(
+//                        text = "Share the Sales Tools App",
+//                        color = Color.Black,
+//                        modifier = Modifier
+//                            .clip(RoundedCornerShape(8.dp))
+//                            .wrapContentWidth()
+//                            .clickable { }
+//                            .padding(vertical = 18.dp),
+//                        textAlign = TextAlign.Center,
+//                        style = MaterialTheme.typography.bodyLarge
+//                    )
 
                 }
                 Spacer(modifier = Modifier.padding(vertical = 7.dp))

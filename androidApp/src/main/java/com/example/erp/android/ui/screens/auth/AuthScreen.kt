@@ -7,6 +7,8 @@ import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -45,6 +48,7 @@ import androidx.navigation.NavHostController
 import coil.compose.SubcomposeAsyncImage
 import coil.request.ImageRequest
 import coil.size.Scale
+import com.example.erp.android.R
 import com.example.erp.android.ui.graphs.AuthNav_Graph
 import com.example.erp.android.ui.graphs.AuthScreen
 
@@ -79,6 +83,7 @@ fun SharedTransitionScope.Auth_Main(
             modifier = Modifier
 
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.onBackground)
                 .padding(
                     horizontal = 16.dp
                 ),
@@ -89,14 +94,9 @@ fun SharedTransitionScope.Auth_Main(
                 description,
                 loginBtn, signUpBtn) = createRefs()
 
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .scale(Scale.FILL)
-                    .crossfade(true)
-                    .data(logo)
-                    .build(),
-                contentDescription = "Image",
-                contentScale = ContentScale.FillBounds,
+
+            Image(painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = "Logo",
                 modifier = Modifier
                     .constrainAs(image) {
                         top.linkTo(parent.top)
@@ -105,7 +105,7 @@ fun SharedTransitionScope.Auth_Main(
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
-                    .size(86.dp)
+                    .size(200.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .fillMaxSize()
                     .sharedElement(
@@ -113,21 +113,46 @@ fun SharedTransitionScope.Auth_Main(
                         animatedVisibilityScope = animatedVisibilityScope,
                         boundsTransform = { _, _ ->
                             tween(durationMillis = 1000)
-                        }),
-                loading = {
-                    Box(
-                        Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(
-                            modifier = Modifier
-                                .size(50.dp)
-                                .align(Alignment.Center),
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    }
-                }
-            )
+                        }))
+//            SubcomposeAsyncImage(
+//                model = ImageRequest.Builder(LocalContext.current)
+//                    .scale(Scale.FILL)
+//                    .crossfade(true)
+//                    .data("https://hellopolicy.com/images/1clickpolicy_logo.svg")
+//                    .build(),
+//                contentDescription = "Image",
+//                contentScale = ContentScale.FillBounds,
+//                modifier = Modifier
+//                    .constrainAs(image) {
+//                        top.linkTo(parent.top)
+//                        verticalBias = 1f
+//                        bottom.linkTo(cname.top, margin = 18.dp)
+//                        start.linkTo(parent.start)
+//                        end.linkTo(parent.end)
+//                    }
+//                    .size(86.dp)
+//                    .clip(RoundedCornerShape(12.dp))
+//                    .fillMaxSize()
+//                    .sharedElement(
+//                        state = rememberSharedContentState(key = "logo"),
+//                        animatedVisibilityScope = animatedVisibilityScope,
+//                        boundsTransform = { _, _ ->
+//                            tween(durationMillis = 1000)
+//                        }),
+//                loading = {
+//                    Box(
+//                        Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        CircularProgressIndicator(
+//                            modifier = Modifier
+//                                .size(50.dp)
+//                                .align(Alignment.Center),
+//                            color = MaterialTheme.colorScheme.secondary
+//                        )
+//                    }
+//                }
+//            )
             Column(
                 Modifier
                     .fillMaxWidth()
@@ -152,16 +177,16 @@ fun SharedTransitionScope.Auth_Main(
                     text = cName,
                     modifier = Modifier
                         .fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onPrimary,
+                    color = Color.Black,
                     style = MaterialTheme.typography.headlineLarge,
                     textAlign = TextAlign.Center
                 )
                 Spacer(modifier = Modifier.padding(vertical = 4.dp))
                 Text(
-                    "A holistic learning platform for your employees to learn and grow together.",
+                    "Simplifying Sales for Smarter Policy Agents.",
                     modifier = Modifier
                         .fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onBackground,
+                    color = Color.Black,
                     style = customBodyLarge,
                     textAlign = TextAlign.Center
                 )
@@ -180,10 +205,11 @@ fun SharedTransitionScope.Auth_Main(
                     },
                 shape = RoundedCornerShape(8.dp),
                 border = null,
-                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor = Color.White)
+                colors = androidx.compose.material3.ButtonDefaults.buttonColors(containerColor =
+                MaterialTheme.colorScheme.background)
             ) {
                 Text(
-                    text = "Log in", color = Color.Black,
+                    text = "Log in", color = Color.White,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(vertical = 14.dp)
                 )
@@ -222,7 +248,7 @@ fun SharedTransitionScope.Auth_Main(
                         end.linkTo(parent.end)
                     },
                 text = "A product of 1 Click Global family",
-                color = androidx.compose.material.MaterialTheme.colors.onPrimary,
+                color = Color.Black,
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center
             )
