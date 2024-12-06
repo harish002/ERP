@@ -136,10 +136,6 @@ struct LMSLoginWithOtpView: View {
                                     }
                                     
                                 }
-                                else {
-                                    print("Email-Id Selected !!")
-                                  
-                                }
 
                         }
                     )

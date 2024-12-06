@@ -43,185 +43,163 @@ struct ExploreView: View {
     
     var body: some View {
         
-        ZStack{
+        ZStack(alignment: .center){
             
-            VStack(spacing:0){
-                    ZStack{
-                        VStack(spacing:0){
-                            
-                            HStack(spacing:0){
-                                HStack(spacing:10){
-                                    Circle()
-                                        .foregroundStyle(Color(hex: "#F8F8F8"))
-                                        .frame(width: 42,height: 42)
-                                        .overlay(content: {
-                                            Text(nameInitials)
-                                                .font(.custom("Gilroy-SemiBold", size: 13))
-                                        })
-                                    
-                                    VStack(alignment:.leading,spacing:6){
-                                        Text("Welcome ")
-                                            .font(.custom("Gilroy-SemiBold", size: 13))
-                                        
-                                        Text("\(userName)")
-                                            .font(.custom("Gilroy-SemiBold", size: 13))
-                                        
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                NotificationBellView(){
-                                    withAnimation{
-                                        router.navigateTo(to: .notificationscreen)
-                                    }
-                                }
-                                
-                            }
-                            .padding(.bottom,23)
-                            .padding(.horizontal,16)
-                            .padding(.top,12)
-                            
-                            HStack(spacing:0){
-                                Text("Sales Tools")
-                                    .matchedGeometryEffect(id: "header", in: nameSpace)
-                                    .font(.custom("Gilroy-Bold", size: 28))
-                                
-                                Spacer()
-                                
-                                Text("Apply Filter")
-                                    .font(.custom("Gilroy-Bold", size: 12))
-                                    .padding(.vertical,8)
-                                    .padding(.horizontal,12)
-                                    .overlay(content: {
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .stroke(.black, lineWidth: 1)
-                                    })
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        withAnimation{
-                                            isFilterSelected = true
-                                        }
-                                    }
-
-                                
-                            }
-                            .padding(.horizontal,16)
-                            .padding(.bottom,12)
-                            
-                        }
-                        .background(Color(hex: "#D9D9D9"))
-                    }
-
-                
                 VStack(spacing:0){
-                    
-                    ScrollView{
-                        if loader {
-                            ProgressView()
-                                .padding(.top,20)
-                        }
-                        else {
-                            if !showAllPolicyRates.isEmpty {
-                                ForEach(showAllPolicyRates, id: \.self){policyRate in
-                                    
-                                    HStack(alignment:.top,spacing:12){
-                                        Circle()
-                                            .foregroundStyle(Color(hex: "#D9D9D9"))
-                                            .frame(width: 35,height: 35)
-                                            .overlay(content: {
-                                                Image(systemName: "doc")
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fit)
-                                                    .frame(width: 12, height: 12)
-                                                
-                                            })
-                                        
-                                        HStack(alignment:.top,spacing:16){
-                                            VStack(alignment:.leading,spacing:4){
-                                                Text("PAYOUT %")
-                                                    .font(.custom("Gilroy-Medium", size: 12))
-                                                
-                                                Text(policyRate.payouts)
-                                                    .font(.custom("Gilroy-Bold", size: 14))
-                                            }
-                                            
-                                            
-                                            VStack(alignment:.leading,spacing:4){
-                                                Text("INSURER")
-                                                    .font(.custom("Gilroy-Medium", size: 12))
-                                                
-                                                Text(policyRate.insurer.name)
-                                                    .font(.custom("Gilroy-Bold", size: 14))
-                                            }
-                                            
-                                            VStack(alignment:.leading,spacing:4){
-                                                Text("INSURANCE TYPE")
-                                                    .font(.custom("Gilroy-Medium", size: 12))
-                                                
-                                                Text(policyRate.insurance_type.name)
-                                                    .font(.custom("Gilroy-Bold", size: 14))
-                                            }
-                                            
-                                            
-                                        }
-                                        .offset(y:2)
-                                        
-                                        Spacer()
-                                        
-                                        Image(systemName: "arrowshape.right.fill")
-                                    }
-                                    .padding(.vertical,12)
-                                    .padding(.horizontal,16)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        print("Policy Rate Selected")
-                                        withAnimation{
-                                            isPolicyRateSelected = true
-                                            self.policyRateId = policyRate.id
-                                        }
-                                    }
-                                    
-                                    
-                                    Divider()
-                                }
-                                .onAppear{
+                    VStack(spacing:0){
+                        
+                        HStack(spacing:0){
+                            Text("Sales Tools")
+                                .matchedGeometryEffect(id: "header", in: nameSpace)
+                                .font(.custom("Gilroy-Bold", size: 28))
+                                .foregroundStyle(Color("bgColor1", bundle: nil))
+                            
+                            Spacer()
+                            
+                            Image("1Filter3x")
+                                .resizable()
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 22, height: 22)
+                                .padding(.vertical,8)
+                                .padding(.horizontal,12)
+                                .contentShape(Rectangle())
+                                .onTapGesture {
                                     withAnimation{
-                                        self.loader = false
+                                        isFilterSelected = true
                                     }
                                 }
-                               
-                            }
-                            else {
-                                Text("No Data Found.")
-                                    .font(.custom("Gilroy-SemiBold", size: 28))
-                                    .padding(.top,20)
-                                    .onAppear{
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                        }
+                        .padding(.horizontal,16)
+                        .padding(.vertical,12)
+                    }
+                    .background(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color("bgColor2", bundle: nil), Color("bgColor2", bundle: nil), Color("bgColor1", bundle: nil)]),
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                        .ignoresSafeArea(edges: .top) // Extend the gradient to ignore the safe area at the top
+                    )
+                    
+                    VStack(spacing:8){
+                        ScrollView(.vertical,showsIndicators: false){
+                                
+                                if loader {
+                                    ProgressView()
+                                        .padding(.top,20)
+                                }
+                                else {
+                                    if !showAllPolicyRates.isEmpty {
+                                        ForEach(showAllPolicyRates, id: \.self){policyRate in
+                                            
+                                            HStack(spacing:16){
+                                                
+                                                VStack(alignment:.leading,spacing:4){
+                                                    Text(policyRate.insurer.name)
+                                                        .font(.custom("Gilroy-Bold", size: 18))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                        .lineLimit(1)
+                                                    
+                                                    
+                                                    
+                                                    Text(policyRate.insurance_type.name)
+                                                        .font(.custom("Gilroy-Medium", size: 14))
+                                                        .foregroundStyle(Color("subtitle", bundle: nil))
+                                                        .lineLimit(1)
+                                                    
+                                                }
+                                                .frame(maxWidth:.infinity,alignment:.leading)
+                                                
+                                                Spacer()
+                                                    .frame(width:24)
+                                                
+                                                
+                                                HStack(spacing:2){
+                                                    Text("\(policyRate.payouts)")
+                                                        .font(.custom("Gilroy-Bold", size: 32))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                    
+                                                    Text("%")
+                                                        .font(.custom("Gilroy-Bold", size: 32))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                }
+                                                .frame(maxWidth:.infinity,alignment:.trailing)
+                                               
+                                            }
+                                            .frame(maxWidth:.infinity,alignment:.leading)
+                                            .padding(.vertical,20)
+                                            .padding(.horizontal,20)
+                                            .background(Color("cardbackground", bundle: nil))
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                print("Policy Rate Selected")
+                                                withAnimation{
+                                                    isPolicyRateSelected = true
+                                                    self.policyRateId = policyRate.id
+                                                }
+                                            }
+                                        }
+                                        .onAppear{
                                             withAnimation{
                                                 self.loader = false
                                             }
                                         }
+                                        
                                     }
-                            }
+                                    else {
+                                        Text("No Data Found.")
+                                            .font(.custom("Gilroy-SemiBold", size: 28))
+                                            .padding(.top,20)
+                                            .onAppear{
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                                                    withAnimation{
+                                                        self.loader = false
+                                                    }
+                                                }
+                                            }
+                                    }
+                                }
+                            
                         }
+                        .refreshable(action: {
+                            let token = retrieveToken() ?? ""
+                            let payload = SearchPolicyRatePayload(
+                                state_id: "",
+                                city_id: "",
+                                city_category_id: "",
+                                vehicle_type_id: "",
+                                vehicle_model_id: "",
+                                renewal_type_id: "",
+                                insurance_type_id: "",
+                                insurer_id: "",
+                                fuel_type_id: "",
+                                status: "", page: 1, size: 20
+                            )
+                            
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                searchPolicyRates(token: token, payload: payload)
+                            }
+                        })
                     }
-                    .refreshable(action: {
-                        let token = retrieveToken() ?? ""
-                        getPolicyRatesList(token: token)
-                    }) 
-                }
                 
             }
             .zIndex(0)
+            .blur(radius: isPolicyRateSelected ? 4 : 0)
+           
+            
+            let data = showAllPolicyRates.filter{ policy in
+                policy.id == policyRateId
+            }
             
             if isPolicyRateSelected {
-                PolicyRateDetailView(accessModel: accessModel,snackBar: snackBar, policyRateId: policyRateId){
-                    withAnimation{
-                        isPolicyRateSelected = false
+                if let policyRateData = data.first {
+                    PolicyRateDetailView(accessModel: accessModel,snackBar: snackBar, policyRateId: policyRateId, policyRateData: policyRateData){
+                        withAnimation{
+                            isPolicyRateSelected = false
+                        }
                     }
+                    .zIndex(1)
                 }
-                .zIndex(1)
             }
             
         }
@@ -237,29 +215,49 @@ struct ExploreView: View {
             
             let token = retrieveToken() ?? ""
             self.loader = true
+            
+            let payload = SearchPolicyRatePayload(
+                state_id: "",
+                city_id: "",
+                city_category_id: "",
+                vehicle_type_id: "",
+                vehicle_model_id: "",
+                renewal_type_id: "",
+                insurance_type_id: "",
+                insurer_id: "",
+                fuel_type_id: "",
+                status: "", page: 1, size: 20
+            )
+            searchPolicyRates(token: token, payload: payload)
+            
                     
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                allCities(token: token)
+                insuranceTypes(token : token)
+                renewalTypes(token : token)
+                insurerTypes(token : token)
+                vehicleTypes(token: token)
+                fuelTypes(token: token)
+                allStates(token: token)
+                cityCategories(token: token)
+            })
             
-            allCities(token: token)
-            insuranceTypes(token : token)
-            renewalTypes(token : token)
-            insurerTypes(token : token)
-            vehicleTypes(token: token)
-            fuelTypes(token: token)
-            allStates(token: token)
-            cityCategories(token: token)
-            
-        }
-        .onReceive(accessModel.$policyRatesData){data in
-            if !data.isEmpty {
-                self.loader = false
-                showAllPolicyRates = data
-            }
         }
         .onReceive(appDelegate.$fcmToken, perform: {token in
             print("FCM Token After Authorization -> \(token)")
-            if !token.isEmpty{
+            let isRegistered = retrieveDeviceRegistration() ?? false
+            if !(isRegistered) {
                 registerDeviceWithKMM(fcmToken: token, accessModel: accessModel)
             }
+        })
+        .onReceive(accessModel.$policyRatesData, perform: { policy in
+            if !policy.isEmpty {
+                self.showAllPolicyRates = policy
+            }
+            else {
+                self.showAllPolicyRates = []
+            }
+            
         })
     
 
@@ -275,7 +273,7 @@ struct ExploreView: View {
         Task{
             do
             {
-                try await accessModel.registerDeviceForNotification(userId: id, token: token, projectId: projectId, deviceToken: fcmToken)
+                let _ =  try await accessModel.registerDeviceForNotification(userId: id, token: token, projectId: projectId, deviceToken: fcmToken)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -508,6 +506,43 @@ struct ExploreView: View {
         }
     }
     
+    func searchPolicyRates(token : String, payload : SearchPolicyRatePayload){
+        Task.init{
+            do
+            {
+                let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
+                
+                if result {
+                    self.loader = false
+                    self.showAllPolicyRates = response
+                }
+                else {
+                    self.loader = false
+                    self.showAllPolicyRates = response
+                }
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                self.loader = false
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                self.loader = false
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                self.loader = false
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                self.loader = false
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+            
+        }
+    }
+    
 }
 
 struct ViewOffsetKey: PreferenceKey {
@@ -553,3 +588,84 @@ struct NotificationBellView : View {
 }
 
 
+
+//HStack(spacing:0){
+//    HStack(spacing:10){
+//        Circle()
+//            .foregroundStyle(Color(hex: "#F8F8F8"))
+//            .frame(width: 42,height: 42)
+//            .overlay(content: {
+//                Text(nameInitials)
+//                    .font(.custom("Gilroy-SemiBold", size: 13))
+//            })
+//        
+//        VStack(alignment:.leading,spacing:6){
+//            Text("Welcome ")
+//                .font(.custom("Gilroy-SemiBold", size: 12))
+//            
+//            Text("\(userName)")
+//                .font(.custom("Gilroy-Bold", size: 15))
+//            
+//        }
+//    }
+//    
+//    Spacer()
+//    
+//    NotificationBellView(){
+//        withAnimation{
+//            router.navigateTo(to: .notificationscreen)
+//        }
+//    }
+//    
+//}
+//.padding(.bottom,23)
+//.padding(.horizontal,16)
+//.padding(.top,12)
+
+//
+//HStack(alignment:.top,spacing:12){
+//    Circle()
+//        .foregroundStyle(Color(hex: "#D9D9D9"))
+//        .frame(width: 35,height: 35)
+//        .overlay(content: {
+//            Image(systemName: "doc")
+//                .resizable()
+//                .aspectRatio(contentMode: .fit)
+//                .frame(width: 12, height: 12)
+//            
+//        })
+//    
+//    HStack(alignment:.top,spacing:16){
+//        VStack(alignment:.leading,spacing:4){
+//            Text("PAYOUT %")
+//                .font(.custom("Gilroy-Medium", size: 12))
+//            
+//            Text(policyRate.payouts)
+//                .font(.custom("Gilroy-Bold", size: 14))
+//        }
+//        
+//        
+//        VStack(alignment:.leading,spacing:4){
+//            Text("INSURER")
+//                .font(.custom("Gilroy-Medium", size: 12))
+//            
+//            Text(policyRate.insurer.name)
+//                .font(.custom("Gilroy-Bold", size: 14))
+//        }
+//        
+//        VStack(alignment:.leading,spacing:4){
+//            Text("INSURANCE TYPE")
+//                .font(.custom("Gilroy-Medium", size: 12))
+//            
+//            Text(policyRate.insurance_type.name)
+//                .font(.custom("Gilroy-Bold", size: 14))
+//        }
+//        
+//        
+//    }
+//    .offset(y:2)
+//    
+//    Spacer()
+//    
+//    Image(systemName: "arrowshape.right.fill")
+//}

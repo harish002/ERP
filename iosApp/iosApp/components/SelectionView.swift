@@ -72,33 +72,33 @@ struct SelectionView: View {
             .padding(.top,5)
             
             if isContentVisible{
-                HStack{
-                    Text("Email ID")
-                        .matchedGeometryEffect(id: "mail", in: namespace)
-                        .font(.custom("Gilroy-SemiBold", size: 16))
-                        .foregroundStyle(Color("textvalue"))
-                    
-                    Spacer()
-                    
-                    Circle()
-                        .fill(Color(hex: "#3960F6"))
-                        .frame(width: 9, height: 9)
-                        .overlay(content: {
-                            Circle()
-                                .stroke(Color(hex: "#3960F6"),lineWidth: 1)
-                                .frame(width: 16,height: 16)
-                        })
-                        .opacity(isEmailIdSelected ? 1 : 0)
-                }
-                .padding(.vertical,14)
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    withAnimation{
-                        isContentVisible = false
-                        isEmailIdSelected = true
-                        label = "Enter Email ID"
-                    }
-                }
+//                HStack{
+//                    Text("Email ID")
+//                        .matchedGeometryEffect(id: "mail", in: namespace)
+//                        .font(.custom("Gilroy-SemiBold", size: 16))
+//                        .foregroundStyle(Color("textvalue"))
+//                    
+//                    Spacer()
+//                    
+//                    Circle()
+//                        .fill(Color(hex: "#3960F6"))
+//                        .frame(width: 9, height: 9)
+//                        .overlay(content: {
+//                            Circle()
+//                                .stroke(Color(hex: "#3960F6"),lineWidth: 1)
+//                                .frame(width: 16,height: 16)
+//                        })
+//                        .opacity(isEmailIdSelected ? 1 : 0)
+//                }
+//                .padding(.vertical,14)
+//                .contentShape(Rectangle())
+//                .onTapGesture {
+//                    withAnimation{
+//                        isContentVisible = false
+//                        isEmailIdSelected = true
+//                        label = "Enter Email ID"
+//                    }
+//                }
                 
                 
                 HStack{
@@ -150,7 +150,7 @@ struct SelectionView: View {
 }
 
 #Preview {
-    SelectionView(label: .constant("Enter Phone Number"))
+    SelectionView(label: .constant("Enter Email ID"))
 }
 
 

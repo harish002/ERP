@@ -103,9 +103,9 @@ struct CustomTextField: View {
                     })
                     .zIndex(0)
                     .onChange(of: text){newValue in
-//                        if validationOnlyForSignUp {
-//                            handleValidations(label: label, value: newValue)
-//                        }
+                        if validationOnlyForSignUp {
+                            handleValidations(label: label, value: newValue)
+                        }
                     }
 
             }
@@ -125,7 +125,52 @@ struct CustomTextField: View {
         }
         
     }
-//    
+    
+    func handleValidations(label : String, value : String){
+        switch label {
+        case "Enter Email ID" :
+            let validatedValue = isEmailValid(value)
+            if validatedValue {
+                withAnimation{
+                    isValidationTrue[label] = true
+                    isErrorMessageNeeded = false
+                }
+                self.errorMessage = ""
+            }
+            else {
+                withAnimation{
+                    isValidationTrue[label] = false
+                    isErrorMessageNeeded = true
+                }
+                self.errorMessage = "Email-Id entered is incorrect! "
+            }
+            
+        default: isValidationTrue[label] = true
+            
+        }
+    }
+    
+//    // Api Call for Email Validation
+//    func handleEmailApiCall(label : String,email : String){
+//        Task.init{
+//            let result = try await accessModel.checkEmail(email: email)
+//            if result == false {
+//                withAnimation{
+//                    isValidationTrue[label] = false
+//                    isErrorMessageNeeded = true
+//                }
+//                self.errorMessage = "This email-id is already taken."
+//            }
+//            else {
+//                withAnimation{
+//                    isValidationTrue[label] = true
+//                    isErrorMessageNeeded = false
+//                }
+//                self.errorMessage = ""
+//            }
+//        }
+//    }
+    
 //    // Validation Function
 //    func handleValidations(label : String, value : String){
 //        switch label {
@@ -159,19 +204,7 @@ struct CustomTextField: View {
 //                }
 //            }
 //            
-//        case "Enter Email ID" : 
-//            let validatedValue = isEmailValid(value)
-//            if validatedValue {
-//                timer?.invalidate()
-//                timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false, block: {_ in
-//                    handleEmailApiCall(label: label, email: value)
-//                })
-//            }
-//            else {
-//                withAnimation{
-//                    isValidationTrue[label] = false
-//                }
-//            }
+       
 //            
 //        case "Create Password" :
 //            let validateValue = isPasswordValid(value)
@@ -217,26 +250,7 @@ struct CustomTextField: View {
 //        }
 //    }
 //
-//    // Api Call for Email Validation
-//    func handleEmailApiCall(label : String,email : String){
-//        Task.init{
-//            let result = try await accessModel.checkEmail(email: email)
-//            if result == false {
-//                withAnimation{
-//                    isValidationTrue[label] = false
-//                    isErrorMessageNeeded = true
-//                }
-//                self.errorMessage = "This email-id is already taken."
-//            }
-//            else {
-//                withAnimation{
-//                    isValidationTrue[label] = true
-//                    isErrorMessageNeeded = false
-//                }
-//                self.errorMessage = ""
-//            }
-//        }
-//    }
+
 //
 //    // Api Call for Phone Number Validation
 //    func handlePhoneNumberApiCall(label : String,phoneNumber : String){

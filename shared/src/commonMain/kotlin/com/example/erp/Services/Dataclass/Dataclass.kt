@@ -1,5 +1,6 @@
 package com.example.lms.Services.Dataclass
 
+import kotlinx.coroutines.internal.synchronized
 import kotlinx.serialization.Serializable
 
 // Module 1 ------------------------------------------------------------------
@@ -30,26 +31,32 @@ data class UserResponse(
 
 @Serializable
 data class UserData(
-    val id: String,
-    val name: String,
-    val username: String,
-    val surname: String,
-    val email: String?=null,
-    val mobileNumber: String,
-    val gender: String,
-    val birthDate: String?=null,
-    val enabled: Boolean,
-    val superAdmin: Boolean,
-    val note: String?=null,
-    val projectRoles: List<ProjectRole>,
-    val departmentRoles: List<DepartmentRole>,
-    val zones: List<Zone>,
-    val departments: List<Department>,
-    val verifications: List<Verification>,
-    val currentRole: CurrentRole?=null,
-    val notificationPreferences: List<NotificationPreference>,
-    val isAvailable: Boolean,
-    val createdDate: String,
+    val id: String?= null,
+    val name: String?= null,
+    val username: String?= null,
+    val surname: String?= null,
+    val email: String?= null,
+    val mobileNumber: String?= null,
+    val gender: String?= null,
+    val birthDate: String?= null,
+    val enabled: Boolean?= null,
+    val superAdmin: Boolean?= null,
+    val needsPasswordReset: Boolean?= null,
+    val note: String?= null,
+    val profileImageId: String?= null,
+    val projectRoles: List<ProjectRole>?= emptyList(),
+    val departmentRoles: List<DepartmentRole>?= emptyList(),
+    val zones: List<Zone>?= emptyList(),
+    val departments: List<Department>?= emptyList(),
+    val projects: List<Project>?= emptyList(),
+    val verifications: List<Verification>?= emptyList(),
+    val organisations: List<Organisation>?= emptyList(),
+    val notificationPreferences: List<NotificationPreference>?= emptyList(),
+    val isAvailable: Boolean?= null,
+    val createdDate: String?= null,
+    val currentRole: CurrentRole?= null,
+    val currentProject: CurrentProject?= null,
+    val currentOrganisation: CurrentOrganisation?= null
 )
 
 @Serializable
@@ -115,11 +122,23 @@ data class NotificationPreference(
     val notificationType: String,
     val notificationChannels: List<String>
 )
+
+@Serializable
+data class CurrentProject(
+    val id: String,
+    val name: String
+)
+
+@Serializable
+data class CurrentOrganisation(
+    val id: String,
+    val name: String
+)
+
 @Serializable
 data class Project(
     val id: String,
     val name: String,
-    val subject: String? = null,
     val department: DepartmentX?= null,//String in Example
     val roles: List<String>?= emptyList(),
     val createdDate: String?= null,
@@ -153,8 +172,6 @@ data class Module(
     val name: String
 )
 
-
-
 @Serializable
 data class Organisation(
     val id: String,
@@ -162,6 +179,7 @@ data class Organisation(
     val departments: List<String>? = null,
     val zones: List<Zone>? = null
 )
+
 @Serializable
 data class FailedResponse(
     val message: String,
@@ -175,8 +193,7 @@ data class GetUserData(
     val id: String,
     val username: String,
     val email: String?=null,
-    val userData: UserData,
-
+    val userData: UserData
     )
 
 
@@ -795,12 +812,122 @@ data class RegisteredDeviceResponse(
     val createdBy: String? = null,
     val lastModifiedDate: String? = null,
     val lastModifiedBy: String? = null,
-    val version: Int,
+    val version: Int? = null,
     val projectId: String? = null,
     val userId: String? = null,
     val deviceTokens: List<String>? = emptyList()
 )
 
 //-------------------------------------------------------------------------------
+// Health Filters ---------------------------------------------------------------
+// Slab
+// Response
+@Serializable
+data class SlabResponse(
+    val message: String,
+    val data : List<SlabData>? = emptyList()
+)
+
+@Serializable
+data class SlabData(
+    val id: String,
+    val policy_segment: PolicySegment,
+    val min_amount: Int,
+    val max_amount: Int,
+    val name: String,
+    val status: Int,
+    val remarks: String,
+    val description: String
+)
+
+@Serializable
+data class PolicySegment(
+    val id: String,
+    val name: String,
+    val remarks: String,
+    val status: Int,
+    val description: String? = null,
+    val data_table_name: String,
+    val class_path: String
+)
+
+// Product
+// Response
+@Serializable
+data class ProductResponse(
+    val message: String,
+    val data : List<ProductData>
+)
+
+@Serializable
+data class ProductData(
+    val id: String,
+    val insurance_type: InsuranceTypeX,
+    val policy_segment: PolicySegment,
+    val status: Int,
+    val name: String,
+    val remarks: String? = null,
+    val description: String? = null
+)
+
+@Serializable
+data class InsuranceTypeX(
+    val name: String,
+    val description: String? = null,
+    val policy_segment_id: String,
+    val id: String,
+    val status: Int
+)
+
+// Insurer_Group
+// Response
+@Serializable
+data class InsurerGroupResponse(
+    val message: String,
+    val data : List<InsurerGroupData>
+)
+
+@Serializable
+data class InsurerGroupData(
+    val id: String,
+    val name: String,
+    val description: String? = null,
+    val remarks: String? = null,
+    val status: Int,
+    val policy_segment: PolicySegment
+)
+
+// Policy_Segment
+// Response
+@Serializable
+data class PolicySegmentResponse(
+    val id: String,
+    val name: String,
+    val remarks: String,
+    val status: Int,
+    val description: String? = null,
+    val data_table_name: String,
+    val class_path: String
+)
+
+// Insurance Type Using Policy Segment ID
+// Response
+@Serializable
+data class InsuranceTypeUsingSegmentID(
+    val message: String,
+    val data : List<InsuranceTypeUsingSegmentIDData>
+)
+
+@Serializable
+data class InsuranceTypeUsingSegmentIDData(
+    val name: String,
+    val description: String? = null,
+    val policy_segment_id: String,
+    val id: String,
+    val policy_segment: PolicySegment,
+    val status: Int
+)
 
 
+
+//-------------------------------------------------------------------------------

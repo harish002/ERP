@@ -14,13 +14,13 @@ struct PolicyRateDetailView: View {
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var snackBar : SnackbarModel
     let policyRateId : String
-    
+    let policyRateData : PolicyRateData?
     let policyRateDetailViewClosed : () -> Void
     let columns = [
            GridItem(.flexible()),
            GridItem(.flexible()),
     ]
-    @State private var policyRateData : PolicyRateData?
+    
     
     var body: some View {
         VStack(spacing:0){
@@ -192,35 +192,35 @@ struct PolicyRateDetailView: View {
         .onAppear{
             let token = retrieveToken() ?? ""
             print("Policy Rate Id -> \(policyRateId)")
-            Task{
-                do
-                {
-                    let result = try await accessModel.getSinglePolicyRate(token: token, id: policyRateId)
-                    self.policyRateData = result
-                    
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-                }
-            }
+//            Task{
+//                do
+//                {
+//                    let result = try await accessModel.getSinglePolicyRate(token: token, id: policyRateId)
+//                    self.policyRateData = result
+//                    
+//                }
+//                catch ApiError.networkFailure {
+//                    // Handle network failure, e.g., show error Snackbar
+//                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+//                } catch ApiError.lowInternetConnection {
+//                    // Handle low internet connection, e.g., show error Snackbar
+//                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+//                } catch ApiError.serverError(let status) {
+//                    // Handle server errors, e.g., show error Snackbar
+//                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+//                } catch ApiError.unknownError(let description){
+//                    // Handle unknown errors
+//                    print("Data Fetching Failed -> \(description)")
+//                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+//                }
+//            }
         }
        
     }
 }
 
-#Preview {
-    PolicyRateDetailView(accessModel: AccessServiceViewModel(), snackBar: SnackbarModel(),policyRateId: ""){
-        
-    }
-}
+//#Preview {
+//    PolicyRateDetailView(accessModel: AccessServiceViewModel(), snackBar: SnackbarModel(),policyRateId: ""){
+//        
+//    }
+//}

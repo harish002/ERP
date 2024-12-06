@@ -21,7 +21,7 @@ struct Bottombar: View {
     
     var body: some View {
         
-        HStack{
+        HStack(spacing:8){
             
             // Explore -----
             Button{
@@ -33,12 +33,11 @@ struct Bottombar: View {
                 ZStack{
                     BottomBarButtonView(
                         name: "Policy Rates",
-                        imageName: "book.pages",
+                        imageName: "1Asset 13x",
                         isActive: navigationState.activeViewName == "Policy Rates"
                     )
                 }
             }
-
             
             // Notification -----
             Button{
@@ -48,27 +47,14 @@ struct Bottombar: View {
                 }
             label: {
                 ZStack{
-                    
-                    VStack(spacing:8){
-                        Rectangle()
-                            .frame(height: 0)
-                        
-                        Image(systemName: "licenseplate")
-                            .resizable()
-                            .frame(width: 32,height: 24)
-                            .foregroundStyle(navigationState.activeViewName == "Vehicle Number" ? Color(hex: "#3960F6") : Color(hex: "#949494"))
-                        
-                        Text("Vehicle Number")
-                            .font(.custom("Gilroy-Medium", size: 12))
-                            .foregroundStyle(navigationState.activeViewName == "Vehicle Number" ? Color(hex: "#3960F6") : Color(hex: "#949494"))
-                    }
-                    .padding(.top,5)
-                    .padding(.bottom,11)
-                    
+                    BottomBarButtonView(
+                        name: "Vehicle Number",
+                        imageName: "1Asset 23x",
+                        isActive: navigationState.activeViewName == "Vehicle Number"
+                    )
                 }
             }
-            
-
+        
             
             // Profile -----
             Button{
@@ -80,16 +66,71 @@ struct Bottombar: View {
                 ZStack{
                     BottomBarButtonView(
                         name: "Profile",
-                        imageName: "person.circle",
+                        imageName: "1Asset 33x",
                         isActive: navigationState.activeViewName == "Profile"
+                    )
+                    
+                }
+            }
+        
+            
+            // HelpLine -----
+            Button{
+                withAnimation{
+                    dialPhoneNumber(phoneNumber: "8055875587")
+                }
+            }
+            label: {
+                ZStack{
+                    BottomBarButtonView(
+                        name: "Helpline",
+                        imageName: "1Asset 43x",
+                        isActive: navigationState.activeViewName == "Helpline"
+                    )
+                    
+                    
+                }
+            }
+            
+            // Notification -----
+            Button{
+                withAnimation{
+                    navigationState.push(viewName: "Notification")
+                }
+            }
+            label: {
+                ZStack{
+                    BottomBarButtonView(
+                        name: "Notification",
+                        imageName: "1Asset 7_13x",
+                        isActive: navigationState.activeViewName == "Notification"
                     )
                     
                     
                 }
             }
         }
-        .padding(.horizontal,24)
-        .background(Color(hex: "#F8F8F8"))
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal,16)
+        .background(
+            LinearGradient(
+                gradient: Gradient(colors: [Color("bgColor2", bundle: nil), Color("bgColor2", bundle: nil), Color("bgColor1", bundle: nil)]),
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .ignoresSafeArea(edges: .bottom) // Extend the gradient to ignore the safe at the bottom
+        )
+       
+    }
+    
+    func dialPhoneNumber(phoneNumber: String) {
+            let phoneNumberString = "tel://\(phoneNumber)"
+            if let url = URL(string: phoneNumberString), UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url, options: [:], completionHandler: nil)
+            } else {
+                print("No dialer found")
+                // You can display a SwiftUI alert if needed
+            }
     }
 }
 

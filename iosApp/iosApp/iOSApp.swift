@@ -59,10 +59,8 @@ struct iOSApp: App {
                                 NotificationView(
                                     accessModel: accessViewModel,
                                     navigationState: navigationState,
-                                    snackBar: snackBarManager,
-                                    onBackButtonTap: {
-                                        router.navigateBack()
-                                    }
+                                    snackBar: snackBarManager
+                                    
                                 )
                             }
                             

@@ -26,7 +26,7 @@ struct MatchedView: View {
                 VStack(alignment:.center, spacing: 16) {
                     Spacer()
                     
-                    Image("Policy Logo")
+                    Image("appstore")
                         .resizable()
                         .frame(width: 160, height: 160)
                         .matchedGeometryEffect(id: "logo", in: namespace)
@@ -50,7 +50,7 @@ struct MatchedView: View {
                 VStack(alignment:.center) {
                     Spacer()
                     
-                    Image("Policy Logo")
+                    Image("appstore")
                         .resizable()
                         .frame(width: 160, height: 160)
                         .matchedGeometryEffect(id: "logo", in: namespace)

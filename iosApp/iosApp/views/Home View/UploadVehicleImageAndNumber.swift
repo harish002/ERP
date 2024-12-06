@@ -286,36 +286,62 @@ struct UploadVehicleImageAndNumber: View {
                                     self.vehicleNumberLoader = true
                                 }
                                 let token = retrieveToken() ?? ""
-                                Task.init{
-                                    let result = try await accessModel.getVehicleDetails(token: token, number: vehicleNumber)
-                                    
-                                    if result.status == "success"{
-                                        self.vehicleNumberLoader = false
-                                        snackBar.show(message: "Vehicle number submitted successfully.", title: "Success", type: .success)
+                                    Task.init{
+                                        do{
                                         
-                                        self.policyRateLoader = true
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                            let payload = SearchPolicyRatePayload(
-                                                state_id: statesData?.id ?? "",
-                                                city_id: cityData?.id ?? "",
-                                                city_category_id: cityCategories?.id ?? "",
-                                                vehicle_type_id: vehicleType?.id ?? "",
-                                                vehicle_model_id: "",
-                                                renewal_type_id: renewalTypes?.id ?? "",
-                                                insurance_type_id: "",
-                                                insurer_id: insurerType?.id ?? "",
-                                                fuel_type_id:fuelType?.id  ?? "",
-                                                status: "0", page: 1, size: 50
-                                            )
-                                            print("Vehicle Number Filter Payload -> \(payload)")
-                                            getPolicyRatesList(token: token, payload: payload)
+                                            let result = try await accessModel.getVehicleDetails(token: token, number: vehicleNumber)
+                                            
+                                            if !result.message.isEmpty{
+                                                self.vehicleNumberLoader = false
+                                                snackBar.show(message: "Vehicle number submitted successfully.", title: "Success", type: .success)
+                                                
+                                                self.policyRateLoader = true
+                                                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                                    let payload = SearchPolicyRatePayload(
+                                                        state_id: statesData?.id ?? "",
+                                                        city_id: cityData?.id ?? "",
+                                                        city_category_id: cityCategories?.id ?? "",
+                                                        vehicle_type_id: vehicleType?.id ?? "",
+                                                        vehicle_model_id: "",
+                                                        renewal_type_id: renewalTypes?.id ?? "",
+                                                        insurance_type_id: "",
+                                                        insurer_id: insurerType?.id ?? "",
+                                                        fuel_type_id:fuelType?.id  ?? "",
+                                                        status: "0", page: 1, size: 50
+                                                    )
+                                                    print("Vehicle Number Filter Payload -> \(payload)")
+                                                    getPolicyRatesList(token: token, payload: payload)
+                                                }
+                                            }
+                                            else {
+                                                self.vehicleNumberLoader = false
+                                                snackBar.show(message: result.message, title: "Error", type: .error)
+                                            }
                                         }
-                                    }
-                                    else {
-                                        self.vehicleNumberLoader = false
-                                        snackBar.show(message: result.message, title: "Error", type: .error)
-                                    }
+                                        catch ApiExceptionError.unknown(let description) {
+                                            // Handle unknown errors
+                                            self.vehicleNumberLoader = false
+                                            print("An unknown error occurred: \(description)")
+                                            snackBar.show(message: description, title: "Error", type: .error)
+
+                                       }
+                                        catch ApiExceptionError.noInternet{
+                                            // Handle No Internet Connection errors
+                                            self.vehicleNumberLoader = false
+                                            print(" Get Vehicle Details -> No internet connection.")
+                                            snackBar.show(message: "No internet connection. Please check your network.", title: "No Internet", type: .error)
+                                        }
+                                        catch ApiExceptionError.timeout{
+                                            // Handle Api Timeout  errors
+                                            self.vehicleNumberLoader = false
+                                            print(" Get Vehicle Details -> Request Timeout")
+                                           
+                                            snackBar.show(message: "Request timed out. Please try again.", title: "Timeout", type: .error)
+                                        }
+                                    
                                 }
+                             
+                                
                             },
                             label: {
                                 ZStack{
@@ -416,7 +442,7 @@ struct UploadVehicleImageAndNumber: View {
                                                     .foregroundStyle(Color("button_background_2"))
                                                 
                                             })
-                                        if vehicleNumberLoader {
+                                        if policyRateLoader {
                                             ProgressView()
                                                 .tint(.white)
                                         }
@@ -532,13 +558,19 @@ struct UploadVehicleImageAndNumber: View {
                 }
             }
             
+            let data = showAllPolicyRates.filter{ policy in
+                policy.id == policyRateId
+            }
+            
             if isPolicyRateSelected {
-                PolicyRateDetailView(accessModel: accessModel,snackBar: snackBar, policyRateId: policyRateId){
-                    withAnimation{
-                        isPolicyRateSelected = false
+                if let policyRateData = data.first {
+                    PolicyRateDetailView(accessModel: accessModel,snackBar: snackBar, policyRateId: policyRateId, policyRateData: policyRateData){
+                        withAnimation{
+                            isPolicyRateSelected = false
+                        }
                     }
+                    .zIndex(1)
                 }
-                .zIndex(1)
             }
         }
         .onAppear{

@@ -16,28 +16,42 @@ struct BottomBarButtonView :View {
     
     var body: some View {
 
-            VStack(spacing:8){
-                Rectangle()
-                    .frame(height: 0)
+            VStack(spacing:12){
+                Circle()
+                    .fill(
+                        Color.white
+                    )
+                    .frame(width: 46,height: 46)
+                    .overlay(content: {
+                        Image(imageName)
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 24,height: 24)
+                    })
+                    .overlay(content: {
+                        if isActive {
+                            Circle()
+                                .stroke(Color("bgColor1", bundle: nil), lineWidth: 3)
+                                .frame(width: 56,height: 56)
+                        }
+                    })
                 
-                Image(systemName: imageName)
-                    .resizable()
-                    .frame(width: 24,height: 24)
-                    .foregroundStyle(isActive ? Color(hex: "#3960F6") : Color(hex: "#949494"))
                 
                 Text(name)
-                    .font(.custom("Gilroy-Medium", size: 12))
-                    .foregroundStyle(isActive ? Color(hex: "#3960F6") : Color(hex: "#949494"))
+                    .font(.custom("Gilroy-Medium", size: 10))
+                    .foregroundStyle(Color.white)
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    
             }
-            .padding(.top,5)
-            .padding(.bottom,11)
-        
+            .frame(maxWidth: .infinity,alignment: .center)
+            .padding(.top,12)
     }
 }
 
 #Preview {
     BottomBarButtonView(
         name: "Policy Rates",
-        imageName: "book.pages",
+        imageName: "1Asset 13x",
         isActive: false)
 }

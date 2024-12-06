@@ -10,14 +10,20 @@ import com.example.lms.Services.Dataclass.GetPolicyRates
 import com.example.lms.Services.Dataclass.GetRegistrationNumberResponse
 import com.example.lms.Services.Dataclass.GetUserData
 import com.example.lms.Services.Dataclass.GetVehicleDetails
+import com.example.lms.Services.Dataclass.InsuranceTypeUsingSegmentID
 import com.example.lms.Services.Dataclass.InsuranceTypes
+import com.example.lms.Services.Dataclass.InsurerGroupResponse
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PolicyRateData
+import com.example.lms.Services.Dataclass.PolicySegmentResponse
+import com.example.lms.Services.Dataclass.ProductResponse
 import com.example.lms.Services.Dataclass.RefreshToken
 import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.example.lms.Services.Dataclass.RenewalTypes
 import com.example.lms.Services.Dataclass.SearchPolicyRateData
 import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
+import com.example.lms.Services.Dataclass.SlabResponse
+import com.example.lms.Services.Dataclass.UserData
 import com.example.lms.Services.Dataclass.UserDetails
 import com.example.lms.Services.Dataclass.UserResponse
 import com.example.lms.Services.Dataclass.VehicleTypes
@@ -45,6 +51,7 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import io.ktor.util.InternalAPI
 import io.ktor.utils.io.errors.IOException
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -54,6 +61,13 @@ import okio.SYSTEM
 import okio.buffer
 import kotlin.coroutines.cancellation.CancellationException
 
+
+sealed class ApiException(message: String) : IOException(message) {
+    class TimeoutException : ApiException("Request timed out")
+    class NoInternetException : ApiException("No internet connection")
+    class UnknownException(message: String) : ApiException(message)
+}
+
 @Serializable
 class ApiConfig {
     companion object {
@@ -62,10 +76,9 @@ class ApiConfig {
         const val  UAT_ACCESS_API = "https://api.1click.tech/api/access"
         const val ACCESS_API = "https://api.1clicktech.in/api/access"
 
-        const val COURSE_MANAGEMENT_API = "https://ccm-api.1clicktech.in/api"
-
         const val  UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications"
         const val NOTIFICATION_MANAGEMENT = "https://api.1clicktech.in/api/notifications"
+
         const val SALES_TOOL_API = "https://sales-tool-api.1click.tech"
     }
 }
@@ -229,14 +242,15 @@ class ApiServices {
     suspend fun loginWithPhone(phone: String): Boolean {
         try {
             val response: HttpResponse = client.post {
-                url("${ApiConfig.ACCESS_API}/auth/login/send-otp?")
+                url("${ApiConfig.UAT_ACCESS_API}/auth/login/send-otp")
                 contentType(ContentType.Application.Json)
-//                header("Referer","https://api.1clicktech.in")
                 parameter("input", phone)
+                parameter("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
             }
             if (response.status.isSuccess()) {
                 return true
-            }else{
+            }
+            else{
                 throw IOException(
                     "${response.status}"
                 )
@@ -252,9 +266,10 @@ class ApiServices {
     suspend fun authenticateLoginOTP(phone: String, otp: String): UserResponse {
         try {
             val response: HttpResponse = client.post {
-                url("${ApiConfig.ACCESS_API}/auth/login/authenticate-otp?")
+                url("${ApiConfig.UAT_ACCESS_API}/auth/login/authenticate-otp")
                 contentType(ContentType.Application.Json)
-                header("Referer", "https://api.1clicktech.in")
+                header("Referer", "https://api.1click.tech/")
+                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
                 parameter("input", phone)
                 parameter("otp", otp)
             }
@@ -273,26 +288,23 @@ class ApiServices {
 
     // Get user who logged In
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getUserWhoLoggedIn(token : String) : GetUserData{
+    suspend fun getUserWhoLoggedIn(token: String, userid: String): UserData {
         try {
             val response: HttpResponse = client.get {
-                url("${ApiConfig.UAT_ACCESS_API}/users")
-                contentType(ContentType.Application.Json)
+                url("https://api.1click.tech/api/access/users/$userid")
                 header("Authorization", "Bearer $token")
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-                header("Referer","https://api.1click.tech")
             }
 
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
             }
-            else{
-                throw IOException(
-                    response.body<String>()
-                )
+            else {
+                // Capture the error response in more detail
+                val errorMessage = response.body<String>()
+                println("Error Response ${response.status}: $errorMessage")
+                throw IOException(errorMessage)
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             throw IOException(e.message.toString())
         }
 
@@ -306,9 +318,9 @@ class ApiServices {
     suspend fun refreshToken(refreshToken: RefreshToken):UserResponse{
         try {
             val response: HttpResponse = client.post {
-                url("${ApiConfig.ACCESS_API}/auth/token")
+                url("${ApiConfig.UAT_ACCESS_API}/auth/token")
                 contentType(ContentType.Application.Json)
-                header("Referer", "https://api.1clicktech.in")
+                header("Referer", "https://api.1click.tech")
                 body = Json.encodeToString(RefreshToken.serializer(), refreshToken)
             }
             if (response.status.isSuccess()) {
@@ -322,6 +334,65 @@ class ApiServices {
                 throw e.message?.let { IOException(it) }!!
         }
     }
+
+    // Forget password
+    // Send Token to Mail to Reset Password
+    @OptIn(InternalAPI::class)
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun resetPassword(email: String) : String {
+        try {
+            val response : HttpResponse = client.post {
+                url("${ApiConfig.UAT_ACCESS_API}/auth/resetPassword")
+                contentType(ContentType.Application.Json)
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+                parameter("email",email)
+
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Reset Password Failed -> ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+
+    // Change Password with the received Token
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun changePasswordWithToken(token: String, newPassword: String) : String {
+        try {
+            val response : HttpResponse = client.post {
+                url("${ApiConfig.UAT_ACCESS_API}/auth/changePasswordWithToken")
+                contentType(ContentType.Application.Json)
+                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
+                parameter("token",token)
+                parameter("newPassword",newPassword)
+
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Change Password with Token Error Message -> ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+
+
     //----------------------------------------------------------------------
 
     // Get In-App Notifications
@@ -404,7 +475,7 @@ class ApiServices {
             throw e.message?.let { IOException(it) }!!
         }
     }
-
+    // Motor Filters ---------------------------------------------------------------------------
     // Vehicle Details ---------------------------------------------------------------------------
     // Read all vehicle types
     @Throws(IOException::class, CancellationException::class)
@@ -604,6 +675,126 @@ class ApiServices {
         }
     }
 
+    //  --------------------------------------------------------------------------------------------
+    // Health Filters -----------------------------------------------------------------------------
+    // Slab Types
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getAllSlabTypes() : SlabResponse {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/slab/")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Slab Types Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Product Types
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getAllProductTypes() : ProductResponse {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/product/")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Product Types Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Insurer Groups Data
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getAllInsurerGroups() : InsurerGroupResponse {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/insurer_group/")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Insurer Group Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Policy Segments
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getAllPolicySegments() : List<PolicySegmentResponse> {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/policy_segment/")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Policy Segment Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Insurance Type Using Policy Segment ID
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getInsuranceTypeByPolicySegments(segmentId : String) : InsuranceTypeUsingSegmentID {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/insurance_type/policy_segment/${segmentId}")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Insurance Type Using SegmentID Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+
+    //  --------------------------------------------------------------------------------------------
+
     // Search Policy Rate Data
     @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
@@ -674,7 +865,6 @@ class ApiServices {
 
     // Get Vehicle Details for the Vehicle Number
     @Throws(IOException::class, CancellationException::class)
-    @OptIn(InternalAPI::class)
     suspend fun getVehicleDetails(token : String, vehicleNumber : String): GetVehicleDetails {
         try {
             val response: HttpResponse = client.post {
@@ -687,14 +877,19 @@ class ApiServices {
                     return  response.body()
                 }
                 else {
-                    throw IOException(
-                        response.body<String>()
-                    )
+                    throw ApiException.UnknownException(response.body())
                 }
         }
-        catch (e: Exception) {
-            println("Upload Image Error Message ${e.message}")
-            throw e.message?.let { IOException(it) }!!
+        catch (e:TimeoutCancellationException){
+            throw ApiException.TimeoutException()
+        }
+        catch (e : IOException){
+            if (e.message?.contains("No Internet") == true){
+                throw ApiException.NoInternetException()
+            }
+            else {
+                throw  ApiException.UnknownException(e.message ?: "Unknown error")
+            }
         }
     }
 
