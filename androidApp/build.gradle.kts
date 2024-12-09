@@ -15,13 +15,13 @@ android {
     lint{
         abortOnError = false
     }
-    namespace = "com.example.erp.android"
+    namespace = "com.chp.erp.android"
     compileSdk = 34
     defaultConfig {
-        applicationId = "com.example.erp.android"
+        applicationId = "com.chp.erp.android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
+        versionCode = 4
         versionName = "1.0"
     }
     buildFeatures {
@@ -93,10 +93,11 @@ dependencies {
     implementation ("com.google.firebase:firebase-messaging")
     implementation("androidx.compose.material3:material3:1.3.0-beta04")
 
-
     implementation ("com.github.bumptech.glide:glide:4.14.2") // Use the latest version
     implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("com.airbnb.android:lottie-compose:5.0.3")
+
+    implementation(libs.gson)
 
 //    kapt ("com.github.bumptech.glide:compiler:4.14.2") // For annotation processing
 }
