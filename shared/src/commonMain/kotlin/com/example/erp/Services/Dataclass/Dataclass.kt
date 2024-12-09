@@ -268,6 +268,7 @@ data class GetPolicyRates(
 @Serializable
 data class PolicyRateData(
     val city_id: String,
+    val city_category_id : String,
     val fuel_type_id: String,
     val renewal_type_id: String,
     val insurance_type_id: String,
@@ -278,6 +279,7 @@ data class PolicyRateData(
     val description: String? = null,
     val id: String,
     val city: City,
+    val city_category: CityCategory? = null,
     val vehicle_model: VehicleModel,
     val fuel_type: FuelType,
     val insurance_type: InsuranceType,
@@ -297,9 +299,9 @@ data class City(
     val name: String,
     val description: String? = null,
     val state_id: String,
-    val city_category_id: String,
+    val city_category_id: String? = null,
     val id: String,
-    val city_category: CityCategory,
+    val city_category: CityCategory? = null,
     val state: States,
     val status: Int,
     val created_at: String? = null,
@@ -339,8 +341,10 @@ data class FuelType(
 data class InsuranceType(
     val name: String,
     val description: String? = null,
+    val policy_segment_id: String,
     val created_at: String? = null,
     val id: String,
+    val policy_segment: PolicySegment? = null,
     val status: Int
 )
 
@@ -350,7 +354,8 @@ data class Insurer(
     val name: String,
     val status: Int,
     val description: String? = null,
-    val created_at: String? = null
+    val created_at: String? = null,
+    val insurer_groups : List<String>? = emptyList()
 )
 
 @Serializable
@@ -373,7 +378,7 @@ data class CityCategory(
     val description: String? = null,
     val id: String,
     val status: Int,
-    val created_at: String
+    val created_at: String? = null
 )
 
 @Serializable
@@ -513,9 +518,9 @@ data class CityData(
     val name: String,
     val description: String? = null,
     val state_id: String,
-    val city_category_id: String,
+    val city_category_id: String? = null,
     val id: String,
-    val city_category: CityCategoryFromCityApi,
+    val city_category: CityCategoryFromCityApi? = null,
     val state: StateFromCityApi,
     val status: Int,
     val created_at: String? = null,
@@ -627,11 +632,9 @@ data class SearchPolicyRatePayload(
 // Response Body
 @Serializable
 data class SearchPolicyRateData(
-    val items: List<PolicyRateData>,
+    val message : String,
     val total: Int,
-    val page: Int,
-    val size: Int,
-    val pages: Int
+    val items: List<PolicyRateData>,
 )
 
 // Get Registration Number from Image
@@ -927,6 +930,26 @@ data class InsuranceTypeUsingSegmentIDData(
     val policy_segment: PolicySegment,
     val status: Int
 )
+
+// PPts Types Using Policy Segment ID
+// Response
+data class PPTsTypesBySegmentId(
+    val message: String,
+    val data : List<PPTsTypesData>
+)
+
+data class PPTsTypesData(
+    val id: String,
+    val policy_segment: PolicySegment,
+    val name: String,
+    val min: Int,
+    val max: Int,
+    val remarks: String,
+    val description: String?= null,
+    val status: Int
+)
+
+
 
 
 

@@ -62,6 +62,55 @@ struct iOSApp: App {
                                     snackBar: snackBarManager
                                     
                                 )
+                                
+                            case .editprofilescreen:
+                                EditProfileView(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState
+                                ){
+                                    router.navigateBack()
+                                }
+                                
+                            case .policyratedetailview:
+                                PolicyRateDetailView(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router,
+                                    policyRateDetailViewClosed: {
+                                        router.navigateBack()
+                                    })
+                            
+                            case .vehicledataview :
+                                VehicleDataView(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState,
+                                    snackBar: snackBarManager,
+                                    onBackButtonTap: {
+                                        router.navigateBack()
+                                    })
+                                
+                            case .motorview :
+                                UploadVehicleImageAndNumber(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router
+                                )
+                            
+                            case .healthview:
+                                HealthView(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router
+                                )
+                            
+                            case .lifeview:
+                                EmptyView()
+                                
+                            case .smeview:
+                                EmptyView()
+                                
                             }
                             
                         }

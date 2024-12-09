@@ -32,8 +32,8 @@ class AccessServiceViewModel : ObservableObject {
     @Published var specificCourseId : String = ""       // Used in Course Detail Screen for Fetching Details about the course --> /course/show
     @Published var myCourseId : String = ""             // Used in Course Start View for Getting Course Information --> /my_courses/show
     @Published var fcmToken : String = ""
-    // Fix Variable Values
-//    let projectId : String = "c319ab33-dbf1-45e7-b566-521cfecfb3e5"
+    @Published var policyRateId : String = ""           // Used in Policy Rate Detail View to Fetch Specific Policy Rate Data
+
     
     // Module 1 ----------------------------------------------------------------------------------------------------------------
     // Login With Otp Api's ViewModel--------------------------------------------------------
@@ -940,6 +940,264 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Health Filters
+    // Slab Types
+    @Published var slabTypes : [SlabData] = []
+    func getAllSlabTypes() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllSlabTypes()
+                        if (!(response.data?.isEmpty ?? false)) {
+                            self.slabTypes = response.data ?? []
+                            print("Slab Types Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Slab Types Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Insurer Groups Data
+    @Published var insurerGroupsData : [InsurerGroupData] = []
+    func getAllInsurerGroups() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllInsurerGroups()
+                        if (!(response.data.isEmpty)) {
+                            self.insurerGroupsData = response.data
+                            print("Insurer Groups Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Insurer Groups Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Policy Segments
+    @Published var policySegments : [PolicySegmentResponse] = []
+    func getAllPolicySegments() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllPolicySegments()
+                        if (!(response.isEmpty)) {
+                            self.policySegments = response
+                            print("Policy Segments Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Policy Segments Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Product Types
+    @Published var productTypes : [ProductData] = []
+    func getAllProductTypes() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllProductTypes()
+                        if (!(response.data.isEmpty)) {
+                            self.productTypes = response.data
+                            print("Product Types Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Product Types Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Insurance Type Using Policy Segment ID
+    @Published var getInsuranceTypes : [InsuranceTypeUsingSegmentIDData] = []
+    func getInsuranceTypeByPolicySegments(segmentId : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getInsuranceTypeByPolicySegments(segmentId: segmentId)
+                        if (!(response.data.isEmpty)) {
+                            self.getInsuranceTypes = response.data
+                            print("Insurance Types with Id Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Insurance Type With Ids Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // PPTs Types Using Policy Segment ID
+    @Published var getPPtsTypes : [PPTsTypesData] = []
+    func getPPTsTypesBySegmentId(segmentId : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getPPtsByPolicySegments(segmentId: segmentId)
+                        if (!(response.data.isEmpty)) {
+                            self.getPPtsTypes = response.data
+                            print("PPTs Types with Id Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("PPTs Types With Id Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
     
     // Get the Registrtaion Number from Image
     func uploadImage(token: String, filePath: String, completion: @escaping (String?) -> Void) {

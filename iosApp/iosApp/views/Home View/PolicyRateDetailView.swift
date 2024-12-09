@@ -13,191 +13,413 @@ struct PolicyRateDetailView: View {
     
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var snackBar : SnackbarModel
-    let policyRateId : String
-    let policyRateData : PolicyRateData?
+    @ObservedObject var router : Router
+    
+    @State private var policyRateId : String = ""
+    @State private var policyRateData : PolicyRateData?
     let policyRateDetailViewClosed : () -> Void
-    let columns = [
-           GridItem(.flexible()),
-           GridItem(.flexible()),
-    ]
+    
+    @State private var loader : Bool = false
     
     
     var body: some View {
         VStack(spacing:0){
-            HStack(spacing:0){
-                Text("Policy Rates")
-                    .font(.custom("Gilroy-Bold", size: 32))
-                
-                Spacer()
-                
-                Image("close-button")
-                    .contentShape(Circle())
-                    .onTapGesture {
-                        policyRateDetailViewClosed()
+            VStack(spacing:0){
+                    HStack(spacing:0){
+                        
+                        Image("back")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 20, height: 20)
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                withAnimation{
+                                    policyRateDetailViewClosed()
+                                }
+                            }
+                        
+                        Spacer()
+                        
+                        Text("Policy Rates")
+                            .font(.custom("Poppins-SemiBold", size: 24))
+                            .foregroundStyle(Color.black)
+                        
+                        Spacer()
+                        
                     }
+                    .padding(.horizontal,16)
+                    .padding(.vertical,16)
             }
-            .padding(.horizontal,16)
+            .background(
+                Color(hex: "#E3FFF6")
+                    .ignoresSafeArea(edges: .top) // Extend the gradient to ignore the safe area at the top
+            )
             
-            LazyVGrid(columns: columns,alignment: .leading,spacing: 16){
-                VStack(alignment:.leading,spacing:8){
-                    Text("PAYOUT %".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    if let payout = policyRateData?.payouts {
-                        Text(payout)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
+            VStack(spacing:0){
+                if loader {
+                    VStack{
+                        Spacer()
+                        
                         ProgressView()
+                            .progressViewStyle(.circular)
+                        
+                        Spacer()
                     }
                 }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("Insurer".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    if let insurerName = policyRateData?.insurer.name {
-                        Text(insurerName)
-                            .font(.custom("Gilroy-Bold", size: 16))
+                else {
+                    if ((policyRateData?.isEqual(nil)) != nil) {
+                        ScrollView(.vertical,showsIndicators: false){
+                            VStack(alignment: .leading,spacing: 16){
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("PAYOUT %".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let payout = policyRateData?.payouts {
+                                        Text(payout)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("Insurer".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let insurerName = policyRateData?.insurer.name {
+                                        Text(insurerName)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("Insurance Type".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let insuranceType = policyRateData?.insurance_type.name {
+                                        Text( insuranceType)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("Vehicle Type".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let vehicleModel = policyRateData?.vehicle_model.name {
+                                        Text(vehicleModel)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("Renewal Type".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let renewalType = policyRateData?.renewal_type.name {
+                                        Text(renewalType)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("Fuel Type".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let fuelType = policyRateData?.fuel_type.name{
+                                        Text(fuelType)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("State".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let state = policyRateData?.city.state.name {
+                                        Text(state)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("City Category".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let cityCategory = policyRateData?.city_category?.name {
+                                        Text(cityCategory)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("City".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if let cityName = policyRateData?.city.name {
+                                        Text(cityName)
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    else {
+                                        Text("N / A")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color("title", bundle: nil))
+                                    }
+                                    
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                VStack(alignment:.leading,spacing:0){
+                                    Text("NCB".uppercased())
+                                        .font(.custom("Poppins-Medium", size: 16))
+                                        .foregroundStyle(Color("title", bundle: nil))
+                                    
+                                    Spacer()
+                                    
+                                    if policyRateData?.status == 1 {
+                                        Text("Yes")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color.green)
+                                    }
+                                    else {
+                                        Text("No")
+                                            .font(.custom("Poppins-SemiBold", size: 20))
+                                            .foregroundStyle(Color.red)
+                                    }
+                                }
+                                .padding(.horizontal,16)
+                                .padding(.vertical,16)
+                                .frame(maxWidth:.infinity,alignment: .leading)
+                                .background(
+                                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                )
+                                .cornerRadius(12, corners: [.allCorners])
+                                .padding(.horizontal,16)
+                                
+                                
+                            }
+                        }
                     }
                     else {
-                        ProgressView()
-                    }
-                   
-                }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("Insurance Type".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    if let insuranceType = policyRateData?.insurance_type.name {
-                        Text( insuranceType)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
-                        ProgressView()
+                        VStack{
+                            Spacer()
+                            
+                            Image("nodata")
+                            
+                            Text("No data found")
+                                .font(.custom("Gilroy-SemiBold", size: 28))
+                                .padding(.top,20)
+                            
+                            Spacer()
+                        }
                     }
                 }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("Vehicle Type".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    if let vehicleModel = policyRateData?.vehicle_model.name {
-                        Text(vehicleModel)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
-                        ProgressView()
-                    }
-                  
-                }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("Renewal Type".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    if let renewalType = policyRateData?.renewal_type.name {
-                        Text(renewalType)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
-                        ProgressView()
-                    }
-                  
-                }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("Fuel Type".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    if let fuelType = policyRateData?.fuel_type.name{
-                        Text(fuelType)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
-                        ProgressView()
-                    }
-                 
-                }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("State".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    if let state = policyRateData?.city.state.name {
-                        Text(state)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
-                        ProgressView()
-                    }
-                   
-                }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("City Category".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    if let cityCategory = policyRateData?.city.city_category.name {
-                        Text(cityCategory)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
-                        ProgressView()
-                    }
-                   
-                }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("City".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    if let cityName = policyRateData?.city.name {
-                        Text(cityName)
-                            .font(.custom("Gilroy-Bold", size: 16))
-                    }
-                    else {
-                        ProgressView()
-                    }
-                   
-                }
-                
-                VStack(alignment:.leading,spacing:8){
-                    Text("NCB".uppercased())
-                        .font(.custom("Gilroy-Medium", size: 12))
-                    
-                    if policyRateData?.status == 1 {
-                        Text("Yes")
-                            .font(.custom("Gilroy-Bold", size: 16))
-                            .foregroundStyle(Color.green)
-                    }
-                    else {
-                        Text("No")
-                            .font(.custom("Gilroy-Bold", size: 16))
-                            .foregroundStyle(Color.red)
-                    }
-                    
-                      
-                }
-
             }
-            .padding(.horizontal,16)
-            .padding(.top,16)
+            .padding(.vertical,16)
             
         }
-        .padding(.vertical,12)
-        .overlay(content: {
-            RoundedRectangle(cornerRadius: 5)
-                .stroke(.black, lineWidth: 1)
-        })
-        .padding(.all,8)
-        .background(Color.white)
+        .background(
+            Color(hex: "#F5F8FF")
+        )
+        .navigationBarBackButtonHidden()
         .onAppear{
-            let token = retrieveToken() ?? ""
-            print("Policy Rate Id -> \(policyRateId)")
+            self.loader = true
+            let rateId = accessModel.policyRateId
+            self.policyRateId = rateId
+            print("Policy Rate Id -> \(rateId)")
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                let policyRateData = accessModel.policyRatesData
+
+                if !policyRateData.isEmpty {
+                    let data = policyRateData.filter{ rate in
+                        rate.id == policyRateId
+                    }
+                    self.loader = false
+                    self.policyRateData = data.first
+                }
+                else {
+                    self.loader = false
+                    self.policyRateData = nil
+                }
+            })
+        }
+    }
+}
+
+//#Preview {
+//    PolicyRateDetailView(accessModel: AccessServiceViewModel(), snackBar: SnackbarModel(),policyRateId: ""){
+//        
+//    }
+//}
+
 //            Task{
 //                do
 //                {
 //                    let result = try await accessModel.getSinglePolicyRate(token: token, id: policyRateId)
 //                    self.policyRateData = result
-//                    
+//
 //                }
 //                catch ApiError.networkFailure {
 //                    // Handle network failure, e.g., show error Snackbar
@@ -214,13 +436,3 @@ struct PolicyRateDetailView: View {
 //                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
 //                }
 //            }
-        }
-       
-    }
-}
-
-//#Preview {
-//    PolicyRateDetailView(accessModel: AccessServiceViewModel(), snackBar: SnackbarModel(),policyRateId: ""){
-//        
-//    }
-//}

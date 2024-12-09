@@ -14,6 +14,7 @@ import com.example.lms.Services.Dataclass.InsuranceTypeUsingSegmentID
 import com.example.lms.Services.Dataclass.InsuranceTypes
 import com.example.lms.Services.Dataclass.InsurerGroupResponse
 import com.example.lms.Services.Dataclass.InsurerTypes
+import com.example.lms.Services.Dataclass.PPTsTypesBySegmentId
 import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.PolicySegmentResponse
 import com.example.lms.Services.Dataclass.ProductResponse
@@ -792,6 +793,29 @@ class ApiServices {
         }
     }
 
+    // PPTs Types Using Policy Segment ID
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getPPtsByPolicySegments(segmentId : String) :   PPTsTypesBySegmentId {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/ppt/policy_segment/${segmentId}")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All PPts Types Using SegmentID Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
 
     //  --------------------------------------------------------------------------------------------
 
@@ -805,7 +829,7 @@ class ApiServices {
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
                 parameter("page", 1)
-                parameter("size", 50)
+                parameter("size", 100)
                 body = Json.encodeToString(SearchPolicyRatePayload.serializer(),searchData)
             }
             if (response.status.isSuccess()){
