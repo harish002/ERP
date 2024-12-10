@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.chp.erp.android.R
 
@@ -153,12 +154,17 @@ fun FileButton(
             enabled = isEnable
         ) {
             if (_uri == null) {
-                androidx.compose.material3.Text(text = title, color = Color.White,
+                androidx.compose.material3.Text(
+                    text = title,
+                    color = Color.White,
                     maxLines = 1)
             } else {
                 val contentResolver = context.contentResolver
                 val fileName = getFileName(contentResolver = contentResolver, uri = _uri!!)
-                fileName?.let { androidx.compose.material3.Text(text = it, color = Color.White,
+                fileName?.let { androidx.compose.material3.Text(text = it,
+//                    modifier=modifier.fillMaxWidth(0.5f),
+                    color = Color.White,
+                    overflow = TextOverflow.Ellipsis,
                     maxLines = 1) }
             }
         }

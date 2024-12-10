@@ -78,6 +78,7 @@ fun FilterScreen(
 
     val context = LocalContext.current
     var loading by remember { mutableStateOf(true) }
+
     val policyRatesList by viewModel.getPolicyRates.collectAsState()
 
 
@@ -93,7 +94,7 @@ fun FilterScreen(
     val allRenewalTypes by viewModel.getAllRenewalTypes.collectAsState()
     val allInsurerTypes by viewModel.getAllInsurerTypes.collectAsState()
 
-    val sheetState = androidx.compose.material3.rememberModalBottomSheetState()
+    val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     var filterSheet by remember { mutableStateOf(false) }
 
@@ -199,7 +200,6 @@ fun FilterScreen(
                         logout = logout
                     )
                 }
-
             }
         }
 
@@ -317,18 +317,6 @@ fun FilterScreen(
 //                }
                 if (policyRatesList.isEmpty()) {
                     item {
-                        //Test
-//                        PolicyListView(
-//                            data = 1,
-//                            mainNavController = mainNavController
-//                        )
-//                        PolicyListView(1)
-//                        PolicyListView(1)
-//                        PolicyListView(1)
-//                        PolicyListView(1)
-                        //TEst
-
-
                         // Display a message when there are no items
                         Image(
                             painter = painterResource(R.drawable.not_found),
@@ -481,6 +469,8 @@ fun FilterScreen(
                         )
 //                            Divider(modifier = Modifier.padding(), color = Color.Black, thickness = 1.dp)
                         // Insurance Type SelectionView
+
+
                         SelectionView(
                             selectionTitle = "Insurance Type",
                             staticValue = "Please select an insurance type",
@@ -551,11 +541,18 @@ fun FilterScreen(
                                     size = 20
                                 )
                                 coroutineScope.launch {
-                                    Methods().retrieve_Token(context)?.let { it1 ->
+
+                                   val result= Methods().retrieve_Token(context)?.let { it1 ->
                                         viewModel.filterPolicyRateData(
                                             it1, filterpayload
                                         )
                                     }
+                                    if (result != null) {
+                                        viewModel.updatePolicyRates(result)
+                                    }
+
+
+
                                 }
                                 coroutineScope.launch { sheetState.hide() }.invokeOnCompletion {
                                     if (!sheetState.isVisible) {

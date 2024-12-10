@@ -146,6 +146,7 @@ fun Profile(
             Column(
                 modifier = Modifier
                     .padding(it)
+                    .padding(8.dp)
                     .fillMaxSize()
                     .background(MaterialTheme.colorScheme.background)
                     .verticalScroll(scrollState), horizontalAlignment = Alignment.CenterHorizontally
@@ -175,30 +176,30 @@ fun Profile(
                     }
                 }
 
+//
+//                Text(
+//                    modifier = Modifier.padding(vertical = 10.dp),
+//                    text = userData?.name ?: "NA",
+//                    color = MaterialTheme.colorScheme.onSurface,
+//                    style = MaterialTheme.typography.headlineSmall
+//                )
 
-                Text(
-                    modifier = Modifier.padding(vertical = 10.dp),
-                    text = userData?.name ?: "NA",
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.headlineSmall
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-//                    Icon(
-//                        imageVector = Icons.Outlined.Mail,
-//                        tint = Color.Blue,
-//                        contentDescription = "Mail Icon"
+//                Row(
+//                    verticalAlignment = Alignment.CenterVertically
+//                ) {
+////                    Icon(
+////                        imageVector = Icons.Outlined.Mail,
+////                        tint = Color.Blue,
+////                        contentDescription = "Mail Icon"
+////                    )
+//                    Text(
+//                        text = userData?.email ?: "NA",
+//                        color = MaterialTheme.colorScheme.primary,
+//                        style = MaterialTheme.typography.bodyLarge
+//
 //                    )
-                    Text(
-                        text = userData?.email ?: "NA",
-                        color = MaterialTheme.colorScheme.primary,
-                        style = MaterialTheme.typography.bodyLarge
-
-                    )
-
-                }
+//
+//                }
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -473,34 +474,44 @@ fun Profile(
 fun ProfileDetails(userData: UserData?) {
     var fullName by remember {
         mutableStateOf(
-            userData?.name?.capitalize(Locale.ROOT) + " " + userData?.surname?.capitalize(
+            userData?.name?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() } + " " + userData?.surname?.capitalize(
                 Locale.ROOT
             )
         )
     }
-    var userName by remember { mutableStateOf(userData?.username?.capitalize(Locale.ROOT) ?: "NA") }
-    var emailId by remember { mutableStateOf(userData?.email?.capitalize(Locale.ROOT) ?: "NA") }
-    var mobileNum by remember { mutableStateOf(userData?.mobileNumber?.capitalize(Locale.ROOT) ?: "NA") }
-    var gender by remember { mutableStateOf(userData?.gender?.capitalize(Locale.ROOT)?: "NA") }
-    var birthday by remember { mutableStateOf(userData?.birthDate?.capitalize(Locale.ROOT)?: "NA")}
+    var userName by remember { mutableStateOf(userData?.username?.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString()
+    }
+        ?: "NA") }
+    var emailId by remember { mutableStateOf(userData?.email?.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString()
+    }
+        ?: "NA") }
+    var mobileNum by remember { mutableStateOf(userData?.mobileNumber?.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString()
+    }
+        ?: "NA") }
+    var gender by remember { mutableStateOf(userData?.gender?.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString()
+    }
+        ?: "NA") }
+    var birthday by remember { mutableStateOf(userData?.birthDate?.replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.ROOT
+        ) else it.toString()
+    }
+        ?: "NA")}
     var isProfileEditingEnabled by remember { mutableStateOf(false) }
     var context = LocalContext.current
     Column() {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 18.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Profile",
-                modifier = Modifier.padding(horizontal = 8.dp),
-                color = MaterialTheme.colorScheme.onSurface,
-                style = MaterialTheme.typography.labelMedium
-            )
-
-        }
         Column(
             modifier = Modifier.padding(horizontal = 16.dp),
             verticalArrangement = Arrangement.Center

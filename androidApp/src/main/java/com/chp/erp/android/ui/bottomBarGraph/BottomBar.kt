@@ -111,7 +111,8 @@ fun RowScope.AddItem(
                             .makeText(context, "No dialer found else", Toast.LENGTH_SHORT)
                             .show()
                     }
-                } else {
+                }
+                else {
                     screen.route?.let {
                         navController.navigate(it) {
                             popUpTo(navController.graph.findStartDestination().id) {
@@ -142,11 +143,9 @@ fun RowScope.AddItem(
                         colorFilter =
                         if (screen.route == BottomBarScreen.Vehicle_Number.route) {
                             ColorFilter.tint(MaterialTheme.colorScheme.background)
-                        }
-                        else if (screen.route == BottomBarScreen.HelpLine.route) {
-                           ColorFilter.tint( Color(0xFF04C98B))
-                        }
-                        else {
+                        } else if (screen.route == BottomBarScreen.HelpLine.route) {
+                            ColorFilter.tint(Color(0xFF04C98B))
+                        } else {
                             ColorFilter.tint(
                                 if (!selected) {
                                     Color(0xFF6C757D)
@@ -222,14 +221,14 @@ sealed class BottomBarScreen(
         icon = R.drawable.camera,
     )
 
-//     Network Screen
+    //     Network Screen
     data object Network : BottomBarScreen(
         route = "Network",
         title = "Network",
         icon = R.drawable.lock_01,
     )
 
-//     Filter Vehicel Data
+    //     Filter Vehicel Data
     data object Vehicle_Data : BottomBarScreen(
         route = "Vehicle_Data",
         title = "Vehicle_Data",
@@ -243,6 +242,7 @@ sealed class BottomBarScreen(
         icon = R.drawable.profile,
 //        icon_focused = Icons.Outlined.AccountCircle
     )
+
     // for User Setting
     data object Profile : BottomBarScreen(
         route = "Profile",
