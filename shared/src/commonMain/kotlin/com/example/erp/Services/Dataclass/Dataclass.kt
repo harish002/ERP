@@ -933,11 +933,13 @@ data class InsuranceTypeUsingSegmentIDData(
 
 // PPts Types Using Policy Segment ID
 // Response
+@Serializable
 data class PPTsTypesBySegmentId(
     val message: String,
     val data : List<PPTsTypesData>
 )
 
+@Serializable
 data class PPTsTypesData(
     val id: String,
     val policy_segment: PolicySegment,
@@ -948,6 +950,33 @@ data class PPTsTypesData(
     val description: String?= null,
     val status: Int
 )
+
+// Search General Policy Rates
+// Payload
+@Serializable
+ data class GeneralPolicyRatePayload(
+    val insurer_id: String,
+    val renewal_type_id: String,
+    val insurance_type_id: String,
+    val policy_segment_id: String,
+    val slab_id: String,
+    val product_id: String,
+    val ppt_id: String,
+    val insurer_group_id: String,
+    val payouts: String,
+    val payins: String,
+    val remarks: String,
+    val description: String
+)
+
+// Response
+@Serializable
+data class GeneralPolicyRateResponse(
+    val message: String,
+    val total: Int,
+    val items: List<String>
+)
+
 
 
 

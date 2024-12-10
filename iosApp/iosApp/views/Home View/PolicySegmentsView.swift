@@ -106,7 +106,7 @@ struct PolicySegmentsView: View {
                                         Image(segment.iconName)
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
-                                            .frame(width: size * 0.3, height: size * 0.3) // Scaled proportionally
+                                            .frame(width: size * 0.2, height: size * 0.2) // Scaled proportionally
                                             .foregroundStyle(Color.black)
                                         
                                         Text(segment.name)

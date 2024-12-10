@@ -98,6 +98,9 @@ struct iOSApp: App {
                                     router: router
                                 )
                             
+                            case .heathDataView:
+                                EmptyView()
+                            
                             case .healthview:
                                 HealthView(
                                     accessModel: accessViewModel,

@@ -60,6 +60,8 @@ struct HealthView: View {
         "Product" : ""
     ]
     
+    @State private var isDataFiltered = false
+    
     
     var body: some View {
         VStack(spacing:0){
@@ -109,7 +111,7 @@ struct HealthView: View {
             
             VStack(spacing:0){
                 ScrollView(.vertical,showsIndicators: false){
-                    VStack(spacing:12){
+                    VStack(spacing:16){
                         
                         selectionView(selectionTitle: "Insurance Type", staticValue: "Insurance Type")
                         
@@ -125,17 +127,29 @@ struct HealthView: View {
                         selectionView(selectionTitle: "Product", staticValue: "Product")
                         
                     }
+                    .padding([.horizontal,.vertical],16)
+                    .background(
+                        LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                    )
+                    .cornerRadius(12, corners: [.allCorners])
+                    .padding([.horizontal,.vertical],16)
                 }
-                .padding([.horizontal,.vertical],16)
-                .background(
-                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
-                )
-                .cornerRadius(12, corners: [.allCorners])
-                .padding([.horizontal,.vertical],16)
-                
+           
                 Button {
-                    withAnimation{
-                        router.navigateTo(to: .vehicledataview)
+                    let payload = GeneralPolicyRatePayload(
+                        insurer_id: submittingValue["Insurer"] ?? "", renewal_type_id: submittingValue["Renewal Type"] ?? "",
+                        insurance_type_id: submittingValue["Insurance Type"] ?? "", policy_segment_id: "3b554917-a340-4682-9eac-3ffe13ec660f",
+                        slab_id: submittingValue["Slab"] ?? "", product_id: submittingValue["Product"] ?? "",
+                        ppt_id: "", insurer_group_id: submittingValue["Slab"] ?? "",
+                        payouts: "", payins: "",
+                        remarks: "", description: ""
+                    )
+                    let token = retrieveToken() ?? ""
+                    searchGeneralPolicyRates(token: token, payload: payload)
+                    if isDataFiltered {
+                        withAnimation{
+                            router.navigateTo(to: .heathDataView)
+                        }
                     }
                 }
                 label : {
@@ -511,7 +525,46 @@ struct HealthView: View {
                 }
             }
         }
+    
+    
+    func searchGeneralPolicyRates(token : String, payload : GeneralPolicyRatePayload){
+        Task.init{
+            do
+            {
+                let result = try await accessModel.searchGeneralPolicyRates(token: token, searchPayload: payload)
+                
+                if result {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                        snackBar.show(message: "Match Found.", title: "Success", type: .success)
+                    })
+                    self.isDataFiltered = result
+                }
+                else {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                        snackBar.show(message: "No Data Found, for the filters applied.", title: "No Data", type: .warning)
+                    })
+                    self.isDataFiltered = result
+                }
+                
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+            
+        }
     }
+}
 
 #Preview {
     HealthView(

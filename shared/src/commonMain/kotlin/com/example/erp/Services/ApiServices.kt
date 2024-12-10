@@ -4,6 +4,8 @@ import com.example.lms.Services.Dataclass.AllCities
 import com.example.lms.Services.Dataclass.AllCityCategories
 import com.example.lms.Services.Dataclass.FailedResponse
 import com.example.lms.Services.Dataclass.FuelTypes
+import com.example.lms.Services.Dataclass.GeneralPolicyRatePayload
+import com.example.lms.Services.Dataclass.GeneralPolicyRateResponse
 import com.example.lms.Services.Dataclass.GetAllStates
 import com.example.lms.Services.Dataclass.GetNotificationsResponse
 import com.example.lms.Services.Dataclass.GetPolicyRates
@@ -831,6 +833,34 @@ class ApiServices {
                 parameter("page", 1)
                 parameter("size", 100)
                 body = Json.encodeToString(SearchPolicyRatePayload.serializer(),searchData)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+
+        }
+        catch (e: Exception) {
+            println("Search Policy Rate Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Search General Policy Rate Data
+    @Throws(IOException::class, CancellationException::class)
+    @OptIn(InternalAPI::class)
+    suspend fun searchGeneralPolicyRateData(token : String, searchData : GeneralPolicyRatePayload) : GeneralPolicyRateResponse {
+        try {
+            val response : HttpResponse = client.post{
+                url("${ApiConfig.SALES_TOOL_API}/general_policy_rates/search")
+                contentType(ContentType.Application.Json)
+                parameter("page", 1)
+                parameter("size", 100)
+                body = Json.encodeToString(GeneralPolicyRatePayload.serializer(),searchData)
             }
             if (response.status.isSuccess()){
                 return response.body()

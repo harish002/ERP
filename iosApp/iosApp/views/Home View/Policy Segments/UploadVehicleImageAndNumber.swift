@@ -498,6 +498,7 @@ struct UploadVehicleImageAndNumber: View {
                         .resizable()
                         .frame(width: 20,height: 20)
                         .foregroundStyle(Color(hex: "#000000"))
+                        .padding(.bottom,3)
                 }
                 
                 
@@ -822,7 +823,7 @@ struct UploadVehicleImageAndNumber: View {
                         .padding(.vertical,8)
                         .padding(.horizontal,12)
                         .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundStyle(Color(hex: "#000000"))
+                        .foregroundStyle(Color(hex: "#C4C4C4"))
                         .overlay(content: {
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(Color(hex: "#544C4C"), lineWidth: 1)
@@ -941,13 +942,14 @@ struct UploadVehicleImageAndNumber: View {
                     selectionView(selectionTitle: "Insurer", staticValue: "Insurer")
                     
                 }
+                .padding([.horizontal,.vertical],16)
+                .background(
+                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                )
+                .cornerRadius(12, corners: [.allCorners])
+                .padding([.horizontal,.vertical],16)
             }
-            .padding([.horizontal,.vertical],16)
-            .background(
-                LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
-            )
-            .cornerRadius(12, corners: [.allCorners])
-            .padding([.horizontal,.vertical],16)
+            
             
             Button {
                 let payload = SearchPolicyRatePayload(

@@ -1199,6 +1199,47 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Search General Policy Rate Data
+    @Published var generalPolicyRatesData : GeneralPolicyRateResponse?
+    func searchGeneralPolicyRates(token : String, searchPayload : GeneralPolicyRatePayload) async throws -> Bool {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().searchGeneralPolicyRateData(token: token, searchData: searchPayload)
+                        if !(response.items.isEmpty){
+                            self.generalPolicyRatesData = response
+                            print("General Filtered Policy Rate Data is Fetched!")
+                            continuation.resume(returning:(true))
+                        }
+                        else {
+                            print("General Filtered Policy Rate Data is empty!")
+                            continuation.resume(returning: (false))
+                        }
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
     // Get the Registrtaion Number from Image
     func uploadImage(token: String, filePath: String, completion: @escaping (String?) -> Void) {
        
