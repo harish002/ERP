@@ -63,6 +63,8 @@ import com.chp.lms.android.Services.Methods
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("SuspiciousIndentation")
@@ -78,7 +80,6 @@ fun FilterScreen(
     var loading by remember { mutableStateOf(true) }
     val policyRatesList by viewModel.getPolicyRates.collectAsState()
 
-    val filterPolicyRateDatalist by viewModel.getfilterPolicyRateData.collectAsState()
 
     val userData by viewModel.getUserdata.collectAsState()
     val vehiclType by viewModel.getVehicleTypes.collectAsState()
@@ -183,7 +184,7 @@ fun FilterScreen(
             insurance_type_id = "",
             insurer_id = "",
             fuel_type_id = "",
-            status = "0", page = 1, size = 50
+            status = "", page = 1, size = 50
         )
 
 
@@ -191,52 +192,18 @@ fun FilterScreen(
             // Launching a coroutine in LaunchedEffect to initialize data
             coroutineScope.launch {
                 Methods().retrieve_Token(context)?.let {
-                    viewModel.getAllPolicyRates(it, context,payload, logout)
+                    viewModel.getAllPolicyRates(
+                        token = it,
+                        context = context,
+                        payload = payload,
+                        logout = logout
+                    )
                 }
-                try {
-                    Methods().retrieve_Token(context)?.let { token ->
-                        // Use async to call multiple suspend functions concurrently
-                        val userDeferred = async {
-                            Methods().retrieve_userID(context)
-                                ?.let { viewModel.getUserWhoLoggedIn(token, it) }
-                        }
-                        val vehicleTypesDeferred = async { viewModel.getAllVehicleTypes(token) }
-                        val statesDeferred = async { viewModel.getAllStates(token) }
-                        val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
-                        val allCityCategoryDeferred = async { viewModel.getAllCityCategory(token) }
-                        val allCitiesDeferred = async { viewModel.getAllCities(token) }
-                        val allInsuranceTypesDeferred =
-                            async { viewModel.getAllInsuranceTypes(token) }
-                        val allRenewalTypesDeferred = async { viewModel.getAllRenewalTypes(token) }
-                        val allInsurerTypesDeferred = async { viewModel.getAllInsurerTypes(token) }
 
-
-                        // Await all results
-
-                        userDeferred.await()
-                        vehicleTypesDeferred.await()
-                        statesDeferred.await()
-                        fuelTypesDeferred.await()
-                        allCitiesDeferred.await()
-                        allCityCategoryDeferred.await()
-                        allInsuranceTypesDeferred.await()
-                        allRenewalTypesDeferred.await()
-                        allInsurerTypesDeferred.await()
-
-                        loading = false
-
-                    }
-                } catch (e: Exception) {
-                    println("Error occurred: ${e.message}")
-                    loading = false // Handle loading state on error
-                }
             }
         }
 
-        LaunchedEffect(filterPolicyRateDatalist) {
-            // Update policyRatesList based on filterPolicyRateDatalist
-            viewModel.updatePolicyRates(filterPolicyRateDatalist)
-        }
+
 
 
 //        val allCategorylist = viewModel.allCourseCate.collectAsState()
@@ -395,11 +362,50 @@ fun FilterScreen(
                 },
                 sheetState = sheetState
             ) {
+
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 16.dp, horizontal = 4.dp)
                 ) {
+
+                    coroutineScope.launch {
+                        try {
+                            Methods().retrieve_Token(context)?.let { token ->
+                                // Use async to call multiple suspend functions concurrently
+                                val vehicleTypesDeferred =
+                                    async { viewModel.getAllVehicleTypes(token) }
+                                val statesDeferred = async { viewModel.getAllStates(token) }
+                                val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
+                                val allCitiesDeferred = async { viewModel.getAllCities(token) }
+                                val allInsuranceTypesDeferred =
+                                    async { viewModel.getAllInsuranceTypes(token) }
+//                                val allRenewalTypesDeferred =
+//                                    async { viewModel.getAllRenewalTypes(token) }
+                                val allInsurerTypesDeferred =
+                                    async { viewModel.getAllInsurerTypes(token) }
+                                val allCityCategoryDeferred =
+                                    async { viewModel.getAllCityCategory(token) }
+                                // Await all results
+//                        userDeferred.await()
+                                vehicleTypesDeferred.await()
+                                statesDeferred.await()
+                                fuelTypesDeferred.await()
+                                allCitiesDeferred.await()
+                                allCityCategoryDeferred.await()
+                                allInsuranceTypesDeferred.await()
+//                                allRenewalTypesDeferred.await()
+                                allInsurerTypesDeferred.await()
+                                loading = false
+
+                            }
+                        } catch (e: Exception) {
+                            println("Error occurred: ${e.message}")
+                            loading = false // Handle loading state on error
+                        }
+                    }
+
+
 
                     item {
                         Text(

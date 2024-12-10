@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,10 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Card
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -39,20 +35,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
+import com.chp.erp.android.R
+import com.chp.erp.android.ui.bottombarGraph.BottomBarScreen
 import com.chp.erp.android.ui.component.Credential_Option
 import com.chp.lms.Services.Dataclass.CityCategoryData
 import com.chp.lms.Services.Dataclass.CityData
@@ -63,8 +58,6 @@ import com.chp.lms.Services.Dataclass.PolicyRateData
 import com.chp.lms.Services.Dataclass.RenewalTypeData
 import com.chp.lms.Services.Dataclass.StatesData
 import com.chp.lms.Services.Dataclass.VehicleData
-import com.chp.erp.android.R
-import com.chp.erp.android.ui.bottombarGraph.BottomBarScreen
 
 @Composable
 fun PolicyListView(
@@ -116,8 +109,7 @@ fun PolicyListView(
                         Text(
                             text =
 //                            "Insurance Type"
-                            it
-                            ,
+                            it,
                             color =
                             Color(0xFF6C757D)
 //                            MaterialTheme.colorScheme.onSurface
@@ -132,8 +124,7 @@ fun PolicyListView(
                         Text(
                             text =
 //                        "InsurerName"
-                            it
-                            ,
+                            it,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
@@ -152,19 +143,18 @@ fun PolicyListView(
                 )
 
 
-        if (data != null) {
-                Text(
-                    text =
+                if (data != null) {
+                    Text(
+                        text =
 //                    "30%"
-                "${data.payouts}%"
-                    ,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier
-                        .padding(bottom = 2.dp)
-                        .weight(0.2f)
-                )
-        }
+                        "${data.payouts}%",
+                        color = MaterialTheme.colorScheme.onSurface,
+                        style = MaterialTheme.typography.labelLarge,
+                        modifier = Modifier
+                            .padding(bottom = 2.dp)
+                            .weight(0.2f)
+                    )
+                }
 
             }
         }
@@ -264,35 +254,78 @@ fun PolicyListView(
 
 @Composable
 fun GridItem(key: String, values: String) {
-    Column(
+    val gradient = Brush.linearGradient(
+        colors = listOf(
+            Color(0xFFFFFFFF),
+            Color(0xFFEBF1FF),
+        ), // Customize your colors here
+        start = Offset(100f, 0f),
+        end = Offset(700f, 0f) // Adjust the end point for gradient direction
+    )
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(8.dp),
-    ) {
-        Text(
-            text = key,
-            color = MaterialTheme.colorScheme.onSurface,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 2.dp)
-        )
-        Text(
-            text = when (values) {
-                "1" -> "Yes"
-                "0" -> "No"
-                else -> values
-            },
-            color = when (values) {
-                "1" -> Color.Green
-                "0" -> Color.Red
-                else -> MaterialTheme.colorScheme.onSurface
-            },
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier,
-            maxLines = 1
-        )
+            .padding(6.dp)
+            .clip(RoundedCornerShape(12.dp)),
+    )
+    {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(gradient)
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp, vertical = 18.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+
+                ) {
+
+                Column(
+                    modifier = Modifier
+                        .weight(0.7f),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(horizontal = 8.dp),
+                    ) {
+                        Text(
+                            text = key,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            style = MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                        Text(
+                            text = when (values) {
+                                "1" -> "Yes"
+                                "0" -> "No"
+                                else -> values
+                            },
+                            color = when (values) {
+                                "1" -> Color.Green
+                                "0" -> Color.Red
+                                else -> MaterialTheme.colorScheme.onSurface
+                            },
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier,
+                            maxLines = 1
+                        )
+
+                    }
+                }
+
+
+            }
+        }
 
     }
 }

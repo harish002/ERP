@@ -1,6 +1,7 @@
 package com.chp.erp.android.ui.screens.bottomNavScreens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -52,17 +53,11 @@ fun Poicy_Rate_Details(
 ) {
 
 
-
     val policyRatesList by viewModel.getPolicyRates.collectAsState()
 
 
-    var specificPolicyRate by mutableStateOf<PolicyRateData?>(null)
 
-    LaunchedEffect(data) {
-        specificPolicyRate = policyRatesList.firstOrNull { policyRate ->
-            policyRate?.id == data
-        }
-    }
+
 
     ERPTheme {
         Scaffold(
@@ -113,17 +108,41 @@ fun Poicy_Rate_Details(
                     .padding(12.dp)
                     .background(MaterialTheme.colorScheme.background)
             ) {
-
                 item {
-                    specificPolicyRate?.let {
-                        it1 -> PolicyRateComp(data = it1)
+//                    var specificPolicyRate by mutableStateOf<List<PolicyRateData?>>(emptyList())
+//
+//                    LaunchedEffect(true) {
+//
+//                        specificPolicyRate =specificPolicyRate1
+//
+//                        Log.d("lagValue",specificPolicyRate1.toString())
+//                    }
+                    val specificPolicyRate1 = policyRatesList.filter { i -> i?.id == data }
+                    specificPolicyRate1.firstOrNull()?.let { it2 ->
+
+                        GridItem("Payout %", it2.payouts)
+
+                        GridItem("Insurer", it2.insurer.name)
+
+                        GridItem("Insurance Type", it2.insurance_type.name)
+
+                        GridItem("Vehicle Type", it2.vehicle_model.vehicle_type.name)
+
+                        GridItem("Renewal Type", it2.renewal_type.name)
+
+                        GridItem("Fuel Type", it2.fuel_type.name)
+
+                        GridItem("State", it2.city.state.name)
+
+                        it2.city.city_category?.let { GridItem("City Category", it.name) }
+
+                        GridItem("City", it2.city.name)
+
+                        GridItem("NCB", it2.status.toString())
+
                     }
-                }
 
-                item {
-                    GridItem("Payout %", "asdf")
                 }
-
             }
         }
     }
@@ -169,26 +188,6 @@ fun PolicyRateComp(data: PolicyRateData) {
                 ) {
 
                     GridItem("Payout %", data.payouts)
-
-                    GridItem("Insurer", data.insurer.name)
-
-                    GridItem("Insurance Type", data.insurance_type.name)
-
-                    GridItem("Vehicle Type", data.vehicle_model.vehicle_type.name)
-
-                    GridItem("Renewal Type", data.renewal_type.name)
-
-                    GridItem("Fuel Type", data.fuel_type.name)
-
-                    GridItem("State", data.city.state.name)
-
-                    data.city.city_category?.let { GridItem("City Category", it.name) }
-
-                    GridItem("City", data.city.name)
-
-                    GridItem("NCB", data.status.toString())
-
-
                 }
 
 

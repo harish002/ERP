@@ -126,7 +126,7 @@ class ApiViewModel : ViewModel() {
             Methods().save_RefreshToken(context, authRefreshToken)
             val userID = response.userData.id
             if (userID != null) {
-                Methods().save_userID(userID,context)
+                Methods().save_userID(userID, context)
             }
             val userData = UserData(
                 id = response.userData.id,
@@ -243,11 +243,16 @@ class ApiViewModel : ViewModel() {
     val getPolicyRates: StateFlow<List<PolicyRateData?>> = _getPolicyRates
 
 
-    suspend fun getAllPolicyRates(token: String, context: Context, payload: SearchPolicyRatePayload,logout: () -> Unit): List<PolicyRateData?> {
+    suspend fun getAllPolicyRates(
+        token: String,
+        context: Context,
+        payload: SearchPolicyRatePayload,
+        logout: () -> Unit
+    ): List<PolicyRateData?> {
         return try {
             val deferredResponse = viewModelScope.async {
                 ApiServices()
-                    .searchPolicyRateData(token,payload)
+                    .searchPolicyRateData(token, payload)
 //                    .getPolicyRates(token)
             }
             val response = deferredResponse.await()
@@ -257,8 +262,9 @@ class ApiViewModel : ViewModel() {
             return response.items
         } catch (e: Exception) {
             //Refresh Token is not working
-            if(e.message == "401"){
-                Toast.makeText(context, "Session time out please login again", Toast.LENGTH_LONG).show()
+            if (e.message == "401") {
+                Toast.makeText(context, "Session time out please login again", Toast.LENGTH_LONG)
+                    .show()
                 logout()
             }
             Log.e(
@@ -273,10 +279,10 @@ class ApiViewModel : ViewModel() {
     private var _getUserdata = MutableStateFlow<UserData?>(null)
     val getUserdata: MutableStateFlow<UserData?> = _getUserdata
 
-    suspend fun getUserWhoLoggedIn(token: String,userId: String): UserData? {
+    suspend fun getUserWhoLoggedIn(token: String, userId: String): UserData? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getUserWhoLoggedIn(token,userId)
+                ApiServices().getUserWhoLoggedIn(token, userId)
             }
             val response = deferredResponse.await()
             Log.d("UserWhoLoggedIN", response.toString())
@@ -414,12 +420,12 @@ class ApiViewModel : ViewModel() {
                 ApiServices().getAllInsuranceTypes(token)
             }
             val response = deferredResponse.await()
-            Log.d("Get All Cities", response.toString())
+            Log.d("Get InsuranceTypes", response.toString())
             _getAllInsuranceTypes.value = response
             return response
         } catch (e: Exception) {
             Log.e(
-                "get All Cities",
+                "get InsuranceTypes",
                 e.message ?: "Unknown error"
             )
             null // Return null in case of an exception
@@ -436,12 +442,12 @@ class ApiViewModel : ViewModel() {
                 ApiServices().getAllRenewalTypes(token)
             }
             val response = deferredResponse.await()
-            Log.d("Get All Cities", response.toString())
+            Log.d("Get RenewalTypes", response.toString())
             _getAllRenewalTypes.value = response
             return response
         } catch (e: Exception) {
             Log.e(
-                "get All Cities",
+                "get RenewalTypes",
                 e.message ?: "Unknown error"
             )
             null // Return null in case of an exception
@@ -638,7 +644,7 @@ class ApiViewModel : ViewModel() {
 
     suspend fun resetPassword(
         email: String,
-    ):String {
+    ): String {
         return try {
             val response = withContext(Dispatchers.IO) {
                 ApiServices().resetPassword(
