@@ -229,6 +229,13 @@ sealed class BottomBarScreen(
         icon = R.drawable.lock_01,
     )
 
+//     Filter Vehicel Data
+    data object Vehicle_Data : BottomBarScreen(
+        route = "Vehicle_Data",
+        title = "Vehicle_Data",
+        icon = R.drawable.lock_01,
+    )
+
     // for User Setting
     data object Setting : BottomBarScreen(
         route = "Setting",

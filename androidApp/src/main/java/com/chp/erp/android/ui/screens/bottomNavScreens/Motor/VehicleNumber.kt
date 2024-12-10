@@ -69,6 +69,7 @@ import androidx.core.content.FileProvider
 import androidx.navigation.NavHostController
 import com.chp.erp.android.R
 import com.chp.erp.android.apiServices.ApiViewModel
+import com.chp.erp.android.ui.bottombarGraph.BottomBarScreen
 import com.chp.erp.android.ui.component.CustBtn
 import com.chp.erp.android.ui.screens.SelectionView
 import com.chp.erp.android.ui.screens.bottomNavScreens.Camera.FileButton
@@ -535,7 +536,7 @@ fun CameraPreviewApp(
         content = { paddingValues ->
             Column(Modifier.padding(paddingValues))
             {
-                TabScreen(context, viewModel)
+                TabScreen(context, viewModel,mainNavController)
 //                DetailsTabbedView(tabItems)
 //                LazyColumn(
 //                    modifier = Modifier
@@ -1356,7 +1357,7 @@ fun VehicleNumberSubmissionSection(
 
 
 @Composable
-fun TabScreen(context: Context, viewModel: ApiViewModel) {
+fun TabScreen(context: Context, viewModel: ApiViewModel, mainNavController: NavHostController) {
     var selectedTab by remember { mutableStateOf<DetailTabData?>(null) }
 
     // Create the "Manual" tab first so it can be referenced in the "Upload Image" tab
@@ -1364,7 +1365,7 @@ fun TabScreen(context: Context, viewModel: ApiViewModel) {
         DetailTabData(
             title = "Manual",
             action = { /* Additional logic if needed */ },
-            content = { ManualContent(viewModel, context) }
+            content = { ManualContent(viewModel, context,mainNavController) }
         )
     }
 
@@ -1396,7 +1397,7 @@ fun TabScreen(context: Context, viewModel: ApiViewModel) {
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
-fun ManualContent(viewModel: ApiViewModel, context: Context) {
+fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: NavHostController) {
     var vehicleNumberLoader by remember { mutableStateOf(false) }
     var enteredVehicleNumber by remember { mutableStateOf("") }
     var policyRateLoader by remember { mutableStateOf(false) } // Loader for policy rates retrieval
@@ -1721,7 +1722,7 @@ fun ManualContent(viewModel: ApiViewModel, context: Context) {
                                             )
                                         }
                                     }
-                                vehicleNumberLoader = false
+
                                 if (result == "success") {
                                     delay(2000)
                                     loadStatesData(viewModel)
@@ -1762,6 +1763,7 @@ fun ManualContent(viewModel: ApiViewModel, context: Context) {
                                             "No Policy Data Found ",
                                             Toast.LENGTH_SHORT
                                         ).show()
+                                        vehicleNumberLoader = false
                                     }
 
 
@@ -1909,6 +1911,7 @@ fun ManualContent(viewModel: ApiViewModel, context: Context) {
 
         item{
             CustBtn(text = "Submit", isblue = true,) {
+                BottomBarScreen.Vehicle_Data.route?.let { mainNavController.navigate(it) }
                 val filterpayload = SearchPolicyRatePayload(
                     state_id = stateState.value["id"] ?: "",
                     city_id = cityState.value["id"] ?: "",

@@ -12,6 +12,7 @@ import androidx.navigation.navArgument
 import com.chp.erp.android.apiServices.ApiViewModel
 import com.chp.erp.android.ui.bottombarGraph.BottomBarScreen
 import com.chp.erp.android.ui.screens.bottomNavScreens.FilterScreen
+import com.chp.erp.android.ui.screens.bottomNavScreens.Motor.VehicleData
 import com.chp.erp.android.ui.screens.bottomNavScreens.Notification
 import com.chp.erp.android.ui.screens.bottomNavScreens.Profile.Network
 import com.chp.erp.android.ui.screens.bottomNavScreens.Profile.Profile
@@ -53,6 +54,11 @@ fun MainNavGraph(
         BottomBarScreen.Network.route?.let { it1 ->
             composable(route = it1) {
                 Network(mainNavController)
+            }
+        }
+        BottomBarScreen.Vehicle_Data.route?.let { it1 ->
+            composable(route = it1) {
+                VehicleData(viewModel,mainNavController)
             }
         }
         BottomBarScreen.Poicy_Rate_Details.route?.let { it1 ->

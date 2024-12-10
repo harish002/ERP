@@ -32,20 +32,40 @@ fun ERPTheme(
     val colors = if (darkTheme) {
         darkColorScheme(
 //            primary = Color(0xFF3085FE),
+            //primary uper wala nhi kholna hai
+
+//            primary = Color(0xFF1F2ADC),
+//            secondary = Color(0xFF03DAC5),
+//            tertiary = Color(0xFF3700B3),
+//            surface = Color(0xFFF8F8F8),
+//            onSurface = Color(0xFFe2e2e2),
+//            background = Color(0xFF212121),//Some changes
+////            background = Color(0xFFF8F8F8),
+//            onBackground = Color(0xFFF8F8F8),
+//            onPrimary = Color.DarkGray,
+//            error = Color(0xFFF63939),
+//            onSecondary = Color(0xFF4E4E4E),
+//            onSurfaceVariant = Color(0xFF00de81),
+//            surfaceContainer = Color(0xFF515151),
+//            tertiaryContainer = Color(0xFFE3FFF6),
+//            surfaceContainerLow = Color(0xFFFFFFFF)
+
             primary = Color(0xFF1F2ADC),
             secondary = Color(0xFF03DAC5),
             tertiary = Color(0xFF3700B3),
             surface = Color(0xFFF8F8F8),
-            onSurface = Color(0xFFe2e2e2),
-            background = Color(0xFF212121),//Some changes
+            onSurface = Color(0xFF333333),
+            background = Color(0xFFF5F8FF),
+//            background = Color(0xFFF8F8F8),//Some changes
 //            background = Color(0xFFF8F8F8),
-            onBackground = Color(0xFFF8F8F8),
-            onPrimary = Color.DarkGray,
             error = Color(0xFFF63939),
+            onBackground = Color(0xFFF8F8F8),
             onSecondary = Color(0xFF4E4E4E),
+            onPrimary = Color.White,
             onSurfaceVariant = Color(0xFF00de81),
-            surfaceContainer = Color(0xFF515151),
-                    tertiaryContainer = Color(0xFFE3FFF6)
+            surfaceContainer = Color(0xFFe2e2e2),
+            tertiaryContainer = Color(0xFFE3FFF6),
+            surfaceContainerLow = Color(0xFFFFFFFF)
         )
     } else {
         lightColorScheme(
@@ -64,7 +84,9 @@ fun ERPTheme(
             onPrimary = Color.White,
             onSurfaceVariant = Color(0xFF00de81),
             surfaceContainer = Color(0xFFe2e2e2),
-            tertiaryContainer = Color(0xFFE3FFF6)
+            tertiaryContainer = Color(0xFFE3FFF6),
+            surfaceContainerLow = Color(0xFFFFFFFF)
+
         )
     }
     val gilroy_black = FontFamily(Font(R.font.gilroy_black))
@@ -140,7 +162,7 @@ fun ERPTheme(
             fontFamily = gilroy_semibold,
             fontSize = 32.sp
         ),
-        )
+    )
     val shapes = Shapes(
         small = RoundedCornerShape(4.dp),
         medium = RoundedCornerShape(4.dp),
@@ -156,7 +178,7 @@ fun ERPTheme(
 
 //             Check if status bar icons should be dark (light background)
             if (!darkTheme) {
-            windowInsetsController.setAppearanceLightStatusBars(true)
+                windowInsetsController.setAppearanceLightStatusBars(true)
             } else {
                 windowInsetsController.setAppearanceLightStatusBars(false)
             }
