@@ -447,6 +447,7 @@ data class VehicleData(
     val status: Int
 )
 
+
 // Read All Fuel Types -----------------------------------------------------
 // Response Body
 @Serializable
@@ -465,6 +466,48 @@ data class FuelTypeData(
 )
 
 //-----------------------------------------------------------------------------
+
+// Real All Vehicle Brands
+@Serializable
+data class VehicleBrandTypes(
+    val message: String,
+    val data : List<VehicleBrandData>
+)
+
+@Serializable
+data class VehicleBrandData(
+    val name: String,
+    val description: String,
+    val id: String,
+    val created_at: String,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+// Read All Active Vehicle Models
+// Response
+@Serializable
+data class VehicleModels(
+    val id: String,
+    val name: String,
+    val description: String,
+    val vehicle_brand_id: String,
+    val vehicle_type_id: String,
+    val vehicle_brand: VehicleBrand,
+    val vehicle_type: VehicleType,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
 
 // Read all States ----------------------------------------------------------
 @Serializable
@@ -581,14 +624,11 @@ data class RenewalTypes(
 @Serializable
 data class RenewalTypeData(
     val name: String,
+    val remarks : String? = null,
     val description: String? = null,
+    val policy_segment_id : String,
     val id: String,
-    val created_at: String? = null,
-    val created_by: String? = null,
-    val updated_at: String? = null,
-    val updated_by: String? = null,
-    val deleted_at: String? = null,
-    val deleted_by: String? = null,
+    val policy_segment : PolicySegment,
     val status: Int
 )
 //-----------------------------------------------------------------------------

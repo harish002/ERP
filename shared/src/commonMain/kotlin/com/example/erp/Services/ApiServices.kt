@@ -29,6 +29,8 @@ import com.example.lms.Services.Dataclass.SlabResponse
 import com.example.lms.Services.Dataclass.UserData
 import com.example.lms.Services.Dataclass.UserDetails
 import com.example.lms.Services.Dataclass.UserResponse
+import com.example.lms.Services.Dataclass.VehicleBrandTypes
+import com.example.lms.Services.Dataclass.VehicleModels
 import com.example.lms.Services.Dataclass.VehicleTypes
 import com.example.lms.Services.Dataclass.VerifyOTP
 import io.ktor.client.HttpClient
@@ -527,6 +529,50 @@ class ApiServices {
             throw e.message?.let { IOException(it) }!!
         }
     }
+
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getVehicleBrands(token : String) : VehicleBrandTypes {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/vehicle_brand/active")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Fuel Type Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getVehicleModels() : VehicleModels {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/vehicle_model/active")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Fuel Type Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
     // ------------------------------------------------------------------------------------------
 
     // Location Details --------------------------------------------------------------------------
@@ -633,11 +679,9 @@ class ApiServices {
     suspend fun getAllRenewalTypes(token : String) : RenewalTypes {
         try {
             val response : HttpResponse = client.get {
-                url("${ApiConfig.SALES_TOOL_API}/renewal_type/")
+                url("${ApiConfig.SALES_TOOL_API}/renewal_type/all")
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-                parameter("skip",0)
-                parameter("limit",10)
+
             }
             if (response.status.isSuccess()){
                 return response.body()
