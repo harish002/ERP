@@ -84,9 +84,14 @@ struct PolicySegmentsView: View {
                             
                         case "Life":
                             print("Life Page Executed")
+                            withAnimation{
+                                self.isSheetClosed = false
+                            }
+                            router.navigateTo(to: .lifeview)
                             
                         case "SME":
                             print("SME Page Executed")
+                            
                             
                         default:
                             print("No Such Page Found")
@@ -106,7 +111,7 @@ struct PolicySegmentsView: View {
                                         Image(segment.iconName)
                                             .resizable()
                                             .aspectRatio(contentMode: .fit)
-                                            .frame(width: size * 0.3, height: size * 0.3) // Scaled proportionally
+                                            .frame(width: size * 0.2, height: size * 0.2) // Scaled proportionally
                                             .foregroundStyle(Color.black)
                                         
                                         Text(segment.name)

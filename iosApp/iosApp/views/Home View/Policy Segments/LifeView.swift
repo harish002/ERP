@@ -1,16 +1,15 @@
 //
-//  HealthView.swift
+//  LifeView.swift
 //  iosApp
 //
-//  Created by Tusmit Shah on 09/12/24.
+//  Created by Tusmit Shah on 10/12/24.
 //  Copyright © 2024 orgName. All rights reserved.
 //
 
 import SwiftUI
 import shared
 
-struct HealthView: View {
-    
+struct LifeView: View {
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var snackBar : SnackbarModel
     @ObservedObject var router : Router
@@ -22,6 +21,7 @@ struct HealthView: View {
     @State private var insurerGroupsList : [InsurerGroupData] = []
     @State private var policySegmentsList : [PolicySegmentResponse] = []
     @State private var productTypeList : [ProductData] = []
+    @State private var pptsTypesData : [PPTsTypesData] = []
     
     // Filter Objects
     @State private var insuranceType : InsuranceTypeUsingSegmentIDData?
@@ -30,6 +30,7 @@ struct HealthView: View {
     @State private var insurerGroups : InsurerGroupData?
     @State private var policySegments : PolicySegmentResponse?
     @State private var productType : ProductData?
+    @State private var pptsType : PPTsTypesData?
     
     // Values for Drop Down Menu
     @State private var dropDownViewSelected : [String : Bool] = [
@@ -38,7 +39,8 @@ struct HealthView: View {
         "Insurer Group" : false,
         "Slab" : false,
         "Insurer" : false,
-        "Product" : false
+        "Product" : false,
+        "PPT": false
     ]
     
     // Value Selected from the Filter
@@ -48,7 +50,8 @@ struct HealthView: View {
         "Insurer Group" : "",
         "Slab" : "",
         "Insurer" : "",
-        "Product" : ""
+        "Product" : "",
+        "PPT": ""
     ]
     
     @State private var submittingValue : [String : String] = [
@@ -57,7 +60,8 @@ struct HealthView: View {
         "Insurer Group" : "",
         "Slab" : "",
         "Insurer" : "",
-        "Product" : ""
+        "Product" : "",
+        "PPT": ""
     ]
     
     @State private var isDataFiltered = false
@@ -81,9 +85,9 @@ struct HealthView: View {
                     
                     Spacer()
                     
-                    Image("health")
+                    Image("life")
                     
-                    Text("Health")
+                    Text("Life")
                         .font(.custom("Poppins-SemiBold", size: 24))
                         .foregroundStyle(Color.black)
                     
@@ -106,7 +110,8 @@ struct HealthView: View {
                     getAllInsurerGroups()
                     getAllPolicySegments()
                     getAllProductTypes()
-                    getInsuranceTypeByPolicySegments(segmentId : "3b554917-a340-4682-9eac-3ffe13ec660f")
+                    getInsuranceTypeByPolicySegments(segmentId : "50ec3716-3e49-47ff-8b3d-c768700c9328")
+                    getPPTypeByPolicySegments(segmentId: "50ec3716-3e49-47ff-8b3d-c768700c9328")
             }
             
             VStack(spacing:0){
@@ -125,6 +130,8 @@ struct HealthView: View {
                         selectionView(selectionTitle: "Insurer", staticValue: "Insurer")
                         
                         selectionView(selectionTitle: "Product", staticValue: "Product")
+                        
+                        selectionView(selectionTitle: "PPT", staticValue: "PPT")
                         
                     }
                     .padding([.horizontal,.vertical],16)
@@ -171,7 +178,6 @@ struct HealthView: View {
             Color(hex: "#F5F8FF")
         )
         .navigationBarBackButtonHidden()
-        
         .onReceive(accessModel.$slabTypes, perform: {slab in
             if !slab.isEmpty {
                 self.slabTypesList = slab
@@ -202,34 +208,41 @@ struct HealthView: View {
                 self.insuranceTypesList = value
             }
         })
+        .onReceive(accessModel.$getPPtsTypes, perform: {value in
+            if !value.isEmpty {
+                self.pptsTypesData = value
+            }
+        })
+        
     }
     
-    
-        func getFilterList(for selectionTitle: String) -> [Any] {
-            switch selectionTitle {
-            case "Insurance Type" :
-                return insuranceTypesList
-                
-            case "Renewal Type" :
-                return renewalTypesList
-                
-            case "Insurer Group" :
-                return insurerGroupsList
-                
-            case "Slab" :
-                return slabTypesList
-                
-            case "Insurer" :
-                return []
-                
-            case "Product" :
-                return productTypeList
-                
-            default:
-                return []
-            }
+    func getFilterList(for selectionTitle: String) -> [Any] {
+        switch selectionTitle {
+        case "Insurance Type" :
+            return insuranceTypesList
+            
+        case "Renewal Type" :
+            return renewalTypesList
+            
+        case "Insurer Group" :
+            return insurerGroupsList
+            
+        case "Slab" :
+            return slabTypesList
+            
+        case "Insurer" :
+            return []
+            
+        case "Product" :
+            return productTypeList
+        
+        case "PPT" :
+            return pptsTypesData
+            
+        default:
+            return []
         }
-    
+    }
     
     @ViewBuilder
     func selectionView(selectionTitle : String, staticValue : String) -> some View {
@@ -346,6 +359,11 @@ struct HealthView: View {
                                     singleFilterValue(title: selectionTitle, value: product.name, valueId: product.id)
                                 }
                                 
+                                case "PPT":
+                                if let product = singleList as? PPTsTypesData {
+                                    singleFilterValue(title: selectionTitle, value: product.name, valueId: product.id)
+                                }
+                                
                                 default :
                                     EmptyView()
                             }
@@ -404,130 +422,151 @@ struct HealthView: View {
             }
         }
     }
-        
-        // Apis
-        // Slab Types
-        func allSlabTypes(){
-            Task.init {
-                do
-                {
-                    try await accessModel.getAllSlabTypes()
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: description, title: "Error", type: .error)
-                }
-            }
-        }
-        
-        // Insurer Groups Data
-        func getAllInsurerGroups(){
-            Task.init {
-                do
-                {
-                    try await accessModel.getAllInsurerGroups()
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: description, title: "Error", type: .error)
-                }
-            }
-        }
-        
-        // Policy Segments
-        func getAllPolicySegments(){
-            Task.init {
-                do
-                {
-                    try await accessModel.getAllPolicySegments()
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: description, title: "Error", type: .error)
-                }
-            }
-        }
-        
-        // Product Types
-        func getAllProductTypes(){
-            Task.init {
-                do
-                {
-                    try await accessModel.getAllProductTypes()
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: description, title: "Error", type: .error)
-                }
-            }
-        }
-        
-        // Insurance Type Using Policy Segment ID
-        func getInsuranceTypeByPolicySegments(segmentId : String){
-            Task.init {
-                do
-                {
-                    try await accessModel.getInsuranceTypeByPolicySegments(segmentId: segmentId)
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: description, title: "Error", type: .error)
-                }
-            }
-        }
     
- 
+    // Apis
+    // Slab Types
+    func allSlabTypes(){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllSlabTypes()
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
     
+    // Insurer Groups Data
+    func getAllInsurerGroups(){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllInsurerGroups()
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
+    
+    // Policy Segments
+    func getAllPolicySegments(){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllPolicySegments()
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
+    
+    // Product Types
+    func getAllProductTypes(){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllProductTypes()
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
+    
+    // Insurance Type Using Policy Segment ID
+    func getInsuranceTypeByPolicySegments(segmentId : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getInsuranceTypeByPolicySegments(segmentId: segmentId)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
+    
+    // PPTs Type Using Policy Segment ID
+    func getPPTypeByPolicySegments(segmentId : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getPPTsTypesBySegmentId(segmentId: segmentId)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
     
     func searchGeneralPolicyRates(token : String, payload : GeneralPolicyRatePayload){
         Task.init{
@@ -569,7 +608,7 @@ struct HealthView: View {
 }
 
 #Preview {
-    HealthView(
+    LifeView(
         accessModel: AccessServiceViewModel(),
         snackBar: SnackbarModel(),
         router: Router()

@@ -447,6 +447,7 @@ data class VehicleData(
     val status: Int
 )
 
+
 // Read All Fuel Types -----------------------------------------------------
 // Response Body
 @Serializable
@@ -465,6 +466,48 @@ data class FuelTypeData(
 )
 
 //-----------------------------------------------------------------------------
+
+// Real All Vehicle Brands
+@Serializable
+data class VehicleBrandTypes(
+    val message: String,
+    val data : List<VehicleBrandData>
+)
+
+@Serializable
+data class VehicleBrandData(
+    val name: String,
+    val description: String,
+    val id: String,
+    val created_at: String,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
+// Read All Active Vehicle Models
+// Response
+@Serializable
+data class VehicleModels(
+    val id: String,
+    val name: String,
+    val description: String,
+    val vehicle_brand_id: String,
+    val vehicle_type_id: String,
+    val vehicle_brand: VehicleBrand,
+    val vehicle_type: VehicleType,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+
 
 // Read all States ----------------------------------------------------------
 @Serializable
@@ -581,14 +624,11 @@ data class RenewalTypes(
 @Serializable
 data class RenewalTypeData(
     val name: String,
+    val remarks : String? = null,
     val description: String? = null,
+    val policy_segment_id : String,
     val id: String,
-    val created_at: String? = null,
-    val created_by: String? = null,
-    val updated_at: String? = null,
-    val updated_by: String? = null,
-    val deleted_at: String? = null,
-    val deleted_by: String? = null,
+    val policy_segment : PolicySegment,
     val status: Int
 )
 //-----------------------------------------------------------------------------
@@ -933,11 +973,13 @@ data class InsuranceTypeUsingSegmentIDData(
 
 // PPts Types Using Policy Segment ID
 // Response
+@Serializable
 data class PPTsTypesBySegmentId(
     val message: String,
     val data : List<PPTsTypesData>
 )
 
+@Serializable
 data class PPTsTypesData(
     val id: String,
     val policy_segment: PolicySegment,
@@ -948,6 +990,33 @@ data class PPTsTypesData(
     val description: String?= null,
     val status: Int
 )
+
+// Search General Policy Rates
+// Payload
+@Serializable
+ data class GeneralPolicyRatePayload(
+    val insurer_id: String,
+    val renewal_type_id: String,
+    val insurance_type_id: String,
+    val policy_segment_id: String,
+    val slab_id: String,
+    val product_id: String,
+    val ppt_id: String,
+    val insurer_group_id: String,
+    val payouts: String,
+    val payins: String,
+    val remarks: String,
+    val description: String
+)
+
+// Response
+@Serializable
+data class GeneralPolicyRateResponse(
+    val message: String,
+    val total: Int,
+    val items: List<String>
+)
+
 
 
 

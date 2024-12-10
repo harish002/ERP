@@ -305,8 +305,7 @@ class ApiServices {
                 println("Error Response ${response.status}: $errorMessage")
                 throw IOException(errorMessage)
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             throw IOException(e.message.toString())
         }
 
@@ -526,6 +525,50 @@ class ApiServices {
             throw e.message?.let { IOException(it) }!!
         }
     }
+
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getVehicleBrands(token : String) : VehicleBrandTypes {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/vehicle_brand/active")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Fuel Type Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getVehicleModels() : VehicleModels {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/vehicle_model/active")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("Fuel Type Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
     // ------------------------------------------------------------------------------------------
 
     // Location Details --------------------------------------------------------------------------
@@ -632,11 +675,9 @@ class ApiServices {
     suspend fun getAllRenewalTypes(token : String) : RenewalTypes {
         try {
             val response : HttpResponse = client.get {
-                url("${ApiConfig.SALES_TOOL_API}/renewal_type/")
+                url("${ApiConfig.SALES_TOOL_API}/renewal_type/all")
                 contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-                parameter("skip",0)
-                parameter("limit",10)
+
             }
             if (response.status.isSuccess()){
                 return response.body()
@@ -796,7 +837,7 @@ class ApiServices {
 
     // PPTs Types Using Policy Segment ID
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getPPtsByPolicySegments(segmentId : String) : PPTsTypesBySegmentId {
+    suspend fun getPPtsByPolicySegments(segmentId : String) :   PPTsTypesBySegmentId {
         try {
             val response : HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/ppt/policy_segment/${segmentId}")
@@ -832,6 +873,34 @@ class ApiServices {
                 parameter("skip", 1)
                 parameter("limit", 1000)
                 body = Json.encodeToString(SearchPolicyRatePayload.serializer(),searchData)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+
+        }
+        catch (e: Exception) {
+            println("Search Policy Rate Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Search General Policy Rate Data
+    @Throws(IOException::class, CancellationException::class)
+    @OptIn(InternalAPI::class)
+    suspend fun searchGeneralPolicyRateData(token : String, searchData : GeneralPolicyRatePayload) : GeneralPolicyRateResponse {
+        try {
+            val response : HttpResponse = client.post{
+                url("${ApiConfig.SALES_TOOL_API}/general_policy_rates/search")
+                contentType(ContentType.Application.Json)
+                parameter("skip", 1)
+                parameter("limit", 100)
+                body = Json.encodeToString(GeneralPolicyRatePayload.serializer(),searchData)
             }
             if (response.status.isSuccess()){
                 return response.body()

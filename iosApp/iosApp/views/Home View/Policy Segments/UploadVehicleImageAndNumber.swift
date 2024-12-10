@@ -54,7 +54,7 @@ struct UploadVehicleImageAndNumber: View {
     @State private var imageData: Data? = nil
     @State private var imageURL : URL? = nil
     @State private var imageName : String = ""
-    @State private var vehicleNumber : String = ""
+    @State private var vehicleNumber : String = "".uppercased()
     @State private var filePath : String? = nil
     
     // All the loaders along the code
@@ -284,7 +284,7 @@ struct UploadVehicleImageAndNumber: View {
     
     func statesData(accessModel : AccessServiceViewModel){
         let state = accessModel.getAllStatesData.filter{data in
-            data.name.lowercased() == getVehicleDetails?.result?.state_code?.lowercased()
+            data.name.lowercased() == getVehicleDetails?.result?.state?.lowercased()
         }
         self.statesData = state.first
         selectedValue["State"] = state.first?.name
@@ -498,6 +498,7 @@ struct UploadVehicleImageAndNumber: View {
                         .resizable()
                         .frame(width: 20,height: 20)
                         .foregroundStyle(Color(hex: "#000000"))
+                        .padding(.bottom,3)
                 }
                 
                 
@@ -826,7 +827,9 @@ struct UploadVehicleImageAndNumber: View {
                         .overlay(content: {
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(Color(hex: "#544C4C"), lineWidth: 1)
-    
+                        })
+                        .onChange(of: vehicleNumber, perform: {newValue in
+                            self.vehicleNumber = newValue.uppercased()
                         })
     
                     Button(action: {
@@ -941,13 +944,14 @@ struct UploadVehicleImageAndNumber: View {
                     selectionView(selectionTitle: "Insurer", staticValue: "Insurer")
                     
                 }
+                .padding([.horizontal,.vertical],16)
+                .background(
+                    LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                )
+                .cornerRadius(12, corners: [.allCorners])
+                .padding([.horizontal,.vertical],16)
             }
-            .padding([.horizontal,.vertical],16)
-            .background(
-                LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
-            )
-            .cornerRadius(12, corners: [.allCorners])
-            .padding([.horizontal,.vertical],16)
+            
             
             Button {
                 let payload = SearchPolicyRatePayload(
