@@ -959,7 +959,7 @@ class ApiServices {
     ):
             RegisteredDeviceResponse {
         try {
-            val response: HttpResponse = client.post {
+            val response : HttpResponse = client.post {
                 url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/registeredDevices/register")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
