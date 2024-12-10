@@ -3,6 +3,9 @@ import SwiftUI
 @main
 struct iOSApp: App {
     
+    // Initialize the Firebase when the app launches
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     @ObservedObject var router = Router()
     @ObservedObject var selectedTab = GetSelectedTab()
     @StateObject var accessViewModel = AccessServiceViewModel()
@@ -56,11 +59,58 @@ struct iOSApp: App {
                                 NotificationView(
                                     accessModel: accessViewModel,
                                     navigationState: navigationState,
+                                    snackBar: snackBarManager
+                                    
+                                )
+                                
+                            case .editprofilescreen:
+                                EditProfileView(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState
+                                ){
+                                    router.navigateBack()
+                                }
+                                
+                            case .policyratedetailview:
+                                PolicyRateDetailView(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router,
+                                    policyRateDetailViewClosed: {
+                                        router.navigateBack()
+                                    })
+                            
+                            case .vehicledataview :
+                                VehicleDataView(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState,
                                     snackBar: snackBarManager,
                                     onBackButtonTap: {
                                         router.navigateBack()
-                                    }
+                                    })
+                                
+                            case .motorview :
+                                UploadVehicleImageAndNumber(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router
                                 )
+                            
+                            case .healthview:
+                                HealthView(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router
+                                )
+                            
+                            case .lifeview:
+                                EmptyView()
+                                
+                            case .smeview:
+                                EmptyView()
+                                
                             }
                             
                         }
@@ -73,6 +123,7 @@ struct iOSApp: App {
                 
             }
             .snackbar(isPresented: $snackBarManager.showSnackbar, type: snackBarManager.snackBarType, title: snackBarManager.snackBarTitle, message: snackBarManager.snackBarMessage)
+            .environmentObject(appDelegate)
             
         }
 	}

@@ -1,5 +1,6 @@
 package com.chp.erp.android.ui.screens.bottomNavScreens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -21,6 +22,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,17 +37,32 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.chp.erp.android.ERPTheme
+import com.chp.erp.android.apiServices.ApiViewModel
 import com.chp.erp.android.ui.screens.GridItem
 import com.chp.lms.Services.Dataclass.PolicyRateData
 import com.google.gson.Gson
 
+@SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Poicy_Rate_Details(
     mainNavController: NavController,
-    data: String
+    data: String,
+    viewModel: ApiViewModel
 ) {
 
+
+
+    val policyRatesList by viewModel.getPolicyRates.collectAsState()
+
+
+    var specificPolicyRate by mutableStateOf<PolicyRateData?>(null)
+
+    LaunchedEffect(data) {
+        specificPolicyRate = policyRatesList.firstOrNull { policyRate ->
+            policyRate?.id == data
+        }
+    }
 
     ERPTheme {
         Scaffold(
@@ -91,11 +113,17 @@ fun Poicy_Rate_Details(
                     .padding(12.dp)
                     .background(MaterialTheme.colorScheme.background)
             ) {
-                val user = Gson().fromJson(data, PolicyRateData::class.java)
 
-                items(4) {
-                    PolicyRateComp(data = user)
+                item {
+                    specificPolicyRate?.let {
+                        it1 -> PolicyRateComp(data = it1)
+                    }
                 }
+
+                item {
+                    GridItem("Payout %", "asdf")
+                }
+
             }
         }
     }
@@ -154,7 +182,7 @@ fun PolicyRateComp(data: PolicyRateData) {
 
                     GridItem("State", data.city.state.name)
 
-                    GridItem("City Category", data.city.city_category.name)
+                    data.city.city_category?.let { GridItem("City Category", it.name) }
 
                     GridItem("City", data.city.name)
 

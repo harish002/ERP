@@ -16,26 +16,29 @@ struct BottomBarButtonView :View {
     
     var body: some View {
 
-            VStack(spacing:5){
-                Rectangle()
-                    .frame(height: 0)
-                
+            VStack(spacing:12){
                 Image(imageName)
-                    .foregroundStyle(isActive ? Color(hex: "#3960F6") : Color(hex: "#949494"))
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 24,height: 24)
+                    .foregroundStyle(isActive ? Color(hex: "#1F2ADC") : Color(hex: "#D3D3D3"))
+                
                 
                 Text(name)
-                    .font(.custom("Gilroy-Medium", size: 12))
-                    .foregroundStyle(isActive ? Color(hex: "#3960F6") : Color(hex: "#949494"))
+                    .font(.custom("Gilroy-Medium", size: 10))
+                    .foregroundStyle(isActive ? Color(hex: "#1F2ADC") : Color(hex: "#D3D3D3"))
+                    .minimumScaleFactor(0.5)
+                    .lineLimit(1)
+                    
             }
-            .padding(.top,5)
-            .padding(.bottom,11)
-        
+            .frame(maxWidth: .infinity,alignment: .center)
+            .padding(.top,12)
     }
 }
 
 #Preview {
     BottomBarButtonView(
         name: "Policy Rates",
-        imageName: "layout-alt-02",
+        imageName: "rates",
         isActive: false)
 }

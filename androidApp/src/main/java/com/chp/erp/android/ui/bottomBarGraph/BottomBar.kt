@@ -217,7 +217,7 @@ sealed class BottomBarScreen(
 
     // PoicyRateDetails
     data object Poicy_Rate_Details : BottomBarScreen(
-        route = "PoicyRateDetails/{data}",
+        route = "PoicyRateDetails/{policyDataId}",
         title = "PoicyRateDetails",
         icon = R.drawable.camera,
     )

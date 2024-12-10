@@ -15,15 +15,20 @@ import shared
 
 struct HomeView: View {
     
+    @ObservedObject var appDelepgate = AppDelegate()
     @ObservedObject var router : Router
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var snackBar : SnackbarModel
     @ObservedObject var navigationState : NavigationState
     
+    @State private var nameInitials = ""
+    @State private var userName = ""
 
+    @State private var granted = false
+    
+    @State private var isSegmentSheetActive = false
     
     var body: some View {
-            ZStack{
                 VStack(spacing:0){
                     
                     // In-App Navigation
@@ -32,6 +37,8 @@ struct HomeView: View {
                             
                         case "Policy Rates" :
                             ExploreView(
+                                userName:userName,
+                                nameInitials: nameInitials,
                                 accessModel: accessModel,
                                 snackBar: snackBar,
                                 router: router,
@@ -40,7 +47,11 @@ struct HomeView: View {
                             .transition(.trailingToLeading)
                             
                         case "Vehicle Number" :
-                            UploadVehicleImageAndNumber(accessModel: accessModel, snackBar: snackBar)
+                            UploadVehicleImageAndNumber(
+                                accessModel: accessModel,
+                                snackBar: snackBar,
+                                router: router
+                            )
                             
                             
                         case "Profile" :
@@ -50,9 +61,15 @@ struct HomeView: View {
                                 navigationState: navigationState
                             )
                             .transition(.trailingToLeading)
-
-                          
                             
+                        case "Notification" :
+                            NotificationView(
+                                accessModel: accessModel,
+                                navigationState: navigationState,
+                                snackBar: snackBar
+                            )
+                            
+
                         default:
                             Text("Unknown view")
                         }
@@ -64,46 +81,125 @@ struct HomeView: View {
                     Spacer()
                     
                     VStack(spacing:0){
-                        Rectangle()
-                            .fill(Color(hex: "#D0D0D0"))
-                            .frame(height: 1)
                         Bottombar(
                             navigationState: navigationState
-                        )
+                        ){
+                            withAnimation{
+                                self.isSegmentSheetActive = true
+                            }
+                        }
                     }
                     
                 }
                 .zIndex(0)
                 .background(Color(hex: "#F8F8F8"))
-                
-            }
-//            .animation(.easeInOut(duration: 0.3), value: selectedBottomTab)
-            .navigationBarBackButtonHidden()
-            .onAppear{
-                print("Current Active View -> \(navigationState.activeViewName) ")
-                if navigationState.navigationStack.isEmpty {
-                    navigationState.push(viewName: "Policy Rates")
+                .sheet(isPresented:$isSegmentSheetActive , content: {
+                    PolicySegmentsView(
+                        accessModel: accessModel,
+                        snackBar: snackBar,
+                        router: router,
+                        isSheetClosed: $isSegmentSheetActive
+                    )
+                    .presentationDetents([.height(500)])
+                    
+                })
+               
+                .navigationBarBackButtonHidden()
+                .onAppear{
+                    print("Current Active View -> \(navigationState.activeViewName) ")
+                    if navigationState.navigationStack.isEmpty {
+                        navigationState.push(viewName: "Policy Rates")
+                    }
+                    else {
+                        print("NavigationStack is not Empty!")
+                    }
+                    
+                    let token = retrieveToken() ?? ""
+                    let userId = retrieveUserId() ?? ""
+                    
+                    
+                    Task.init{
+                        // Get User Data who is Logged In
+                        do
+                        {
+                            _ = try await accessModel.getUserData(token: token, userId: userId)
+
+                        }
+                        catch ApiError.networkFailure {
+                            // Handle network failure, e.g., show error Snackbar
+                            snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+                        } catch ApiError.lowInternetConnection {
+                            // Handle low internet connection, e.g., show error Snackbar
+                            snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+                        } catch ApiError.serverError(let status) {
+                            // Handle server errors, e.g., show error Snackbar
+                            snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+                        } catch ApiError.unknownError(let description){
+                            // Handle unknown errors
+                            print("Data Fetching Failed -> \(description)")
+                            snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+                        }
+                    }
+                    
+                    
+                    // After login success
+                    requestNotificationAuthorization()
+                    
+                    let name = retrieveName() ?? "Full Name"
+                    self.userName = name
+                    
+                    let initial = retrieveInitials() ?? "?"
+                    self.nameInitials = initial
+
                 }
-                else {
-                    print("NavigationStack is not Empty!")
+                .onChange(of: granted){value in
+                    if !(value) {
+                        snackBar.show(message: "To receive notifications, please enable permissions from your device's settings.", title: "Permission Denied", type: .warning)
+                    }
+                }
+        }
+    
+    
+    func extractInitialsAndName(name:String, surname:String){
+        
+        let nameOfUser = "\(name) \(surname)"
+        
+        guard let nameInitial = name.first else {
+            return
+        }
+        guard let surnameInitial = surname.first else {
+            return
+        }
+        self.nameInitials = "\(nameInitial)\(surnameInitial)"
+        self.userName = nameOfUser
+    }
+    
+    func requestNotificationAuthorization(){
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { success, error in
+            if success {
+                print("Permission Granted")
+                self.granted = success
+                DispatchQueue.main.async {
+                    UIApplication.shared.registerForRemoteNotifications()
                 }
                 
-                let token = retrieveToken() ?? ""
-                
-                vehicleTypes(token: token)
-                fuelTypes(token: token)
-                allStates(token: token)
-                cityCategories(token: token)
-
-
+            }
+            else {
+                print("Permission Denied")
+                self.granted = success
             }
         }
+        
+    }
     
-    func vehicleTypes(token : String){
-        Task.init {
+    // Get Policy Rates
+    func getPolicyRatesList(token : String){
+        Task.init{
+            
             do
             {
-                try await accessModel.getVehicleTypes(token: token)
+                let _ = try await accessModel.getPolicyRates(token: token)
+              
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -121,77 +217,6 @@ struct HomeView: View {
             }
         }
     }
-    
-    func fuelTypes(token : String){
-        Task.init {
-            do
-            {
-                try await accessModel.getFuelTypes(token: token)
-            }
-            catch ApiError.networkFailure {
-                // Handle network failure, e.g., show error Snackbar
-                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-            } catch ApiError.lowInternetConnection {
-                // Handle low internet connection, e.g., show error Snackbar
-                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-            } catch ApiError.serverError(let status) {
-                // Handle server errors, e.g., show error Snackbar
-                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-            } catch ApiError.unknownError(let description){
-                // Handle unknown errors
-                print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-            }
-        }
-    }
-    
-    func allStates(token : String){
-        Task.init {
-            do
-            {
-                try await accessModel.getAllStates(token: token)
-            }
-            catch ApiError.networkFailure {
-                // Handle network failure, e.g., show error Snackbar
-                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-            } catch ApiError.lowInternetConnection {
-                // Handle low internet connection, e.g., show error Snackbar
-                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-            } catch ApiError.serverError(let status) {
-                // Handle server errors, e.g., show error Snackbar
-                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-            } catch ApiError.unknownError(let description){
-                // Handle unknown errors
-                print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-            }
-        }
-    }
-    
-    func cityCategories(token : String){
-        Task.init {
-            do
-            {
-                try await accessModel.getAllCityCategories(token: token)
-            }
-            catch ApiError.networkFailure {
-                // Handle network failure, e.g., show error Snackbar
-                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-            } catch ApiError.lowInternetConnection {
-                // Handle low internet connection, e.g., show error Snackbar
-                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-            } catch ApiError.serverError(let status) {
-                // Handle server errors, e.g., show error Snackbar
-                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-            } catch ApiError.unknownError(let description){
-                // Handle unknown errors
-                print("Data Fetching Failed -> \(description)")
-                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-            }
-        }
-    }
-    
-
     
     
 }

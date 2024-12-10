@@ -55,7 +55,7 @@ struct SnackbarView: View {
         HStack{
             HStack(spacing:12){
                 Rectangle()
-                    .frame(width: 10)
+                    .frame(width: 10,height: 65)
                     .foregroundStyle(type.themeColor)
                 
                 HStack(alignment:.top,spacing:12){
@@ -73,13 +73,15 @@ struct SnackbarView: View {
                                 .font(.custom("Gilroy-SemiBold", size: 12))
                                 .minimumScaleFactor(0.6)
                         }
-                    }
+                }
+                
                 
             }
             
             Spacer()
         }
-        .frame(maxWidth:.infinity, maxHeight: 55)
+        .padding(.vertical,4)
+        .frame(maxWidth:.infinity, maxHeight: 65)
         .background(Color.white)
         .cornerRadius(10, corners: [.allCorners])
         .padding(.horizontal,16)

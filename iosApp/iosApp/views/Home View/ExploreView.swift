@@ -11,6 +11,11 @@ import shared
 
 struct ExploreView: View {
     
+    let userName : String
+    let nameInitials : String
+    
+    @EnvironmentObject var appDelegate: AppDelegate
+    
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var snackBar : SnackbarModel
     @ObservedObject var router : Router
@@ -24,189 +29,190 @@ struct ExploreView: View {
            GridItem(.flexible()),
     ]
     
-    
-    @State private var userName : String = ""
-    @State private var nameInitials  = ""
-    
     @State private var isPolicyRateSelected = false
     @State private var isFilterSelected = false
     
     @State private var showAllPolicyRates : [PolicyRateData] = []
-    @State private var policyRateId : String = ""
     
     @State private var loader = false
     
+    @State private var granted = false
+    
+    @State private var fcmToken = ""
+    
     var body: some View {
         
-        ZStack{
+        ZStack(alignment: .center){
             
             VStack(spacing:0){
-                    ZStack{
-                        VStack(spacing:0){
+                    
+                VStack(spacing:0){
+                        
+                        HStack(spacing:0){
+                            Text("Sales Tools")
+                                .matchedGeometryEffect(id: "header", in: nameSpace)
+                                .font(.custom("Gilroy-Bold", size: 28))
+                                .foregroundStyle(Color.black)
                             
-                            HStack(spacing:0){
-                                HStack(spacing:10){
-                                    Circle()
-                                        .foregroundStyle(Color(hex: "#F8F8F8"))
-                                        .frame(width: 42,height: 42)
-                                        .overlay(content: {
-                                            Text(nameInitials)
-                                                .font(.custom("Gilroy-SemiBold", size: 13))
-                                        })
-                                    
-                                    VStack(alignment:.leading,spacing:8){
-                                        Text("Welcome, \(userName)")
-                                            .font(.custom("Gilroy-SemiBold", size: 13))
-                                        
-                                        Text("Edit Profile")
-                                            .font(.custom("Gilroy-SemiBold", size: 13))
-                                            .foregroundStyle(Color(hex:"#3960F6"))
-                                        
-                                    }
-                                }
-                                
-                                Spacer()
-                                
-                                NotificationBellView(){
-                                    withAnimation{
-                                        router.navigateTo(to: .notificationscreen)
-                                    }
-                                }
-                                
-                            }
-                            .padding(.bottom,23)
-                            .padding(.horizontal,16)
-                            .padding(.top,12)
+                            Spacer()
                             
-                            HStack(spacing:0){
-                                Text("Sales Tools")
-                                    .matchedGeometryEffect(id: "header", in: nameSpace)
-                                    .font(.custom("Gilroy-Bold", size: 28))
-                                
-                                Spacer()
-                                
-                                Text("Apply Filter")
-                                    .font(.custom("Gilroy-Bold", size: 12))
-                                    .padding(.vertical,8)
-                                    .padding(.horizontal,12)
-                                    .overlay(content: {
-                                        RoundedRectangle(cornerRadius: 5)
-                                            .stroke(.black, lineWidth: 1)
-                                    })
+                            HStack(spacing:8){
+                                Image("filter")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 18, height: 18)
+                                    .foregroundStyle(Color(hex: "#FFFFFF"))
                                     .contentShape(Rectangle())
                                     .onTapGesture {
                                         withAnimation{
                                             isFilterSelected = true
                                         }
                                     }
-
                                 
+                                Text("Filter")
+                                    .font(.custom("Gilroy-Medium", size: 12))
+                                    .foregroundStyle(Color.white)
                             }
+                            .padding(.vertical,6)
                             .padding(.horizontal,16)
-                            .padding(.bottom,12)
+                            .background(
+                                Color(hex: "#04C98B")
+                            )
+                            .cornerRadius(8, corners: [.allCorners])
+                        }
+                        .padding(.horizontal,16)
+                        .padding(.vertical,16)
+                    }
+                    .background(
+                        Color(hex: "#E3FFF6")
+                        .ignoresSafeArea(edges: .top) // Extend the gradient to ignore the safe area at the top
+                    )
+                    
+                    VStack(spacing:16){
+                        if loader {
+                            
+                            VStack{
+                                Spacer()
+                                
+                                ProgressView()
+                                    .progressViewStyle(.circular)
+                                
+                                Spacer()
+                            }
                             
                         }
-                        .background(Color(hex: "#D9D9D9"))
-                    }
-
-                
-                VStack(spacing:0){
-                    
-                    ScrollView{
-                        if loader {
-                            ProgressView()
-                                .padding(.top,20)
-                        }
                         else {
+                            
                             if !showAllPolicyRates.isEmpty {
-                                ForEach(showAllPolicyRates, id: \.self){policyRate in
+                                ScrollView(.vertical,showsIndicators: false){
                                     
-                                    HStack(alignment:.top,spacing:12){
-                                        Circle()
-                                            .foregroundStyle(Color(hex: "#D9D9D9"))
-                                            .frame(width: 42,height: 42)
-                                            .overlay(content: {
-                                                Image(systemName: "doc")
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fit)
-                                                    .frame(width: 16, height: 16)
-                                                
-                                            })
+                                    ForEach(showAllPolicyRates, id: \.self){policyRate in
                                         
-                                        HStack(alignment:.top,spacing:16){
-                                            VStack(alignment:.leading,spacing:4){
-                                                Text("PAYOUT %")
-                                                    .font(.custom("Gilroy-Medium", size: 12))
-                                                
-                                                Text(policyRate.payouts)
-                                                    .font(.custom("Gilroy-Bold", size: 14))
-                                            }
-                                            
+                                        HStack(spacing:16){
                                             
                                             VStack(alignment:.leading,spacing:4){
-                                                Text("INSURER")
-                                                    .font(.custom("Gilroy-Medium", size: 12))
-                                                
-                                                Text(policyRate.insurer.name)
-                                                    .font(.custom("Gilroy-Bold", size: 14))
-                                            }
-                                            
-                                            VStack(alignment:.leading,spacing:4){
-                                                Text("INSURANCE TYPE")
-                                                    .font(.custom("Gilroy-Medium", size: 12))
                                                 
                                                 Text(policyRate.insurance_type.name)
-                                                    .font(.custom("Gilroy-Bold", size: 14))
+                                                    .font(.custom("Poppins-Medium", size: 12))
+                                                    .foregroundStyle(Color("subtitle", bundle: nil))
+                                                    .lineLimit(1)
+                                                
+                                                Text(policyRate.insurer.name)
+                                                    .font(.custom("Poppins-SemiBold", size: 16))
+                                                    .foregroundStyle(Color("title", bundle: nil))
+                                                    .lineLimit(1)
+                                                
                                             }
+                                            .frame(maxWidth:.infinity,alignment:.leading)
                                             
+                                            
+                                            
+                                            HStack(spacing:2){
+                                                Text("\(policyRate.payouts)")
+                                                    .font(.custom("Gilroy-Bold", size: 32))
+                                                    .foregroundStyle(Color("title", bundle: nil))
+                                                
+                                                Text("%")
+                                                    .font(.custom("Gilroy-Bold", size: 32))
+                                                    .foregroundStyle(Color("title", bundle: nil))
+                                            }
+                                            .frame(maxWidth:.infinity,alignment:.trailing)
                                             
                                         }
-                                        .offset(y:2)
-                                        
-                                        Spacer()
-                                        
-                                        Image(systemName: "arrowshape.right.fill")
+                                        .frame(maxWidth:.infinity,alignment:.leading)
+                                        .padding(.vertical,20)
+                                        .padding(.horizontal,20)
+                                        .background(
+                                            LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                        )
+                                        .cornerRadius(12, corners: [.allCorners])
+                                        .padding(.horizontal,16)
+                                        .contentShape(Rectangle())
+                                        .onTapGesture {
+                                            print("Policy Rate Selected")
+                                            withAnimation{
+                                                let id = policyRate.id
+                                                DispatchQueue.main.async {
+                                                    accessModel.policyRateId = id
+                                                }
+                                                router.navigateTo(to: .policyratedetailview)
+                                            }
+                                        }
                                     }
-                                    .padding(.vertical,12)
-                                    .padding(.horizontal,16)
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        print("Policy Rate Selected")
+                                    .onAppear{
                                         withAnimation{
-                                            isPolicyRateSelected = true
-                                            self.policyRateId = policyRate.id
+                                            self.loader = false
                                         }
                                     }
-                                    
-                                    
-                                    Divider()
                                 }
+                                .refreshable(action: {
+                                    let token = retrieveToken() ?? ""
+                                    let payload = SearchPolicyRatePayload(
+                                        state_id: "",
+                                        city_id: "",
+                                        city_category_id: "",
+                                        vehicle_type_id: "",
+                                        vehicle_model_id: "",
+                                        renewal_type_id: "",
+                                        insurance_type_id: "",
+                                        insurer_id: "",
+                                        fuel_type_id: "",
+                                        status: "", page: 1, size: 20
+                                    )
+                                    
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                        searchPolicyRates(token: token, payload: payload)
+                                    }
+                                })
                             }
                             else {
-                                Text("No Data Found.")
-                                    .font(.custom("Gilroy-SemiBold", size: 28))
-                                    .padding(.top,20)
+                                VStack{
+                                    
+                                    Spacer()
+                                    
+                                    Image("nodata")
+                                    
+                                    Text("No data found")
+                                        .font(.custom("Gilroy-SemiBold", size: 28))
+                                        .padding(.top,20)
+                                        .onAppear{
+                                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5){
+                                                withAnimation{
+                                                    self.loader = false
+                                                }
+                                            }
+                                        }
+                                    
+                                    Spacer()
+                                }
                             }
                         }
                     }
-                    .refreshable(action: {
-                        let token = retrieveToken() ?? ""
-                        getPolicyRatesList(token: token)
-                    }) 
-                }
+                    .padding(.top,16)
                 
             }
             .zIndex(0)
-            
-            if isPolicyRateSelected {
-                PolicyRateDetailView(accessModel: accessModel,snackBar: snackBar, policyRateId: policyRateId){
-                    withAnimation{
-                        isPolicyRateSelected = false
-                    }
-                }
-                .zIndex(1)
-            }
-            
+           
         }
         .sheet(isPresented: $isFilterSelected, content: {
             ApplyFiltersView(accessModel: accessModel, snackBar: snackBar){
@@ -215,57 +221,94 @@ struct ExploreView: View {
                 }
             }
         })
-        .background(Color(hex: "#F8F8F8"))
+        .background(
+            Color(hex: "#F5F8FF")
+        )
         .onAppear{
+            
             let token = retrieveToken() ?? ""
             self.loader = true
-            Task.init{
-                // Get User Data who is Logged In
-                do
-                {
-                    let data = try await accessModel.getUserData(token: token)
-
-                    let name = data.name.capitalized
-                    let surName = data.surname.capitalized
-
-                    extractInitialsAndName(name: name, surname: surName)
-                }
-                catch ApiError.networkFailure {
-                    // Handle network failure, e.g., show error Snackbar
-                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                } catch ApiError.lowInternetConnection {
-                    // Handle low internet connection, e.g., show error Snackbar
-                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                } catch ApiError.serverError(let status) {
-                    // Handle server errors, e.g., show error Snackbar
-                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                } catch ApiError.unknownError(let description){
-                    // Handle unknown errors
-                    print("Data Fetching Failed -> \(description)")
-                    snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-                }
-            }
             
-            getPolicyRatesList(token: token)
-            allCities(token: token)
-            insuranceTypes(token : token)
-            renewalTypes(token : token)
-            insurerTypes(token : token)
+            let payload = SearchPolicyRatePayload(
+                state_id: "",
+                city_id: "",
+                city_category_id: "",
+                vehicle_type_id: "",
+                vehicle_model_id: "",
+                renewal_type_id: "",
+                insurance_type_id: "",
+                insurer_id: "",
+                fuel_type_id: "",
+                status: "", page: 1, size: 20
+            )
+            searchPolicyRates(token: token, payload: payload)
+            
+                    
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
+                allCities(token: token)
+                insuranceTypes(token : token)
+                renewalTypes(token : token)
+                insurerTypes(token : token)
+                vehicleTypes(token: token)
+                fuelTypes(token: token)
+                allStates(token: token)
+                cityCategories(token: token)
+            })
             
         }
-        .onReceive(accessModel.$policyRatesData){data in
-            if !data.isEmpty {
-                showAllPolicyRates = data
+        .onReceive(appDelegate.$fcmToken, perform: {token in
+            print("FCM Token After Authorization -> \(token)")
+            let isRegistered = retrieveDeviceRegistration() ?? false
+            if !(isRegistered) {
+                registerDeviceWithKMM(fcmToken: token, accessModel: accessModel)
             }
-        }
+        })
+        .onReceive(accessModel.$policyRatesData, perform: { policy in
+            if !policy.isEmpty {
+                self.showAllPolicyRates = policy
+            }
+            else {
+                self.showAllPolicyRates = []
+            }
+            
+        })
+    
 
-        
     }
     
+    // Register Device for Push Notification
+    func registerDeviceWithKMM(fcmToken: String, accessModel : AccessServiceViewModel) {
+    
+        let token = retrieveToken() ?? ""
+        let id = retrieveUserId() ?? ""
+        let projectId = "0d98736c-5f90-41b4-b689-1b1935aab762"
+        
+        Task{
+            do
+            {
+                let _ =  try await accessModel.registerDeviceForNotification(userId: id, token: token, projectId: projectId, deviceToken: fcmToken)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
+        
     // Get Policy Rates
     func getPolicyRatesList(token : String){
         Task.init{
-            
+            self.loader = true
             do
             {
                 let response = try await accessModel.getPolicyRates(token: token)
@@ -290,21 +333,99 @@ struct ExploreView: View {
             }
         }
     }
-    
-    
-    func extractInitialsAndName(name:String, surname:String){
-        
-        let nameOfUser = "\(name) \(surname)"
-        
-        guard let nameInitial = name.first else {
-            return
+ 
+    func vehicleTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getVehicleTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
         }
-        guard let surnameInitial = surname.first else {
-            return
-        }
-        self.nameInitials = "\(nameInitial)\(surnameInitial)"
-        self.userName = nameOfUser
     }
+    
+    func fuelTypes(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getFuelTypes(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func allStates(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllStates(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func cityCategories(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getAllCityCategories(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+ 
     
     func insuranceTypes(token : String){
         Task.init {
@@ -397,6 +518,44 @@ struct ExploreView: View {
             }
         }
     }
+    
+    func searchPolicyRates(token : String, payload : SearchPolicyRatePayload){
+        Task.init{
+            do
+            {
+                let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
+                
+                if result {
+                    self.loader = false
+                    self.showAllPolicyRates = response
+                }
+                else {
+                    self.loader = false
+                    self.showAllPolicyRates = response
+                }
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                self.loader = false
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                self.loader = false
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                self.loader = false
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                self.loader = false
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+            
+        }
+    }
+    
 }
 
 struct ViewOffsetKey: PreferenceKey {
@@ -432,11 +591,94 @@ struct NotificationBellView : View {
 
 #Preview {
     ExploreView(
+        userName:"userName",
+        nameInitials: "nameInitials",
         accessModel: AccessServiceViewModel(),
         snackBar: SnackbarModel(),
-        router: Router(), 
+        router: Router(),
         navigationState: NavigationState()
     )
 }
 
 
+
+//HStack(spacing:0){
+//    HStack(spacing:10){
+//        Circle()
+//            .foregroundStyle(Color(hex: "#F8F8F8"))
+//            .frame(width: 42,height: 42)
+//            .overlay(content: {
+//                Text(nameInitials)
+//                    .font(.custom("Gilroy-SemiBold", size: 13))
+//            })
+//        
+//        VStack(alignment:.leading,spacing:6){
+//            Text("Welcome ")
+//                .font(.custom("Gilroy-SemiBold", size: 12))
+//            
+//            Text("\(userName)")
+//                .font(.custom("Gilroy-Bold", size: 15))
+//            
+//        }
+//    }
+//    
+//    Spacer()
+//    
+//    NotificationBellView(){
+//        withAnimation{
+//            router.navigateTo(to: .notificationscreen)
+//        }
+//    }
+//    
+//}
+//.padding(.bottom,23)
+//.padding(.horizontal,16)
+//.padding(.top,12)
+
+//
+//HStack(alignment:.top,spacing:12){
+//    Circle()
+//        .foregroundStyle(Color(hex: "#D9D9D9"))
+//        .frame(width: 35,height: 35)
+//        .overlay(content: {
+//            Image(systemName: "doc")
+//                .resizable()
+//                .aspectRatio(contentMode: .fit)
+//                .frame(width: 12, height: 12)
+//            
+//        })
+//    
+//    HStack(alignment:.top,spacing:16){
+//        VStack(alignment:.leading,spacing:4){
+//            Text("PAYOUT %")
+//                .font(.custom("Gilroy-Medium", size: 12))
+//            
+//            Text(policyRate.payouts)
+//                .font(.custom("Gilroy-Bold", size: 14))
+//        }
+//        
+//        
+//        VStack(alignment:.leading,spacing:4){
+//            Text("INSURER")
+//                .font(.custom("Gilroy-Medium", size: 12))
+//            
+//            Text(policyRate.insurer.name)
+//                .font(.custom("Gilroy-Bold", size: 14))
+//        }
+//        
+//        VStack(alignment:.leading,spacing:4){
+//            Text("INSURANCE TYPE")
+//                .font(.custom("Gilroy-Medium", size: 12))
+//            
+//            Text(policyRate.insurance_type.name)
+//                .font(.custom("Gilroy-Bold", size: 14))
+//        }
+//        
+//        
+//    }
+//    .offset(y:2)
+//    
+//    Spacer()
+//    
+//    Image(systemName: "arrowshape.right.fill")
+//}

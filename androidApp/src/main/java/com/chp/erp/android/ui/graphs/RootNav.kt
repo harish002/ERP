@@ -69,12 +69,12 @@ fun RootNavGraph(
                                     Methods().retrieve_Token(context)?.let { it1 ->
 
                                         Methods().retrieve_userID(context)?.let { it2 ->
-                                            viewModel.registerDeviceForNotification(
-                                                token = it1,
-                                                projectId = project_id,
-                                                userId = it2,
-                                                deviceToken = it
-                                            )
+//                                            viewModel.registerDeviceForNotification(
+//                                                token = it1,
+//                                                projectId = project_id,
+//                                                userId = it2,
+//                                                deviceToken = it
+//                                            )
                                         }
 
                                     }

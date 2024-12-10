@@ -23,70 +23,85 @@ struct MatchedView: View {
         ZStack {
             if !show {
                 
-                VStack(alignment:.center, spacing: 16) {
+                VStack(alignment:.center, spacing: 33) {
                     Spacer()
                     
-                    Image("Policy Logo")
+                    Image("appstore")
                         .resizable()
-                        .frame(width: 160, height: 160)
+                        .frame(width: 114, height: 114)
                         .matchedGeometryEffect(id: "logo", in: namespace)
+                        .cornerRadius(50, corners: [.allCorners])
+                        .padding(.bottom,33)
                         
                        
-                    Text("1 Click Policy ERP")
+                    Text("Hamesha Aapke Sath")
                         .matchedGeometryEffect(id: "title", in: namespace)
-                        .font(Font.custom("Gilroy-SemiBold", size: 36))
+                        .font(Font.custom("Gilroy-SemiBold", size: 32))
+                        .foregroundStyle(Color(hex: "#FBFAFD"))
                         
                     
                     Spacer()
                     
-                    Text("A product of 1 Click Global family")
+                    Text("Product of 1Click Policy")
                         .font(Font.custom("Gilroy-Medium", size: 12))
-                        .foregroundStyle(Color(hex: "#F8F8F8"))
+                        .foregroundStyle(Color(hex: "#FBFAFD"))
                        
                 }
                 
             }
             else {
-                VStack(alignment:.center) {
+                VStack(alignment:.center,spacing:0) {
                     Spacer()
+                        .frame(height: 214)
                     
-                    Image("Policy Logo")
+                    Image("appstore")
                         .resizable()
-                        .frame(width: 160, height: 160)
+                        .frame(width: 114, height: 114)
                         .matchedGeometryEffect(id: "logo", in: namespace)
-                       
-                    Text("1 Click Policy ERP")
-                        .matchedGeometryEffect(id: "title", in: namespace)
-                        .font(Font.custom("Gilroy-SemiBold", size: 36))
-                                           
-                    Text("Simplifying Sales for Smarter Policy Agents.")
-                        .font(Font.custom("Gilroy-SemiBold", size: 16))
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal,16)
-                        .padding(.top,2)
+                        .cornerRadius(50, corners: [.allCorners])
+                        .padding(.bottom,33)
                     
+                       
+                    Text("Hamesha Aapke Sath")
+                        .matchedGeometryEffect(id: "title", in: namespace)
+                        .font(Font.custom("Gilroy-SemiBold", size: 32))
+                        .foregroundStyle(Color(hex: "#FBFAFD"))
                     
                     Spacer()
+                        .frame(height: 131)
+                                           
+                    Text("Simplifying Sales for Smarter Policy Partners.")
+                        .font(Font.custom("Gilroy-SemiBold", size: 16))
+                        .foregroundStyle(Color(hex: "#FBFAFD"))
+                        .multilineTextAlignment(.center)
+                        .frame(width: 290,height: 52,alignment: .center)
+                        .padding(.bottom,32)
+                        .lineSpacing(4)
+                    
                     
                     VStack(alignment:.center,spacing: 14){
                         Text("Log in")
                             .padding(20)
                             .font(Font.custom("Gilroy-SemiBold", size: 18))
-                            .frame(maxWidth: .infinity)
-                            .foregroundStyle(Color.white)
-                            .background(Color(hex: "#3960F6"))
+                            .foregroundStyle(Color(hex: "#1630C2"))
+                            .frame(width: 136,height: 44,alignment: .center)
+                            .background(Color.white)
                             .cornerRadius(8, corners: [.allCorners])
-                            .padding(.horizontal,16)
                             .onTapGesture {
                                 onLoginButtonTapped()
                             }
                         
-                            
                     }
                     
-                    Text("A product of 1 Click Global family")
+                    Spacer()
+                    
+                    Text("Product of 1Click Policy")
                         .font(Font.custom("Gilroy-Medium", size: 12))
+                        .foregroundStyle(Color(hex: "#FBFAFD"))
                         .padding(.top,12)
+                    
+                    Spacer()
+                        .frame(height:50)
                        
                 }
                 
@@ -95,6 +110,13 @@ struct MatchedView: View {
         }
         .navigationBarBackButtonHidden()
         .frame(maxWidth: .infinity)
+        .background(
+            Image("Rectangle 2")
+                .resizable()
+                .aspectRatio(contentMode: .fill)
+                .frame(maxWidth:.infinity,maxHeight: .infinity)
+        )
+        .ignoresSafeArea()
         .onAppear{
             let token = retrieveToken()
            

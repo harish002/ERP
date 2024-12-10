@@ -14,6 +14,12 @@ enum ApiError: Error {
     case unknownError(description: String)
 }
 
+enum ApiExceptionError : Error {
+    case timeout
+    case noInternet
+    case unknown(String)
+}
+
 struct GetRegistrationNumberResponse : Decodable {
     let result : String
 }
@@ -25,9 +31,9 @@ class AccessServiceViewModel : ObservableObject {
     @Published var loginWithOtpCredential : String = ""
     @Published var specificCourseId : String = ""       // Used in Course Detail Screen for Fetching Details about the course --> /course/show
     @Published var myCourseId : String = ""             // Used in Course Start View for Getting Course Information --> /my_courses/show
-    
-    // Fix Variable Values
-    let projectId : String = "c319ab33-dbf1-45e7-b566-521cfecfb3e5"
+    @Published var fcmToken : String = ""
+    @Published var policyRateId : String = ""           // Used in Policy Rate Detail View to Fetch Specific Policy Rate Data
+
     
     // Module 1 ----------------------------------------------------------------------------------------------------------------
     // Login With Otp Api's ViewModel--------------------------------------------------------
@@ -49,9 +55,18 @@ class AccessServiceViewModel : ObservableObject {
                         let authRefreshToken = response.refreshToken
                         saveRefreshToken(refreshToken: authRefreshToken)
                         
+                        
+                        let (initials,name) = extractInitialsAndName(name: response.userData.name ?? "", surname: response.userData.surname ?? "")
+                        
+                        saveInitials(name: initials)
+                        saveName(name: name)
+                        
+                        let userId = response.id
+                        saveUserId(userId: userId)
+                        
                         let userData = UserData(
                             id: response.userData.id,
-                            name: response.userData.name, 
+                            name: response.userData.name,
                             username: response.userData.username,
                             surname: response.userData.surname,
                             email: response.userData.email,
@@ -60,17 +75,22 @@ class AccessServiceViewModel : ObservableObject {
                             birthDate: response.userData.birthDate,
                             enabled: response.userData.enabled,
                             superAdmin: response.userData.superAdmin,
+                            needsPasswordReset: response.userData.needsPasswordReset,
                             note: response.userData.note,
+                            profileImageId: response.userData.profileImageId,
                             projectRoles: response.userData.projectRoles,
                             departmentRoles: response.userData.departmentRoles,
                             zones: response.userData.zones,
                             departments: response.userData.departments,
+                            projects: response.userData.projects,
                             verifications: response.userData.verifications,
+                            organisations: response.userData.organisations,
+                            notificationPreferences: response.userData.notificationPreferences,
+                            isAvailable: response.userData.isAvailable ,
+                            createdDate: response.userData.createdDate,
                             currentRole: response.userData.currentRole,
-                            notificationPreferences: response.userData.notificationPreferences ,
-                            isAvailable: response.userData.isAvailable,
-                            createdDate: response.userData.createdDate
-                            
+                            currentProject: response.userData.currentProject,
+                            currentOrganisation: response.userData.currentOrganisation
                         )
                         
                         self.userSpecs = userData
@@ -107,37 +127,48 @@ class AccessServiceViewModel : ObservableObject {
     }
     
     // Get user who is logged in
-    func getUserData(token : String) async throws -> UserData {
+    func getUserData(token : String, userId : String) async throws -> UserData {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getUserWhoLoggedIn(token: token)
+                        let response = try await ApiServices().getUserWhoLoggedIn(token: token, userid: userId)
+                        
+                        let (initials,name) = self.extractInitialsAndName(name: response.name ?? "", surname: response.surname ?? "")
+                        
+                        saveInitials(name: initials)
+                        saveName(name: name)
                         
                         let userData = UserData(
-                            id: response.userData.id,
-                            name: response.userData.name,
-                            username: response.userData.username,
-                            surname: response.userData.surname,
-                            email: response.userData.email,
-                            mobileNumber: response.userData.mobileNumber,
-                            gender: response.userData.gender,
-                            birthDate: response.userData.birthDate,
-                            enabled: response.userData.enabled,
-                            superAdmin: response.userData.superAdmin,
-                            note: response.userData.note,
-                            projectRoles: response.userData.projectRoles,
-                            departmentRoles: response.userData.departmentRoles,
-                            zones: response.userData.zones,
-                            departments: response.userData.departments,
-                            verifications: response.userData.verifications,
-                            currentRole: response.userData.currentRole,
-                            notificationPreferences: response.userData.notificationPreferences ,
-                            isAvailable: response.userData.isAvailable,
-                            createdDate: response.userData.createdDate
-                            
+                            id: response.id,
+                            name: response.name,
+                            username: response.username,
+                            surname: response.surname,
+                            email: response.email,
+                            mobileNumber: response.mobileNumber,
+                            gender: response.gender,
+                            birthDate: response.birthDate,
+                            enabled: response.enabled,
+                            superAdmin: response.superAdmin,
+                            needsPasswordReset: response.needsPasswordReset,
+                            note: response.note,
+                            profileImageId: response.profileImageId,
+                            projectRoles: response.projectRoles,
+                            departmentRoles: response.departmentRoles,
+                            zones: response.zones,
+                            departments: response.departments,
+                            projects: response.projects,
+                            verifications: response.verifications,
+                            organisations: response.organisations,
+                            notificationPreferences: response.notificationPreferences,
+                            isAvailable: response.isAvailable ,
+                            createdDate: response.createdDate,
+                            currentRole: response.currentRole,
+                            currentProject: response.currentProject,
+                            currentOrganisation: response.currentOrganisation
                         )
+                        
                         self.userSpecs = userData
                         continuation.resume(returning: userData)
                         print("User Who LoggedIn Data : \(String(describing: self.userSpecs))")
@@ -316,6 +347,14 @@ class AccessServiceViewModel : ObservableObject {
                         let authRefreshToken = response.refreshToken
                         saveRefreshToken(refreshToken: authRefreshToken)
                         
+                        let (initials,name) = self.extractInitialsAndName(name: response.userData.name ?? "", surname: response.userData.surname ?? "")
+                        
+                        saveInitials(name: initials)
+                        saveName(name: name)
+                        
+                        let userId = response.id
+                        saveUserId(userId: userId)
+                        
                         let userData = UserData(
                             id: response.userData.id,
                             name: response.userData.name,
@@ -327,17 +366,22 @@ class AccessServiceViewModel : ObservableObject {
                             birthDate: response.userData.birthDate,
                             enabled: response.userData.enabled,
                             superAdmin: response.userData.superAdmin,
+                            needsPasswordReset: response.userData.needsPasswordReset,
                             note: response.userData.note,
+                            profileImageId: response.userData.profileImageId,
                             projectRoles: response.userData.projectRoles,
                             departmentRoles: response.userData.departmentRoles,
                             zones: response.userData.zones,
                             departments: response.userData.departments,
+                            projects: response.userData.projects,
                             verifications: response.userData.verifications,
+                            organisations: response.userData.organisations,
+                            notificationPreferences: response.userData.notificationPreferences,
+                            isAvailable: response.userData.isAvailable ,
+                            createdDate: response.userData.createdDate,
                             currentRole: response.userData.currentRole,
-                            notificationPreferences: response.userData.notificationPreferences ,
-                            isAvailable: response.userData.isAvailable,
-                            createdDate: response.userData.createdDate
-                            
+                            currentProject: response.userData.currentProject,
+                            currentOrganisation: response.userData.currentOrganisation
                         )
                         
                         self.userSpecs = userData
@@ -896,6 +940,264 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Health Filters
+    // Slab Types
+    @Published var slabTypes : [SlabData] = []
+    func getAllSlabTypes() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllSlabTypes()
+                        if (!(response.data?.isEmpty ?? false)) {
+                            self.slabTypes = response.data ?? []
+                            print("Slab Types Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Slab Types Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Insurer Groups Data
+    @Published var insurerGroupsData : [InsurerGroupData] = []
+    func getAllInsurerGroups() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllInsurerGroups()
+                        if (!(response.data.isEmpty)) {
+                            self.insurerGroupsData = response.data
+                            print("Insurer Groups Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Insurer Groups Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Policy Segments
+    @Published var policySegments : [PolicySegmentResponse] = []
+    func getAllPolicySegments() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllPolicySegments()
+                        if (!(response.isEmpty)) {
+                            self.policySegments = response
+                            print("Policy Segments Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Policy Segments Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Product Types
+    @Published var productTypes : [ProductData] = []
+    func getAllProductTypes() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getAllProductTypes()
+                        if (!(response.data.isEmpty)) {
+                            self.productTypes = response.data
+                            print("Product Types Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Product Types Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Insurance Type Using Policy Segment ID
+    @Published var getInsuranceTypes : [InsuranceTypeUsingSegmentIDData] = []
+    func getInsuranceTypeByPolicySegments(segmentId : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getInsuranceTypeByPolicySegments(segmentId: segmentId)
+                        if (!(response.data.isEmpty)) {
+                            self.getInsuranceTypes = response.data
+                            print("Insurance Types with Id Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Insurance Type With Ids Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // PPTs Types Using Policy Segment ID
+    @Published var getPPtsTypes : [PPTsTypesData] = []
+    func getPPTsTypesBySegmentId(segmentId : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getPPtsByPolicySegments(segmentId: segmentId)
+                        if (!(response.data.isEmpty)) {
+                            self.getPPtsTypes = response.data
+                            print("PPTs Types with Id Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("PPTs Types With Id Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
     
     // Get the Registrtaion Number from Image
     func uploadImage(token: String, filePath: String, completion: @escaping (String?) -> Void) {
@@ -1032,8 +1334,95 @@ class AccessServiceViewModel : ObservableObject {
                             print("Details failed to fetch!")
                         }
                     }
+                    catch let error as ApiException{
+                        switch error {
+                            
+                        case is ApiException.NoInternetException :
+                            continuation.resume(throwing: ApiExceptionError.noInternet)
+                            
+                        case is ApiException.TimeoutException :
+                            continuation.resume(throwing: ApiExceptionError.timeout)
+                            
+                        case let unknown as ApiException.UnknownException :
+                            continuation.resume(throwing: ApiExceptionError.unknown(unknown.description()))
+                            
+                        default:
+                            continuation.resume(throwing: ApiExceptionError.unknown("An unexpected error occurred"))
+                            
+                        }
+                    }
+                    catch {
+                        continuation.resume(throwing: ApiExceptionError.unknown(error.localizedDescription))
+                    }
+                    
+                }
+            }
+        }
+    }
+    
+    // Register Device to activate Push Notifications
+    func registerDeviceForNotification(userId : String, token: String, projectId : String, deviceToken : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().registerDeviceForNotification(token: token, projectId: projectId, userId: userId, deviceToken: deviceToken)
+                        
+                        if !(response.deviceTokens?.isEmpty ?? false) {
+                            print("Device Registered Successfully -> \(deviceToken)")
+                            saveDeviceRegistration(isRegistered: true)
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Device Failed to Register!")
+                            saveDeviceRegistration(isRegistered: false)
+                            continuation.resume(returning: ())
+                        }
+                    }
                     catch let error as NSError {
-                         print("Sent Error", error.localizedDescription)
+                        print("Register Device Sent Error -> \(String(describing: error.localizedFailureReason?.description))" )
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+        
+    
+    // Reset Password
+    // Send Token to Mail to Reset Password
+    func resetPassword(email : String) async throws -> String {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().resetPassword(email: email)
+                        
+                        if !response.isEmpty{
+                            continuation.resume(returning: response)
+                        }
+                        else {
+                            continuation.resume(returning: "")
+                        }
+                    }
+                    catch let error as NSError {
+                        print("Register Device Sent Error -> \(String(describing: error.localizedFailureReason?.description))" )
                          if error.domain == NSURLErrorDomain {
                              switch error.code {
                              case NSURLErrorNotConnectedToInternet :
@@ -1055,8 +1444,6 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
-        
-    
 
     
     // ----------------------------------------------------------------------------------------------------------------
@@ -1076,6 +1463,20 @@ class AccessServiceViewModel : ObservableObject {
         default:
             return "Server Error, Please try again later!"
         }
+    }
+    
+    // Return Initial Name and Username
+    func extractInitialsAndName(name:String, surname:String) -> (String, String ){
+        
+        let nameOfUser = "\(name) \(surname)"
+        
+        let nameInitial = name.first?.uppercased() ?? ""
+        let surnameInitial = surname.first?.uppercased() ?? ""
+        
+        let nameInitials = "\(nameInitial)\(surnameInitial)"
+        let userName = nameOfUser
+        
+        return (nameInitials, userName)
     }
     
     

@@ -56,15 +56,15 @@ fun MainNavGraph(
             }
         }
         BottomBarScreen.Poicy_Rate_Details.route?.let { it1 ->
-            composable(route = "$it1/{data}",
+            composable(route = "$it1/{policyDataId}",
                 arguments = listOf(
-                    navArgument("data") {
+                    navArgument("policyDataId") {
                         type = NavType.StringType
                     }
                 )) {
                     i ->
-                val data = i.arguments?.getString("data") ?: ""
-                Poicy_Rate_Details(mainNavController, data = data)
+                val data = i.arguments?.getString("policyDataId") ?: ""
+                Poicy_Rate_Details(mainNavController, data = data,viewModel)
             }
         }
         BottomBarScreen.Vehicle_Number.route?.let { it1 ->

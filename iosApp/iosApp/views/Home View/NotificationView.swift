@@ -14,7 +14,6 @@ struct NotificationView: View {
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var navigationState : NavigationState
     @ObservedObject var snackBar : SnackbarModel
-    let onBackButtonTap : () -> Void
     
     @State private var exploreTransition = false
     @State private var notifications : [GetNotificationsResponse] = []
@@ -23,17 +22,8 @@ struct NotificationView: View {
         VStack{
             
             HStack(alignment:.center, spacing:0){
-                Button(action: {
-                    onBackButtonTap()
-                },
-                label: {
-                    Image(systemName: "chevron.backward")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .foregroundStyle(Color(hex: "#3C3C43"))
-                        .frame(width: 16,height: 16)
-                        .bold()
-                })
+                Rectangle()
+                    .frame(width: 16,height: 0)
                
                 
                 Spacer()
@@ -47,12 +37,10 @@ struct NotificationView: View {
                 Spacer()
                 
                 
-                Image(systemName: "envelope")
-                    .frame(width: 16,height: 16)
-                    .contentShape(Rectangle())
-                    .onTapGesture {
-                        
-                    }
+                Rectangle()
+                    .frame(width: 16,height: 0)
+                    
+                    
             }
             .padding(.vertical,12)
             .padding(.horizontal,16)
@@ -153,7 +141,5 @@ struct NotificationView: View {
         accessModel: AccessServiceViewModel(),
         navigationState: NavigationState(), 
         snackBar: SnackbarModel()
-    ){
-        
-    }
+    )
 }

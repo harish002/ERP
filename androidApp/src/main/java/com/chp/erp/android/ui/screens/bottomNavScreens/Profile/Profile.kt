@@ -66,6 +66,7 @@ import com.chp.erp.android.R
 import com.chp.erp.android.apiServices.ApiViewModel
 import com.chp.erp.android.ui.bottombarGraph.BottomBarScreen
 import com.chp.lms.Services.Dataclass.GetUserData
+import com.chp.lms.Services.Dataclass.UserData
 import com.chp.lms.android.Services.Methods
 import java.util.Locale
 
@@ -97,7 +98,9 @@ fun Profile(
         LaunchedEffect(context) {
             Methods().retrieve_Token(context)?.let {
 //                viewModel.getAllPolicyRates(it)
-                viewModel.getUserWhoLoggedIn(it)
+
+                Methods().retrieve_userID(context)
+                    ?.let { it1 -> viewModel.getUserWhoLoggedIn(it, it1) }
                 loading = false
             }
         }
@@ -148,7 +151,7 @@ fun Profile(
                     .verticalScroll(scrollState), horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 val initials =
-                    userData?.userData?.username?.split(" ")?.joinToString("")
+                    userData?.username?.split(" ")?.joinToString("")
                     { it.take(1) }?.uppercase() ?: "NA"
 
                 Box(
@@ -175,7 +178,7 @@ fun Profile(
 
                 Text(
                     modifier = Modifier.padding(vertical = 10.dp),
-                    text = userData?.userData?.name ?: "NA",
+                    text = userData?.name ?: "NA",
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.headlineSmall
                 )
@@ -189,7 +192,7 @@ fun Profile(
 //                        contentDescription = "Mail Icon"
 //                    )
                     Text(
-                        text = userData?.userData?.email ?: "NA",
+                        text = userData?.email ?: "NA",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.bodyLarge
 
@@ -467,19 +470,19 @@ fun Profile(
 
 
 @Composable
-fun ProfileDetails(userData: GetUserData?) {
+fun ProfileDetails(userData: UserData?) {
     var fullName by remember {
         mutableStateOf(
-            userData?.userData?.name?.capitalize(Locale.ROOT) + " " + userData?.userData?.surname?.capitalize(
+            userData?.name?.capitalize(Locale.ROOT) + " " + userData?.surname?.capitalize(
                 Locale.ROOT
             )
         )
     }
-    var userName by remember { mutableStateOf(userData?.userData?.username?.capitalize(Locale.ROOT) ?: "NA") }
-    var emailId by remember { mutableStateOf(userData?.userData?.email?.capitalize(Locale.ROOT) ?: "NA") }
-    var mobileNum by remember { mutableStateOf(userData?.userData?.mobileNumber?.capitalize(Locale.ROOT) ?: "NA") }
-    var gender by remember { mutableStateOf(userData?.userData?.gender?.capitalize(Locale.ROOT)?: "NA") }
-    var birthday by remember { mutableStateOf(userData?.userData?.birthDate?.capitalize(Locale.ROOT)?: "NA")}
+    var userName by remember { mutableStateOf(userData?.username?.capitalize(Locale.ROOT) ?: "NA") }
+    var emailId by remember { mutableStateOf(userData?.email?.capitalize(Locale.ROOT) ?: "NA") }
+    var mobileNum by remember { mutableStateOf(userData?.mobileNumber?.capitalize(Locale.ROOT) ?: "NA") }
+    var gender by remember { mutableStateOf(userData?.gender?.capitalize(Locale.ROOT)?: "NA") }
+    var birthday by remember { mutableStateOf(userData?.birthDate?.capitalize(Locale.ROOT)?: "NA")}
     var isProfileEditingEnabled by remember { mutableStateOf(false) }
     var context = LocalContext.current
     Column() {

@@ -1,5 +1,6 @@
 package com.chp.lms.Services.Dataclass
 
+import kotlinx.coroutines.internal.synchronized
 import kotlinx.serialization.Serializable
 
 // Module 1 ------------------------------------------------------------------
@@ -58,16 +59,6 @@ data class UserData(
     val currentOrganisation: CurrentOrganisation?= null
 )
 
-@Serializable
-data class CurrentProject(
-    val id: String,
-    val name: String
-)
-@Serializable
-data class CurrentOrganisation(
-    val id: String,
-    val name: String
-)
 @Serializable
 data class ProjectRole(
     val id: String,
@@ -131,11 +122,23 @@ data class NotificationPreference(
     val notificationType: String,
     val notificationChannels: List<String>
 )
+
+@Serializable
+data class CurrentProject(
+    val id: String,
+    val name: String
+)
+
+@Serializable
+data class CurrentOrganisation(
+    val id: String,
+    val name: String
+)
+
 @Serializable
 data class Project(
     val id: String,
     val name: String,
-    val subject: String? = null,
     val department: DepartmentX?= null,//String in Example
     val roles: List<String>?= emptyList(),
     val createdDate: String?= null,
@@ -169,8 +172,6 @@ data class Module(
     val name: String
 )
 
-
-
 @Serializable
 data class Organisation(
     val id: String,
@@ -178,6 +179,7 @@ data class Organisation(
     val departments: List<String>? = null,
     val zones: List<Zone>? = null
 )
+
 @Serializable
 data class FailedResponse(
     val message: String,
@@ -191,7 +193,7 @@ data class GetUserData(
     val id: String,
     val username: String,
     val email: String?=null,
-    val userData: UserData,
+    val userData: UserData
     )
 
 
@@ -266,16 +268,18 @@ data class GetPolicyRates(
 @Serializable
 data class PolicyRateData(
     val city_id: String,
+    val city_category_id : String,
     val fuel_type_id: String,
     val renewal_type_id: String,
     val insurance_type_id: String,
     val insurer_id: String,
-    val vehicle_model_id: String?=null,
+    val vehicle_model_id: String,
     val payouts: String,
     val payins: String? = null,
     val description: String? = null,
     val id: String,
     val city: City,
+    val city_category: CityCategory? = null,
     val vehicle_model: VehicleModel,
     val fuel_type: FuelType,
     val insurance_type: InsuranceType,
@@ -295,9 +299,9 @@ data class City(
     val name: String,
     val description: String? = null,
     val state_id: String,
-    val city_category_id: String,
+    val city_category_id: String? = null,
     val id: String,
-    val city_category: CityCategory,
+    val city_category: CityCategory? = null,
     val state: States,
     val status: Int,
     val created_at: String? = null,
@@ -337,8 +341,10 @@ data class FuelType(
 data class InsuranceType(
     val name: String,
     val description: String? = null,
+    val policy_segment_id: String,
     val created_at: String? = null,
     val id: String,
+    val policy_segment: PolicySegment? = null,
     val status: Int
 )
 
@@ -348,7 +354,8 @@ data class Insurer(
     val name: String,
     val status: Int,
     val description: String? = null,
-    val created_at: String? = null
+    val created_at: String? = null,
+    val insurer_groups : List<String>? = emptyList()
 )
 
 @Serializable
@@ -371,7 +378,7 @@ data class CityCategory(
     val description: String? = null,
     val id: String,
     val status: Int,
-    val created_at: String
+    val created_at: String? = null
 )
 
 @Serializable
@@ -511,9 +518,9 @@ data class CityData(
     val name: String,
     val description: String? = null,
     val state_id: String,
-    val city_category_id: String,
+    val city_category_id: String? = null,
     val id: String,
-    val city_category: CityCategoryFromCityApi,
+    val city_category: CityCategoryFromCityApi? = null,
     val state: StateFromCityApi,
     val status: Int,
     val created_at: String? = null,
@@ -586,7 +593,7 @@ data class RenewalTypeData(
 )
 //-----------------------------------------------------------------------------
 
-// Read all Insurer Types---------------------------------------------------
+// Read all Insurer Types ---------------------------------------------------
 @Serializable
 data class InsurerTypes(
     val message: String,
@@ -625,11 +632,9 @@ data class SearchPolicyRatePayload(
 // Response Body
 @Serializable
 data class SearchPolicyRateData(
-    val items: List<PolicyRateData>,
+    val message : String,
     val total: Int,
-    val page: Int,
-    val size: Int,
-    val pages: Int
+    val items: List<PolicyRateData>,
 )
 
 // Get Registration Number from Image
@@ -651,117 +656,103 @@ data class GetVehicleDetails(
 
 @Serializable
 data class Result(
-    val state_code: String?=null,
-    val state: String?=null,
-    val office_code: Int?=null,
-    val office_name: String?=null,
-    val reg_no: String?=null,
-    val reg_date: String?=null,
-    val purchase_date: String?=null,
-    val owner_count: Int?=null,
-    val owner_name: String?=null,
-    val owner_father_name: String?=null,
-    val current_address_line1: String?=null,
-    val current_address_line2: String?=null,
-    val current_address_line3: String?=null,
-    val current_district_name: String?=null,
-    val current_state: String?=null,
-    val current_state_name: String?=null,
-    val current_pincode: Int?=null,
-    val current_full_address: String?=null,
-    val permanent_address_line1: String?=null,
-    val permanent_address_line2: String?=null,
-    val permanent_address_line3: String?=null,
-    val permanent_district_name: String?=null,
-    val permanent_state: String?=null,
-    val permanent_state_name: String?=null,
-    val permanent_pincode: Int?=null,
-    val permanent_full_address: String?=null,
-    val owner_code_descr: String?=null,
-    val reg_type_descr: String?=null,
-    val vehicle_class_desc: String?=null,
-    val chassis_no: String?=null,
-    val engine_no: String?=null,
-    val vehicle_manufacturer_name: String?=null,
-    val model_code: String?=null,
-    val model: String?=null,
-    val body_type: String?=null,
-    val cylinders_no: Int?=null,
-    val vehicle_hp: Double?=null,
-    val vehicle_seat_capacity: Int?=null,
-    val vehicle_standing_capacity: Int?=null,
-    val vehicle_sleeper_capacity: Int?=null,
-    val unladen_weight: Int?=null,
-    val vehicle_gross_weight: Int?=null,
-    val vehicle_gross_comb_weight: Int?=null,
-    val fuel_descr: String?=null,
-    val color: String?=null,
-    val manufacturing_mon: Int?=null,
-    val manufacturing_yr: Int?=null,
-    val norms_descr: String?=null,
-    val wheelbase: Int?=null,
-    val cubic_cap: Double?=null,
-    val floor_area: Int?=null,
-    val ac_fitted: String?=null,
-    val audio_fitted: String?=null,
-    val video_fitted: String?=null,
-    val vehicle_purchase_as: String?=null,
-    val vehicle_catg: String?=null,
-    val dealer_code: String?=null,
-    val dealer_name: String?=null,
-    val dealer_address_line1: String?=null,
-    val dealer_address_line2: String?=null,
-    val dealer_address_line3: String?=null,
-    val dealer_district: String?=null,
-    val dealer_pincode: String?=null,
-    val dealer_full_address: String?=null,
-    val sale_amount: Int?=null,
-    val laser_code: String?=null,
-    val garage_add: String?=null,
-    val length: Int?=null,
-    val width: Int?=null,
-    val height: Int?=null,
-    val reg_upto: String?=null,
-    val fit_upto: String?=null,
-    val annual_income: Int?=null,
-    val op_dt: String?=null,
-    val imported_vehicle: String?=null,
-    val other_criteria: Int?=null,
-    val status: String?=null,
-    val vehicle_type: String?=null,
-    val tax_mode: String?=null,
-    val mobile_no: Long?=null,
-    val email_id: String?=null,
-    val pan_no: String?=null,
-    val aadhar_no: String?=null,
-    val passport_no: String?=null,
-    val ration_card_no: String?=null,
-    val voter_id: String?=null,
-    val dl_no: String?=null,
-    val verified_on: String?=null,
-    val dl_validation_required: Boolean?=null,
-    val condition_status: Boolean?=null,
-    val vehicle_insurance_details: VehicleInsuranceDetails?=null,
-    val vehicle_pucc_details: VehiclePuccDetails?=null,
+    val state_code: String? = null,
+    val state: String? = null,
+    val office_code: Int? = null,
+    val office_name: String? = null,
+    val reg_no: String? = null,
+    val reg_date: String? = null,
+    val purchase_date: String? = null,
+    val owner_count: Int? = null,
+    val owner_name: String? = null,
+    val owner_father_name: String? = null,
+    val current_address_line1: String? = null,
+    val current_address_line2: String? = null,
+    val current_address_line3: String? = null,
+    val current_district_name: String? = null,
+    val current_state: String? = null,
+    val current_state_name: String? = null,
+    val current_pincode: Int? = null,
+    val current_full_address: String? = null,
+    val permanent_address_line1: String? = null,
+    val permanent_address_line2: String? = null,
+    val permanent_address_line3: String? = null,
+    val permanent_district_name: String? = null,
+    val permanent_state: String? = null,
+    val permanent_state_name: String? = null,
+    val permanent_pincode: Int? = null,
+    val permanent_full_address: String? = null,
+    val owner_code_descr: String? = null,
+    val reg_type_descr: String? = null,
+    val vehicle_class_desc: String? = null,
+    val chassis_no: String? = null,
+    val engine_no: String? = null,
+    val vehicle_manufacturer_name: String? = null,
+    val model_code: String? = null,
+    val model: String? = null,
+    val body_type: String? = null,
+    val cylinders_no: Int? = null,
+    val vehicle_hp: Double? = null,
+    val vehicle_seat_capacity: Int? = null,
+    val vehicle_standing_capacity: Int? = null,
+    val vehicle_sleeper_capacity: Int? = null,
+    val unladen_weight: Int? = null,
+    val vehicle_gross_weight: Int? = null,
+    val vehicle_gross_comb_weight: Int? = null,
+    val fuel_descr: String? = null,
+    val color: String? = null,
+    val manufacturing_mon: Int? = null,
+    val manufacturing_yr: Int? = null,
+    val norms_descr: String? = null,
+    val wheelbase: Int? = null,
+    val cubic_cap: Double? = null,
+    val floor_area: Int? = null,
+    val ac_fitted: String? = null,
+    val audio_fitted: String? = null,
+    val video_fitted: String? = null,
+    val vehicle_purchase_as: String? = null,
+    val vehicle_catg: String? = null,
+    val dealer_code: String? = null,
+    val dealer_name: String? = null,
+    val dealer_address_line1: String? = null,
+    val dealer_address_line2: String? = null,
+    val dealer_address_line3: String? = null,
+    val dealer_district: String? = null,
+    val dealer_pincode: String? = null,
+    val dealer_full_address: String? = null,
+    val sale_amount: Int? = null,
+    val laser_code: String? = null,
+    val garage_add: String? = null,
+    val length: Int? = null,
+    val width: Int? = null,
+    val height: Int? = null,
+    val reg_upto: String? = null,
+    val fit_upto: String? = null,
+    val annual_income: Int? = null,
+    val op_dt: String? = null,
+    val imported_vehicle: String? = null,
+    val other_criteria: Int? = null,
+    val status: String? = null,
+    val vehicle_type: String? = null,
+    val tax_mode: String? = null,
+    val mobile_no: Long? = null,
+    val email_id: String? = null,
+    val pan_no: String? = null,
+    val aadhar_no: String? = null,
+    val passport_no: String? = null,
+    val ration_card_no: String? = null,
+    val voter_id: String? = null,
+    val dl_no: String? = null,
+    val verified_on: String? = null,
+    val dl_validation_required: Boolean? = null,
+    val condition_status: Boolean? = null,
+    val vehicle_insurance_details: VehicleInsuranceDetails? = null,
+    val vehicle_pucc_details: VehiclePuccDetails? = null,
     val permit_details: String? = null,
-    val latest_tax_details: LatestTaxDetails?=null,
-    val financer_details: FinancerDetails? = null
+    val latest_tax_details: LatestTaxDetails? = null,
+    val financer_details: Financer_details? = null
 )
 
-@Serializable
-data class FinancerDetails(
-    val hp_type: String,
-    val financer_name: String,
-    val financer_address_line1: String,
-    val financer_address_line2: String,
-    val financer_address_line3: String,
-    val financer_district: Int,
-    val financer_pincode: Int,
-    val financer_state: String,
-    val financer_full_address: String,
-    val hypothecation_dt: String,
-    val op_dt: String
-)
 @Serializable
 data class VehicleInsuranceDetails(
     val insurance_from: String,
@@ -797,6 +788,23 @@ data class LatestTaxDetails(
     val rcpt_no: String
 )
 
+@Serializable
+data class Financer_details(
+    val hp_type: String,
+    val financer_name: String,
+    val financer_address_line1: String,
+    val financer_address_line2: String,
+    val financer_address_line3: String,
+    val financer_district: Int,
+    val financer_pincode: Int,
+    val financer_state: String,
+    val financer_full_address: String,
+    val hypothecation_dt: String,
+    val op_dt: String
+)
+
+//--------------------------------------------------------------------------------
+
 // Register Devices for Push Notification
 // Response
 @Serializable
@@ -813,7 +821,136 @@ data class RegisteredDeviceResponse(
     val deviceTokens: List<String>? = emptyList()
 )
 
-//--------------------------------------------------------------------------------
 //-------------------------------------------------------------------------------
+// Health Filters ---------------------------------------------------------------
+// Slab
+// Response
+@Serializable
+data class SlabResponse(
+    val message: String,
+    val data : List<SlabData>? = emptyList()
+)
+
+@Serializable
+data class SlabData(
+    val id: String,
+    val policy_segment: PolicySegment,
+    val min_amount: Int,
+    val max_amount: Int,
+    val name: String,
+    val status: Int,
+    val remarks: String,
+    val description: String
+)
+
+@Serializable
+data class PolicySegment(
+    val id: String,
+    val name: String,
+    val remarks: String,
+    val status: Int,
+    val description: String? = null,
+    val data_table_name: String,
+    val class_path: String
+)
+
+// Product
+// Response
+@Serializable
+data class ProductResponse(
+    val message: String,
+    val data : List<ProductData>
+)
+
+@Serializable
+data class ProductData(
+    val id: String,
+    val insurance_type: InsuranceTypeX,
+    val policy_segment: PolicySegment,
+    val status: Int,
+    val name: String,
+    val remarks: String? = null,
+    val description: String? = null
+)
+
+@Serializable
+data class InsuranceTypeX(
+    val name: String,
+    val description: String? = null,
+    val policy_segment_id: String,
+    val id: String,
+    val status: Int
+)
+
+// Insurer_Group
+// Response
+@Serializable
+data class InsurerGroupResponse(
+    val message: String,
+    val data : List<InsurerGroupData>
+)
+
+@Serializable
+data class InsurerGroupData(
+    val id: String,
+    val name: String,
+    val description: String? = null,
+    val remarks: String? = null,
+    val status: Int,
+    val policy_segment: PolicySegment
+)
+
+// Policy_Segment
+// Response
+@Serializable
+data class PolicySegmentResponse(
+    val id: String,
+    val name: String,
+    val remarks: String,
+    val status: Int,
+    val description: String? = null,
+    val data_table_name: String,
+    val class_path: String
+)
+
+// Insurance Type Using Policy Segment ID
+// Response
+@Serializable
+data class InsuranceTypeUsingSegmentID(
+    val message: String,
+    val data : List<InsuranceTypeUsingSegmentIDData>
+)
+
+@Serializable
+data class InsuranceTypeUsingSegmentIDData(
+    val name: String,
+    val description: String? = null,
+    val policy_segment_id: String,
+    val id: String,
+    val policy_segment: PolicySegment,
+    val status: Int
+)
+
+// PPts Types Using Policy Segment ID
+// Response
+data class PPTsTypesBySegmentId(
+    val message: String,
+    val data : List<PPTsTypesData>
+)
+
+data class PPTsTypesData(
+    val id: String,
+    val policy_segment: PolicySegment,
+    val name: String,
+    val min: Int,
+    val max: Int,
+    val remarks: String,
+    val description: String?= null,
+    val status: Int
+)
 
 
+
+
+
+//-------------------------------------------------------------------------------

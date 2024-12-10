@@ -30,8 +30,8 @@ struct AuthenticationView: View {
     @ObservedObject var selectedTabIs : GetSelectedTab
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var router : Router
-    
     @ObservedObject var snackBar : SnackbarModel
+    
     
     @State private var isSelectedTab : AuthenticationDestination = .signInView
     @State private var selectedTransition : AnyTransition = .trailingToLeading
@@ -117,7 +117,8 @@ struct AuthenticationView: View {
                     width: width,
                     height: height,
                     selectedTabIs: selectedTabIs, 
-                    accessModel: accessModel
+                    accessModel: accessModel,
+                    snackBar:snackBar
                 )
                 .transition(.trailingToLeading)
             }

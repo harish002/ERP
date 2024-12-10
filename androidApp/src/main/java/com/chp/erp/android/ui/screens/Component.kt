@@ -86,7 +86,7 @@ fun PolicyListView(
             .fillMaxWidth()
             .clickable {
 //                showPopup = !showPopup
-                BottomBarScreen.Poicy_Rate_Details.route?.let { mainNavController.navigate("$it/$data") }
+                BottomBarScreen.Poicy_Rate_Details.route?.let { mainNavController.navigate("$it/${data.id}") }
             }
             .padding(6.dp)
             .clip(RoundedCornerShape(12.dp)),
@@ -112,11 +112,11 @@ fun PolicyListView(
                         .weight(0.7f),
                     verticalArrangement = Arrangement.Center,
                 ) {
-//                    data.insurance_type.name.let {
+                    data.insurance_type.name.let {
                         Text(
                             text =
-                            "Insurance Type"
-//                            it
+//                            "Insurance Type"
+                            it
                             ,
                             color =
                             Color(0xFF6C757D)
@@ -127,12 +127,12 @@ fun PolicyListView(
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(bottom = 2.dp)
                         )
-//                    }
-//                    data.insurer.name.let {
+                    }
+                    data.insurer.name.let {
                         Text(
                             text =
-                        "InsurerName"
-//                            it
+//                        "InsurerName"
+                            it
                             ,
                             color = MaterialTheme.colorScheme.onSurface,
                             maxLines = 1,
@@ -140,7 +140,7 @@ fun PolicyListView(
                             style = MaterialTheme.typography.labelMedium,
                             modifier = Modifier.padding(bottom = 2.dp)
                         )
-//                    }
+                    }
 //
 
 
@@ -152,11 +152,11 @@ fun PolicyListView(
                 )
 
 
-//        if (data != null) {
+        if (data != null) {
                 Text(
                     text =
-                    "30%"
-//                "${data.payouts}%"
+//                    "30%"
+                "${data.payouts}%"
                     ,
                     color = MaterialTheme.colorScheme.onSurface,
                     style = MaterialTheme.typography.labelLarge,
@@ -164,7 +164,7 @@ fun PolicyListView(
                         .padding(bottom = 2.dp)
                         .weight(0.2f)
                 )
-//        }
+        }
 
             }
         }
@@ -187,80 +187,80 @@ fun PolicyListView(
 }
 
 
-@Composable
-fun PolicyToolsGridView(data: PolicyRateData, onDismiss: () -> Unit) {
-    val items = (1..5).toList() // Example data set
-    Card(
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth(0.9f)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = "Policy Rate",
-                modifier = Modifier
-                    .padding(14.dp),
-                style = TextStyle(
-                    fontSize = 24.sp, // Increase the font size to 24sp (you can adjust the size as needed)
-                    fontWeight = FontWeight.Bold // Add bold style if desired
-                )
-            )
-
-            Image(
-                painter = painterResource(id = R.drawable.close_btn),
-                modifier = Modifier
-                    .padding(14.dp)
-                    .clickable {
-                        onDismiss()
-                    }, contentDescription = "Close Button"
-            )
-        }
-        LazyVerticalGrid(
-            modifier = Modifier
-                .clip(RoundedCornerShape(8.dp))
-                .padding(8.dp),
-            columns = GridCells.Fixed(2), // 3 columns
-            contentPadding = PaddingValues(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            item() {
-                GridItem("Payout %", data.payouts)
-            }
-            item() {
-                GridItem("Insurer", data.insurer.name)
-            }
-            item() {
-                GridItem("Insurance Type", data.insurance_type.name)
-            }
-            item() {
-                GridItem("Vehicle Type", data.vehicle_model.vehicle_type.name)
-            }
-            item() {
-                GridItem("Renewal Type", data.renewal_type.name)
-            }
-            item() {
-                GridItem("Fuel Type", data.fuel_type.name)
-            }
-            item() {
-                GridItem("State", data.city.state.name)
-            }
-            item() {
-                GridItem("City Category", data.city.city_category.name)
-            }
-            item() {
-                GridItem("City", data.city.name)
-            }
-            item() {
-                GridItem("NCB", data.status.toString())
-            }
-        }
-    }
-}
+//@Composable
+//fun PolicyToolsGridView(data: PolicyRateData, onDismiss: () -> Unit) {
+//    val items = (1..5).toList() // Example data set
+//    Card(
+//        modifier = Modifier
+//            .wrapContentHeight()
+//            .fillMaxWidth(0.9f)
+//    ) {
+//        Row(
+//            modifier = Modifier.fillMaxWidth(),
+//            verticalAlignment = Alignment.CenterVertically,
+//            horizontalArrangement = Arrangement.SpaceBetween
+//        ) {
+//            Text(
+//                text = "Policy Rate",
+//                modifier = Modifier
+//                    .padding(14.dp),
+//                style = TextStyle(
+//                    fontSize = 24.sp, // Increase the font size to 24sp (you can adjust the size as needed)
+//                    fontWeight = FontWeight.Bold // Add bold style if desired
+//                )
+//            )
+//
+//            Image(
+//                painter = painterResource(id = R.drawable.close_btn),
+//                modifier = Modifier
+//                    .padding(14.dp)
+//                    .clickable {
+//                        onDismiss()
+//                    }, contentDescription = "Close Button"
+//            )
+//        }
+//        LazyVerticalGrid(
+//            modifier = Modifier
+//                .clip(RoundedCornerShape(8.dp))
+//                .padding(8.dp),
+//            columns = GridCells.Fixed(2), // 3 columns
+//            contentPadding = PaddingValues(8.dp),
+//            verticalArrangement = Arrangement.spacedBy(8.dp),
+//            horizontalArrangement = Arrangement.spacedBy(8.dp)
+//        ) {
+//            item() {
+//                GridItem("Payout %", data.payouts)
+//            }
+//            item() {
+//                GridItem("Insurer", data.insurer.name)
+//            }
+//            item() {
+//                GridItem("Insurance Type", data.insurance_type.name)
+//            }
+//            item() {
+//                GridItem("Vehicle Type", data.vehicle_model.vehicle_type.name)
+//            }
+//            item() {
+//                GridItem("Renewal Type", data.renewal_type.name)
+//            }
+//            item() {
+//                GridItem("Fuel Type", data.fuel_type.name)
+//            }
+//            item() {
+//                GridItem("State", data.city.state.name)
+//            }
+//            item() {
+//                data.city?.city_category?.name?.let { GridItem("City Category", it) }
+//            }
+//            item() {
+//                GridItem("City", data.city.name)
+//            }
+//            item() {
+//                GridItem("NCB", data.status.toString())
+//            }
+//        }
+//    }
+//}
 
 @Composable
 fun GridItem(key: String, values: String) {
@@ -275,7 +275,7 @@ fun GridItem(key: String, values: String) {
             color = MaterialTheme.colorScheme.onSurface,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = MaterialTheme.typography.titleLarge,
+            style = MaterialTheme.typography.titleMedium,
             modifier = Modifier.padding(bottom = 2.dp)
         )
         Text(
@@ -289,8 +289,9 @@ fun GridItem(key: String, values: String) {
                 "0" -> Color.Red
                 else -> MaterialTheme.colorScheme.onSurface
             },
-            style = MaterialTheme.typography.labelLarge,
-            modifier = Modifier
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier,
+            maxLines = 1
         )
 
     }

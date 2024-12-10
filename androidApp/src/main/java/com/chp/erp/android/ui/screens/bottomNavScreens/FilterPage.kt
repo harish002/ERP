@@ -57,8 +57,11 @@ import com.chp.erp.android.apiServices.ApiViewModel
 import com.chp.erp.android.ui.component.CustBtn
 import com.chp.erp.android.ui.screens.PolicyListView
 import com.chp.erp.android.ui.screens.SelectionView
+import com.chp.lms.Services.Dataclass.GetPolicyRates
 import com.chp.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.chp.lms.android.Services.Methods
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -69,7 +72,7 @@ fun FilterScreen(
     mainNavController: NavController,
     viewModel: ApiViewModel,
     logout: () -> Unit,
-    ) {
+) {
 
     val context = LocalContext.current
     var loading by remember { mutableStateOf(true) }
@@ -165,28 +168,38 @@ fun FilterScreen(
         focusedIndicatorColor = MaterialTheme.colorScheme.background,
         unfocusedIndicatorColor = Color(0xFFD0D0D0)
     )
-    val coroutineScope = rememberCoroutineScope()
 
 
 
     ERPTheme {
+        val coroutineScope = rememberCoroutineScope()
+        val payload = SearchPolicyRatePayload(
+            state_id = "",
+            city_id = "",
+            city_category_id = "",
+            vehicle_type_id = "",
+            vehicle_model_id = "",
+            renewal_type_id = "",
+            insurance_type_id = "",
+            insurer_id = "",
+            fuel_type_id = "",
+            status = "0", page = 1, size = 50
+        )
 
-        LaunchedEffect(filterPolicyRateDatalist) {
-            // Update policyRatesList based on filterPolicyRateDatalist
-            viewModel.updatePolicyRates(filterPolicyRateDatalist)
 
-
-        }
-        LaunchedEffect(Unit) {
+        LaunchedEffect(key1 = true) {
             // Launching a coroutine in LaunchedEffect to initialize data
             coroutineScope.launch {
                 Methods().retrieve_Token(context)?.let {
-                    viewModel.getAllPolicyRates(it, context, logout)
+                    viewModel.getAllPolicyRates(it, context,payload, logout)
                 }
                 try {
                     Methods().retrieve_Token(context)?.let { token ->
                         // Use async to call multiple suspend functions concurrently
-                        val userDeferred = async { viewModel.getUserWhoLoggedIn(token) }
+                        val userDeferred = async {
+                            Methods().retrieve_userID(context)
+                                ?.let { viewModel.getUserWhoLoggedIn(token, it) }
+                        }
                         val vehicleTypesDeferred = async { viewModel.getAllVehicleTypes(token) }
                         val statesDeferred = async { viewModel.getAllStates(token) }
                         val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
@@ -196,6 +209,7 @@ fun FilterScreen(
                             async { viewModel.getAllInsuranceTypes(token) }
                         val allRenewalTypesDeferred = async { viewModel.getAllRenewalTypes(token) }
                         val allInsurerTypesDeferred = async { viewModel.getAllInsurerTypes(token) }
+
 
                         // Await all results
 
@@ -210,6 +224,7 @@ fun FilterScreen(
                         allInsurerTypesDeferred.await()
 
                         loading = false
+
                     }
                 } catch (e: Exception) {
                     println("Error occurred: ${e.message}")
@@ -218,15 +233,19 @@ fun FilterScreen(
             }
         }
 
+        LaunchedEffect(filterPolicyRateDatalist) {
+            // Update policyRatesList based on filterPolicyRateDatalist
+            viewModel.updatePolicyRates(filterPolicyRateDatalist)
+        }
+
 
 //        val allCategorylist = viewModel.allCourseCate.collectAsState()
 //        val allPublishlist = viewModel.allPublishesCourses.collectAsState()
         Scaffold(
             modifier = Modifier
                 .fillMaxSize()
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background),
 //                .nestedScroll(scrollBehavior.nestedScrollConnection)
-            ,
             topBar = {
                 Box(
                     modifier = Modifier
@@ -254,14 +273,14 @@ fun FilterScreen(
                                     filterSheet = true
                                 }) {
                                     Row(
-                                        modifier = Modifier.wrapContentSize()
+                                        modifier = Modifier
+                                            .wrapContentSize()
                                             .clip(RoundedCornerShape(5.dp))
                                             .background(Color(0xFF04C98B))
                                             .padding(
 //                                                horizontal = 6.dp,
                                                 8.dp,
-                                                )
-                                        ,
+                                            ),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
@@ -269,11 +288,11 @@ fun FilterScreen(
                                             tint = MaterialTheme.colorScheme.background,
                                             modifier = Modifier
                                                 .padding(end = 6.dp)
-                                                .size(16.dp)
-                                            ,
+                                                .size(16.dp),
                                             contentDescription = "filter Icon"
                                         )
-                                        Text("Filter",
+                                        Text(
+                                            "Filter",
                                             color = MaterialTheme.colorScheme.background,
                                             style = MaterialTheme.typography.bodySmall
                                         )
@@ -363,15 +382,11 @@ fun FilterScreen(
                     itemsIndexed(policyRatesList) { index, item ->
                         if (item != null) {
                             //REOPEN
-                            PolicyListView(item, index + 1,mainNavController)
+                            PolicyListView(item, index + 1, mainNavController)
                         }
                     }
-
                 }
-
             }
-
-
         }
         if (filterSheet) {
             ModalBottomSheet(

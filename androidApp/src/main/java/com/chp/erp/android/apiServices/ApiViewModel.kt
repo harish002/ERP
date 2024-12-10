@@ -243,16 +243,18 @@ class ApiViewModel : ViewModel() {
     val getPolicyRates: StateFlow<List<PolicyRateData?>> = _getPolicyRates
 
 
-    suspend fun getAllPolicyRates(token: String, context: Context, logout: () -> Unit): List<PolicyRateData?> {
+    suspend fun getAllPolicyRates(token: String, context: Context, payload: SearchPolicyRatePayload,logout: () -> Unit): List<PolicyRateData?> {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getPolicyRates(token)
+                ApiServices()
+                    .searchPolicyRateData(token,payload)
+//                    .getPolicyRates(token)
             }
             val response = deferredResponse.await()
-            Log.d("policy Rates", response.data.toString())
-            _getPolicyRates.value = response.data
+            Log.d("policy Rates", response.items.toString())
+            _getPolicyRates.value = response.items
 
-            return response.data
+            return response.items
         } catch (e: Exception) {
             //Refresh Token is not working
             if(e.message == "401"){
@@ -268,13 +270,13 @@ class ApiViewModel : ViewModel() {
 
     }
 
-    private var _getUserdata = MutableStateFlow<GetUserData?>(null)
-    val getUserdata: MutableStateFlow<GetUserData?> = _getUserdata
+    private var _getUserdata = MutableStateFlow<UserData?>(null)
+    val getUserdata: MutableStateFlow<UserData?> = _getUserdata
 
-    suspend fun getUserWhoLoggedIn(token: String): GetUserData? {
+    suspend fun getUserWhoLoggedIn(token: String,userId: String): UserData? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getUserWhoLoggedIn(token)
+                ApiServices().getUserWhoLoggedIn(token,userId)
             }
             val response = deferredResponse.await()
             Log.d("UserWhoLoggedIN", response.toString())
@@ -602,33 +604,33 @@ class ApiViewModel : ViewModel() {
     }
 
 
-    private var _deviceRegiestration = MutableStateFlow<RegisteredDeviceResponse?>(null)
-    val deviceRegiestration: MutableStateFlow<RegisteredDeviceResponse?> = _deviceRegiestration
-
-    suspend fun registerDeviceForNotification(
-        token: String,
-        projectId: String,
-        userId: String,
-        deviceToken: String
-    ):String {
-        return try {
-            val response = withContext(Dispatchers.IO) {
-                ApiServices().setregisterDeviceForNotification(
-                    token,
-                    projectId, userId, deviceToken
-                )
-            }
-            Log.d("Success registerDeviceForNotification", response.toString())
-            _deviceRegiestration.value = response
-            return "Success"
-        } catch (e: Exception) {
-            Log.e(
-                "registerDeviceForNotification Error",
-                e.localizedMessage ?: "Unknown error"
-            )
-            e.message.toString()
-        }
-    }
+//    private var _deviceRegiestration = MutableStateFlow<RegisteredDeviceResponse?>(null)
+//    val deviceRegiestration: MutableStateFlow<RegisteredDeviceResponse?> = _deviceRegiestration
+//
+//    suspend fun registerDeviceForNotification(
+//        token: String,
+//        projectId: String,
+//        userId: String,
+//        deviceToken: String
+//    ):String {
+//        return try {
+//            val response = withContext(Dispatchers.IO) {
+//                ApiServices().setregisterDeviceForNotification(
+//                    token,
+//                    projectId, userId, deviceToken
+//                )
+//            }
+//            Log.d("Success registerDeviceForNotification", response.toString())
+//            _deviceRegiestration.value = response
+//            return "Success"
+//        } catch (e: Exception) {
+//            Log.e(
+//                "registerDeviceForNotification Error",
+//                e.localizedMessage ?: "Unknown error"
+//            )
+//            e.message.toString()
+//        }
+//    }
 
 
     private var _resetPassword = MutableStateFlow<String?>(null)
