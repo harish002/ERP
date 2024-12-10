@@ -84,9 +84,14 @@ struct PolicySegmentsView: View {
                             
                         case "Life":
                             print("Life Page Executed")
+                            withAnimation{
+                                self.isSheetClosed = false
+                            }
+                            router.navigateTo(to: .lifeview)
                             
                         case "SME":
                             print("SME Page Executed")
+                            
                             
                         default:
                             print("No Such Page Found")

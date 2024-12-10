@@ -34,6 +34,9 @@
 		2578D2822D07105E00460FF8 /* PolicySegmentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D2812D07105E00460FF8 /* PolicySegmentsView.swift */; };
 		2578D2852D0727F700460FF8 /* HealthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D2842D0727F700460FF8 /* HealthView.swift */; };
 		2578D2872D07467D00460FF8 /* HealthDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D2862D07467D00460FF8 /* HealthDataView.swift */; };
+		2578D28B2D085F5A00460FF8 /* login.json in Resources */ = {isa = PBXBuildFile; fileRef = 2578D28A2D085F5A00460FF8 /* login.json */; };
+		2578D28D2D0863AC00460FF8 /* LifeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D28C2D0863AC00460FF8 /* LifeView.swift */; };
+		2578D28F2D0871C700460FF8 /* LifeDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D28E2D0871C700460FF8 /* LifeDataView.swift */; };
 		25791BC72C932BF400B1079B /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791BC52C932BF400B1079B /* Router.swift */; };
 		25791BCA2C9336EE00B1079B /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791BC92C9336EE00B1079B /* MainView.swift */; };
 		25791BCF2C93374700B1079B /* LMSLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791BCB2C93374700B1079B /* LMSLoginView.swift */; };
@@ -175,6 +178,9 @@
 		2578D2812D07105E00460FF8 /* PolicySegmentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PolicySegmentsView.swift; sourceTree = "<group>"; };
 		2578D2842D0727F700460FF8 /* HealthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthView.swift; sourceTree = "<group>"; };
 		2578D2862D07467D00460FF8 /* HealthDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthDataView.swift; sourceTree = "<group>"; };
+		2578D28A2D085F5A00460FF8 /* login.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = login.json; sourceTree = "<group>"; };
+		2578D28C2D0863AC00460FF8 /* LifeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeView.swift; sourceTree = "<group>"; };
+		2578D28E2D0871C700460FF8 /* LifeDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeDataView.swift; sourceTree = "<group>"; };
 		25791BC52C932BF400B1079B /* Router.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		25791BC92C9336EE00B1079B /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		25791BCB2C93374700B1079B /* LMSLoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMSLoginView.swift; sourceTree = "<group>"; };
@@ -347,6 +353,7 @@
 			children = (
 				2578D27F2D07051100460FF8 /* VehicleDataView.swift */,
 				2578D2862D07467D00460FF8 /* HealthDataView.swift */,
+				2578D28E2D0871C700460FF8 /* LifeDataView.swift */,
 			);
 			path = "Segment Data Screens";
 			sourceTree = "<group>";
@@ -356,6 +363,7 @@
 			children = (
 				25791C662C9ACC2200B1079B /* UploadVehicleImageAndNumber.swift */,
 				2578D2842D0727F700460FF8 /* HealthView.swift */,
+				2578D28C2D0863AC00460FF8 /* LifeView.swift */,
 			);
 			path = "Policy Segments";
 			sourceTree = "<group>";
@@ -588,6 +596,7 @@
 			isa = PBXGroup;
 			children = (
 				2585D73F2CAEBBD90017D4DC /* tickJson.json */,
+				2578D28A2D085F5A00460FF8 /* login.json */,
 			);
 			path = jsonFiles;
 			sourceTree = "<group>";
@@ -766,6 +775,7 @@
 				2578D2692D0444B100460FF8 /* Poppins-ExtraLight.ttf in Resources */,
 				2578D26A2D0444B100460FF8 /* Poppins-ThinItalic.ttf in Resources */,
 				2578D26B2D0444B100460FF8 /* Poppins-ExtraLightItalic.ttf in Resources */,
+				2578D28B2D085F5A00460FF8 /* login.json in Resources */,
 				2578D26C2D0444B100460FF8 /* Poppins-Bold.ttf in Resources */,
 				2578D26D2D0444B100460FF8 /* Poppins-ExtraBoldItalic.ttf in Resources */,
 				2578D26E2D0444B100460FF8 /* Poppins-MediumItalic.ttf in Resources */,
@@ -881,6 +891,7 @@
 				25791C092C93392900B1079B /* CustomTextField.swift in Sources */,
 				25791C032C93392900B1079B /* SearchSpaceCard.swift in Sources */,
 				2578D2872D07467D00460FF8 /* HealthDataView.swift in Sources */,
+				2578D28D2D0863AC00460FF8 /* LifeView.swift in Sources */,
 				25791BDF2C9338DE00B1079B /* AuthenticationDetails.swift in Sources */,
 				2578D2802D07051100460FF8 /* VehicleDataView.swift in Sources */,
 				2578D2822D07105E00460FF8 /* PolicySegmentsView.swift in Sources */,
@@ -915,6 +926,7 @@
 				25791BCF2C93374700B1079B /* LMSLoginView.swift in Sources */,
 				25791C0F2C93392900B1079B /* SearchBar.swift in Sources */,
 				25791C532C933EE900B1079B /* OTPSentFaliureView.swift in Sources */,
+				2578D28F2D0871C700460FF8 /* LifeDataView.swift in Sources */,
 				25791BC72C932BF400B1079B /* Router.swift in Sources */,
 				25791C512C933EE900B1079B /* LMSLoginWithOtpView.swift in Sources */,
 				25791C072C93392900B1079B /* CustomHeader.swift in Sources */,

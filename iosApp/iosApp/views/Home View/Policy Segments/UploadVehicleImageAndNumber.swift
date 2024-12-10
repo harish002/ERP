@@ -827,7 +827,9 @@ struct UploadVehicleImageAndNumber: View {
                         .overlay(content: {
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(Color(hex: "#544C4C"), lineWidth: 1)
-    
+                        })
+                        .onChange(of: vehicleNumber, perform: {newValue in
+                            self.vehicleNumber = newValue.uppercased()
                         })
     
                     Button(action: {

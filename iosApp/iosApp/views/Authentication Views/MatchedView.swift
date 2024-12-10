@@ -29,8 +29,8 @@ struct MatchedView: View {
                     Image("appstore")
                         .resizable()
                         .frame(width: 114, height: 114)
-                        .matchedGeometryEffect(id: "logo", in: namespace)
                         .cornerRadius(50, corners: [.allCorners])
+                        .matchedGeometryEffect(id: "logo", in: namespace)
                         .padding(.bottom,33)
                         
                        
@@ -52,13 +52,13 @@ struct MatchedView: View {
             else {
                 VStack(alignment:.center,spacing:0) {
                     Spacer()
-                        .frame(height: 214)
+                        .frame(height: 200)
                     
                     Image("appstore")
                         .resizable()
                         .frame(width: 114, height: 114)
-                        .matchedGeometryEffect(id: "logo", in: namespace)
                         .cornerRadius(50, corners: [.allCorners])
+                        .matchedGeometryEffect(id: "logo", in: namespace)
                         .padding(.bottom,33)
                     
                        
@@ -68,7 +68,7 @@ struct MatchedView: View {
                         .foregroundStyle(Color(hex: "#FBFAFD"))
                     
                     Spacer()
-                        .frame(height: 131)
+                        .frame(height: 121)
                                            
                     Text("Simplifying Sales for Smarter Policy Partners.")
                         .font(Font.custom("Gilroy-SemiBold", size: 16))
@@ -79,18 +79,19 @@ struct MatchedView: View {
                         .lineSpacing(4)
                     
                     
-                    VStack(alignment:.center,spacing: 14){
-                        Text("Log in")
-                            .padding(20)
-                            .font(Font.custom("Gilroy-SemiBold", size: 18))
-                            .foregroundStyle(Color(hex: "#1630C2"))
-                            .frame(width: 136,height: 44,alignment: .center)
-                            .background(Color.white)
-                            .cornerRadius(8, corners: [.allCorners])
-                            .onTapGesture {
-                                onLoginButtonTapped()
-                            }
-                        
+                    HStack(alignment:.center,spacing: 14){
+                        HStack{
+                            Text("Log in")
+                                .font(Font.custom("Gilroy-SemiBold", size: 18))
+                                .foregroundStyle(Color(hex: "#1630C2"))
+                                .padding(20)
+                                .frame(width: 136,height: 44,alignment: .center)
+                                .background(Color.white)
+                                .cornerRadius(8, corners: [.allCorners])
+                                .onTapGesture {
+                                    onLoginButtonTapped()
+                                }
+                        }
                     }
                     
                     Spacer()
@@ -111,7 +112,7 @@ struct MatchedView: View {
         .navigationBarBackButtonHidden()
         .frame(maxWidth: .infinity)
         .background(
-            Image("Rectangle 2")
+            Image("SPLASH-BG")
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .frame(maxWidth:.infinity,maxHeight: .infinity)

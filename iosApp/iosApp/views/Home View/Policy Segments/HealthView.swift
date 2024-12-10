@@ -526,6 +526,8 @@ struct HealthView: View {
             }
         }
     
+ 
+    
     
     func searchGeneralPolicyRates(token : String, payload : GeneralPolicyRatePayload){
         Task.init{

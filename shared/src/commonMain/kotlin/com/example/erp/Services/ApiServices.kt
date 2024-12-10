@@ -874,8 +874,8 @@ class ApiServices {
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/search")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
-                parameter("page", 1)
-                parameter("size", 100)
+                parameter("skip", 1)
+                parameter("limit", 1000)
                 body = Json.encodeToString(SearchPolicyRatePayload.serializer(),searchData)
             }
             if (response.status.isSuccess()){
@@ -902,8 +902,8 @@ class ApiServices {
             val response : HttpResponse = client.post{
                 url("${ApiConfig.SALES_TOOL_API}/general_policy_rates/search")
                 contentType(ContentType.Application.Json)
-                parameter("page", 1)
-                parameter("size", 100)
+                parameter("skip", 1)
+                parameter("limit", 100)
                 body = Json.encodeToString(GeneralPolicyRatePayload.serializer(),searchData)
             }
             if (response.status.isSuccess()){

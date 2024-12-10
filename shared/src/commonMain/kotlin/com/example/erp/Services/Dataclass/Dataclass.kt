@@ -268,7 +268,7 @@ data class GetPolicyRates(
 @Serializable
 data class PolicyRateData(
     val city_id: String,
-    val city_category_id : String,
+    val city_category_id : String? = null,
     val fuel_type_id: String,
     val renewal_type_id: String,
     val insurance_type_id: String,

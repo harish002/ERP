@@ -109,7 +109,11 @@ struct iOSApp: App {
                                 )
                             
                             case .lifeview:
-                                EmptyView()
+                                LifeView(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router
+                                )
                                 
                             case .smeview:
                                 EmptyView()
