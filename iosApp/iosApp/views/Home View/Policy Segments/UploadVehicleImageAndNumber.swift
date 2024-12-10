@@ -823,7 +823,7 @@ struct UploadVehicleImageAndNumber: View {
                         .padding(.vertical,8)
                         .padding(.horizontal,12)
                         .font(.custom("Poppins-Medium", size: 14))
-                        .foregroundStyle(Color(hex: "#C4C4C4"))
+                        .foregroundStyle(Color(hex: "#000000"))
                         .overlay(content: {
                             RoundedRectangle(cornerRadius: 6)
                                 .stroke(Color(hex: "#544C4C"), lineWidth: 1)
