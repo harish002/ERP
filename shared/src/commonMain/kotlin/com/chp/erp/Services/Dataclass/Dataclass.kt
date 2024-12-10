@@ -377,7 +377,7 @@ data class RenewalType(
 data class CityCategory(
     val name: String,
     val description: String? = null,
-    val id: String,
+    val id: String? = null,
     val status: Int,
     val created_at: String? = null
 )

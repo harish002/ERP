@@ -13,6 +13,9 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,6 +27,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
@@ -1162,16 +1166,17 @@ fun UploadImageContent(
             ).show()
         }
     }
+
+    val scrollSheet = rememberScrollState()
     Column(
         Modifier
             .fillMaxSize()
             .background(Color.White)
+            .scrollable( scrollSheet, orientation = Orientation.Vertical),
     ) {
-//                item {
         Box(
             Modifier
-                .padding(8.dp)
-                .weight(1f)
+                .weight(0.6f)
                 .clickable {
                     when {
                         ContextCompat.checkSelfPermission(
@@ -1195,12 +1200,15 @@ fun UploadImageContent(
                         }
                     }
                 }
+                .padding(8.dp)
                 .fillMaxWidth()
-                .weight(0.4f)
-                .background(Color(0xFFF5F8FF))
                 .drawBehind {
                     drawRoundRect(color = Color(0xFF797979), style = stroke)
                 }
+                .clip(RoundedCornerShape(6.dp))
+
+                .weight(0.4f)
+                .background(Color(0xFFF5F8FF))
                 .clip(RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
@@ -1224,7 +1232,7 @@ fun UploadImageContent(
                 )
             }
         }
-        Spacer(Modifier.padding(8.dp))
+        Spacer(Modifier.padding(6.dp))
 
 //                }
 //                item{
@@ -1232,17 +1240,19 @@ fun UploadImageContent(
             modifier = Modifier
                 .fillMaxWidth(1f)
                 .background(Color(0xFFF5F8FF))
-                .padding(8.dp, vertical = 12.dp)
+                .padding(8.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Column(
-                modifier = Modifier
-                    .weight(0.5f),
+                modifier = Modifier,
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
                     "or you can simply upload from\n" +
                             "Your Gallery ",
+                    textAlign = TextAlign.Center,
                     lineHeight = 20.sp,
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(top = 4.dp),
@@ -1271,6 +1281,7 @@ fun UploadImageContent(
         Spacer(Modifier.padding(8.dp))
         Card(
             Modifier
+                .padding(8.dp)
                 .fillMaxWidth()
                 .weight(0.6f)
         ) {
@@ -1287,7 +1298,7 @@ fun UploadImageContent(
                     painter = painterResource(id = R.drawable.land_scape),
                     contentDescription = "Placeholder Image",
                     modifier = Modifier
-                        .padding(40.dp)
+                        .padding(80.dp)
                         .fillMaxSize(1f),
                     contentScale = ContentScale.Fit
                 )
