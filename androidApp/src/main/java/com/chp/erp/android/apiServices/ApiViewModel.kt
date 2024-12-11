@@ -1,34 +1,34 @@
-package com.chp.erp.android.apiServices
+package com.example.erp.android.apiServices
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
-import com.chp.lms.Services.ApiServices
-import com.chp.lms.Services.Dataclass.AllCities
-import com.chp.lms.Services.Dataclass.AllCityCategories
-import com.chp.lms.Services.Dataclass.FuelTypes
-import com.chp.lms.Services.Dataclass.GetAllStates
-import com.chp.lms.Services.Dataclass.GetUserData
-import com.chp.lms.Services.Dataclass.GetVehicleDetails
-import com.chp.lms.Services.Dataclass.InsuranceTypeUsingSegmentID
-import com.chp.lms.Services.Dataclass.InsuranceTypes
-import com.chp.lms.Services.Dataclass.InsurerGroupResponse
-import com.chp.lms.Services.Dataclass.InsurerTypes
-import com.chp.lms.Services.Dataclass.PPTsTypesBySegmentId
-import com.chp.lms.Services.Dataclass.PolicyRateData
-import com.chp.lms.Services.Dataclass.PolicySegmentResponse
-import com.chp.lms.Services.Dataclass.ProductResponse
-import com.chp.lms.Services.Dataclass.RegisteredDeviceResponse
-import com.chp.lms.Services.Dataclass.RenewalTypes
-import com.chp.lms.Services.Dataclass.SearchPolicyRatePayload
-import com.chp.lms.Services.Dataclass.SlabResponse
-import com.chp.lms.Services.Dataclass.UserData
-import com.chp.lms.Services.Dataclass.UserDetails
-import com.chp.lms.Services.Dataclass.VehicleTypes
-import com.chp.lms.Services.Dataclass.VerifyOTP
 import com.chp.lms.android.Services.Methods
+import com.example.lms.Services.Dataclass.AllCities
+import com.example.lms.Services.Dataclass.AllCityCategories
+import com.example.lms.Services.Dataclass.FuelTypes
+import com.example.lms.Services.Dataclass.GetAllStates
+import com.example.lms.Services.Dataclass.GetUserData
+import com.example.lms.Services.Dataclass.GetVehicleDetails
+import com.example.lms.Services.Dataclass.InsuranceTypeUsingSegmentID
+import com.example.lms.Services.Dataclass.InsuranceTypes
+import com.example.lms.Services.Dataclass.InsurerGroupResponse
+import com.example.lms.Services.Dataclass.InsurerTypes
+import com.example.lms.Services.Dataclass.PPTsTypesBySegmentId
+import com.example.lms.Services.Dataclass.PolicyRateData
+import com.example.lms.Services.Dataclass.PolicySegmentResponse
+import com.example.lms.Services.Dataclass.ProductResponse
+import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
+import com.example.lms.Services.Dataclass.RenewalTypes
+import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
+import com.example.lms.Services.Dataclass.SlabResponse
+import com.example.lms.Services.Dataclass.UserDetails
+import com.example.lms.Services.Dataclass.VehicleTypes
+import com.example.lms.Services.Dataclass.VerifyOTP
+import com.example.lms.Services.Dataclass.UserData
+import com.example.lms.lms.Services.ApiServices
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -274,13 +274,13 @@ class ApiViewModel : ViewModel() {
 
     }
 
-    private var _getUserdata = MutableStateFlow<GetUserData?>(null)
-    val getUserdata: MutableStateFlow<GetUserData?> = _getUserdata
+    private var _getUserdata = MutableStateFlow<UserData?>(null)
+    val getUserdata: MutableStateFlow<UserData?> = _getUserdata
 
-    suspend fun getUserWhoLoggedIn(token: String): GetUserData? {
+    suspend fun getUserWhoLoggedIn(token: String, userId: String): UserData? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getUserWhoLoggedIn(token)
+                ApiServices().getUserWhoLoggedIn(token,userId)
             }
             val response = deferredResponse.await()
             Log.d("UserWhoLoggedIN", response.toString())
