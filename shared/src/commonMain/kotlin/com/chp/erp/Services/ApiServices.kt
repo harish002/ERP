@@ -2,7 +2,6 @@ package com.example.lms.Services
 
 import com.example.lms.Services.Dataclass.AllCities
 import com.example.lms.Services.Dataclass.AllCityCategories
-import com.example.lms.Services.Dataclass.AllCourseCategoryResponse
 import com.example.lms.Services.Dataclass.FailedResponse
 import com.example.lms.Services.Dataclass.FuelTypes
 import com.example.lms.Services.Dataclass.GeneralPolicyRatePayload
@@ -22,6 +21,7 @@ import com.example.lms.Services.Dataclass.PolicyRateData
 import com.example.lms.Services.Dataclass.PolicySegmentResponse
 import com.example.lms.Services.Dataclass.ProductResponse
 import com.example.lms.Services.Dataclass.RefreshToken
+import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.example.lms.Services.Dataclass.RenewalTypes
 import com.example.lms.Services.Dataclass.SearchPolicyRateData
 import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
@@ -222,11 +222,11 @@ class ApiServices {
     @Throws(IOException::class, CancellationException::class)
     suspend fun loginApi(user: UserDetails): UserResponse {
         try {
-            val response: HttpResponse = client.post{
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/login")
                 contentType(ContentType.Application.Json)
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-                header("Referer","https://api.1click.tech")
+                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("Referer", "https://api.1click.tech")
                 body = Json.encodeToString(UserDetails.serializer(), user)
             }
             if (response.status.isSuccess()) {
@@ -255,8 +255,7 @@ class ApiServices {
             }
             if (response.status.isSuccess()) {
                 return true
-            }
-            else{
+            } else {
                 throw IOException(
                     "${response.status}"
                 )
@@ -303,8 +302,7 @@ class ApiServices {
 
             if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else {
+            } else {
                 // Capture the error response in more detail
                 val errorMessage = response.body<String>()
                 println("Error Response ${response.status}: $errorMessage")
@@ -321,7 +319,7 @@ class ApiServices {
 
     @OptIn(InternalAPI::class)
     @Throws(IOException::class, CancellationException::class)
-    suspend fun refreshToken(refreshToken: RefreshToken):UserResponse{
+    suspend fun refreshToken(refreshToken: RefreshToken): UserResponse {
         try {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/token")
@@ -331,13 +329,14 @@ class ApiServices {
             }
             if (response.status.isSuccess()) {
                 return response.body()
-            }else {
+            } else {
                 throw IOException(
                     response.body<FailedResponse>().message
-                )            }
-        }catch (e: Exception) {
+                )
+            }
+        } catch (e: Exception) {
             println(e.message.toString())
-                throw e.message?.let { IOException(it) }!!
+            throw e.message?.let { IOException(it) }!!
         }
     }
 
@@ -345,25 +344,23 @@ class ApiServices {
     // Send Token to Mail to Reset Password
     @OptIn(InternalAPI::class)
     @Throws(IOException::class, CancellationException::class)
-    suspend fun resetPassword(email: String) : String {
+    suspend fun resetPassword(email: String): String {
         try {
-            val response : HttpResponse = client.post {
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/resetPassword")
                 contentType(ContentType.Application.Json)
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-                parameter("email",email)
+                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                parameter("email", email)
 
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Reset Password Failed -> ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -372,56 +369,51 @@ class ApiServices {
 
     // Change Password with the received Token
     @Throws(IOException::class, CancellationException::class)
-    suspend fun changePasswordWithToken(token: String, newPassword: String) : String {
+    suspend fun changePasswordWithToken(token: String, newPassword: String): String {
         try {
-            val response : HttpResponse = client.post {
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/changePasswordWithToken")
                 contentType(ContentType.Application.Json)
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-                parameter("token",token)
-                parameter("newPassword",newPassword)
+                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                parameter("token", token)
+                parameter("newPassword", newPassword)
 
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Change Password with Token Error Message -> ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
 
 
-
     //----------------------------------------------------------------------
 
     // Get In-App Notifications
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getNotifications(token : String, projectId : String) :
+    suspend fun getNotifications(token: String, projectId: String):
             List<GetNotificationsResponse> {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/notifications/appNotifications")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
-                parameter("projectId",projectId)
+                parameter("projectId", projectId)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Login error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -433,25 +425,23 @@ class ApiServices {
     // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api
     // Read all Policy Rates
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getPolicyRates(token : String) : GetPolicyRates {
+    suspend fun getPolicyRates(token: String): GetPolicyRates {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
-                parameter("skip",0)
-                parameter("limit",10)
+                parameter("skip", 0)
+                parameter("limit", 10)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Get Policy Rates Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -459,49 +449,46 @@ class ApiServices {
 
     // Read Policy Rate with Id
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getPolicyRateDataUsingId(token : String, policyRateId : String) : PolicyRateData {
+    suspend fun getPolicyRateDataUsingId(token: String, policyRateId: String): PolicyRateData {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/$policyRateId")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
 
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Get Policy Rates Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
+
     // Motor Filters ---------------------------------------------------------------------------
     // Vehicle Details ---------------------------------------------------------------------------
     // Read all vehicle types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getVehicleTypes(token : String) : VehicleTypes {
+    suspend fun getVehicleTypes(token: String): VehicleTypes {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/vehicle_type/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Vehicle Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -509,67 +496,61 @@ class ApiServices {
 
     // Read all Fuel Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getFuelTypes(token : String) : FuelTypes {
+    suspend fun getFuelTypes(token: String): FuelTypes {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/fuel_type/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Fuel Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
 
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getVehicleBrands(token : String) : VehicleBrandTypes {
+    suspend fun getVehicleBrands(token: String): VehicleBrandTypes {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/vehicle_brand/active")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Fuel Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
 
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getVehicleModels() : VehicleModels {
+    suspend fun getVehicleModels(): VehicleModels {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/vehicle_model/active")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Fuel Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -579,23 +560,21 @@ class ApiServices {
     // Location Details --------------------------------------------------------------------------
     // Read all States
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllStates(token : String) : GetAllStates {
+    suspend fun getAllStates(token: String): GetAllStates {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/state/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All States Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -603,23 +582,21 @@ class ApiServices {
 
     // Read all City Categories
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllCityCategory(token : String) : AllCityCategories {
+    suspend fun getAllCityCategory(token: String): AllCityCategories {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/city_category/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("City Category Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -627,23 +604,21 @@ class ApiServices {
 
     // Read all City Categories
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllCities(token : String) : AllCities {
+    suspend fun getAllCities(token: String): AllCities {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/city/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Cities Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -653,23 +628,21 @@ class ApiServices {
     // Policy Details ----------------------------------------------------------------------------
     // Read all Insurance Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllInsuranceTypes(token : String) : InsuranceTypes {
+    suspend fun getAllInsuranceTypes(token: String): InsuranceTypes {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/insurance_type/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Get All Insurance Type Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -677,23 +650,21 @@ class ApiServices {
 
     // Read all Renewal Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllRenewalTypes(token : String) : RenewalTypes {
+    suspend fun getAllRenewalTypes(token: String): RenewalTypes {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/renewal_type/all")
                 contentType(ContentType.Application.Json)
 
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Get Renewal Types Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -701,23 +672,21 @@ class ApiServices {
 
     // Read all Insurer Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllInsurerTypes(token : String) : InsurerTypes {
+    suspend fun getAllInsurerTypes(token: String): InsurerTypes {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/insurer/all")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All Insurer Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -727,22 +696,20 @@ class ApiServices {
     // Health Filters -----------------------------------------------------------------------------
     // Slab Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllSlabTypes() : SlabResponse {
+    suspend fun getAllSlabTypes(): SlabResponse {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/slab/")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All Slab Types Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -750,22 +717,20 @@ class ApiServices {
 
     // Product Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllProductTypes() : ProductResponse {
+    suspend fun getAllProductTypes(): ProductResponse {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/product/")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All Product Types Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -773,22 +738,20 @@ class ApiServices {
 
     // Insurer Groups Data
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllInsurerGroups() : InsurerGroupResponse {
+    suspend fun getAllInsurerGroups(): InsurerGroupResponse {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/insurer_group/")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All Insurer Group Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -796,22 +759,20 @@ class ApiServices {
 
     // Policy Segments
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllPolicySegments() : List<PolicySegmentResponse> {
+    suspend fun getAllPolicySegments(): List<PolicySegmentResponse> {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/policy_segment/")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All Policy Segment Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -819,22 +780,20 @@ class ApiServices {
 
     // Insurance Type Using Policy Segment ID
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getInsuranceTypeByPolicySegments(segmentId : String) : InsuranceTypeUsingSegmentID {
+    suspend fun getInsuranceTypeByPolicySegments(segmentId: String): InsuranceTypeUsingSegmentID {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/insurance_type/policy_segment/${segmentId}")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All Insurance Type Using SegmentID Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -842,22 +801,20 @@ class ApiServices {
 
     // PPTs Types Using Policy Segment ID
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getPPtsByPolicySegments(segmentId : String) :   PPTsTypesBySegmentId {
+    suspend fun getPPtsByPolicySegments(segmentId: String): PPTsTypesBySegmentId {
         try {
-            val response : HttpResponse = client.get {
+            val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/ppt/policy_segment/${segmentId}")
                 contentType(ContentType.Application.Json)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("All PPts Types Using SegmentID Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -869,27 +826,28 @@ class ApiServices {
     // Search Policy Rate Data
     @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
-    suspend fun searchPolicyRateData(token : String, searchData : SearchPolicyRatePayload) : SearchPolicyRateData {
+    suspend fun searchPolicyRateData(
+        token: String,
+        searchData: SearchPolicyRatePayload
+    ): SearchPolicyRateData {
         try {
-            val response : HttpResponse = client.post{
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.SALES_TOOL_API}/policy_rates/search")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
                 parameter("skip", 1)
                 parameter("limit", 1000)
-                body = Json.encodeToString(SearchPolicyRatePayload.serializer(),searchData)
+                body = Json.encodeToString(SearchPolicyRatePayload.serializer(), searchData)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
 
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Search Policy Rate Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -898,26 +856,27 @@ class ApiServices {
     // Search General Policy Rate Data
     @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
-    suspend fun searchGeneralPolicyRateData(token : String, searchData : GeneralPolicyRatePayload) : GeneralPolicyRateResponse {
+    suspend fun searchGeneralPolicyRateData(
+        token: String,
+        searchData: GeneralPolicyRatePayload
+    ): GeneralPolicyRateResponse {
         try {
-            val response : HttpResponse = client.post{
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.SALES_TOOL_API}/general_policy_rates/search")
                 contentType(ContentType.Application.Json)
                 parameter("skip", 1)
                 parameter("limit", 100)
-                body = Json.encodeToString(GeneralPolicyRatePayload.serializer(),searchData)
+                body = Json.encodeToString(GeneralPolicyRatePayload.serializer(), searchData)
             }
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
 
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Search Policy Rate Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -926,7 +885,10 @@ class ApiServices {
     // Get Registration Number from Image
     @Throws(IOException::class, CancellationException::class)
     @OptIn(InternalAPI::class)
-    suspend fun getRegistrationNumberFromImage(token : String, filePath : String) : GetRegistrationNumberResponse {
+    suspend fun getRegistrationNumberFromImage(
+        token: String,
+        filePath: String
+    ): GetRegistrationNumberResponse {
         val cioClient = HttpClient(CIO)
         try {
 
@@ -939,24 +901,22 @@ class ApiServices {
                     val source = FileSystem.SYSTEM.source(filePath.toPath()).buffer()
 
                     append("file", source.readByteArray(), Headers.build {
-                        append(HttpHeaders.Accept,ContentType.Application.Json)
+                        append(HttpHeaders.Accept, ContentType.Application.Json)
                         append(HttpHeaders.ContentType, "multipart/form-data")
-                        append("Authorization",token)
+                        append("Authorization", token)
                     })
                 }
             )
 
-            if (response.status.isSuccess()){
-                return  response.body()
-            }
-            else {
+            if (response.status.isSuccess()) {
+                return response.body()
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
 
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Upload Image Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -964,7 +924,7 @@ class ApiServices {
 
     // Get Vehicle Details for the Vehicle Number
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getVehicleDetails(token : String, vehicleNumber : String): GetVehicleDetails {
+    suspend fun getVehicleDetails(token: String, vehicleNumber: String): GetVehicleDetails {
         try {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.SALES_TOOL_API}/ocr")
@@ -972,22 +932,18 @@ class ApiServices {
                 header("Authorization", "Bearer $token")
                 parameter("vehicle_number", vehicleNumber)
             }
-                if (response.status.isSuccess()){
-                    return  response.body()
-                }
-                else {
-                    throw ApiException.UnknownException(response.body())
-                }
-        }
-        catch (e:TimeoutCancellationException){
-            throw ApiException.TimeoutException()
-        }
-        catch (e : IOException){
-            if (e.message?.contains("No Internet") == true){
-                throw ApiException.NoInternetException()
+            if (response.status.isSuccess()) {
+                return response.body()
+            } else {
+                throw ApiException.UnknownException(response.body())
             }
-            else {
-                throw  ApiException.UnknownException(e.message ?: "Unknown error")
+        } catch (e: TimeoutCancellationException) {
+            throw ApiException.TimeoutException()
+        } catch (e: IOException) {
+            if (e.message?.contains("No Internet") == true) {
+                throw ApiException.NoInternetException()
+            } else {
+                throw ApiException.UnknownException(e.message ?: "Unknown error")
             }
         }
     }
@@ -995,28 +951,31 @@ class ApiServices {
 
     // Register Device for Enabling Push Notification
     @Throws(IOException::class, CancellationException::class)
-    suspend fun registerDeviceForNotification(token : String, projectId : String, userId : String,deviceToken : String) :
+    suspend fun registerDeviceForNotification(
+        token: String,
+        projectId: String,
+        userId: String,
+        deviceToken: String
+    ):
             RegisteredDeviceResponse {
         try {
-            val response : HttpResponse = client.post {
+            val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/registeredDevices/register")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
-                parameter("userId",userId)
-                parameter("projectId",projectId)
-                parameter("deviceToken",deviceToken)
+                parameter("userId", userId)
+                parameter("projectId", projectId)
+                parameter("deviceToken", deviceToken)
             }
 
-            if (response.status.isSuccess()){
+            if (response.status.isSuccess()) {
                 return response.body()
-            }
-            else{
+            } else {
                 throw IOException(
                     response.body<String>()
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             println("Register Device error Message ${e.cause?.message}")
             throw e.message?.let { IOException(it) }!!
         }
@@ -1038,7 +997,8 @@ class ApiServices {
             val response: HttpResponse = client.post {
                 url(
                     ApiConfig.UAT_NOTIFICATION_MANAGEMENT +
-                        "/registeredDevices/register")
+                            "/registeredDevices/register"
+                )
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
                 parameter("userId", userId)
@@ -1057,61 +1017,5 @@ class ApiServices {
             throw e.message?.let { IOException(it) }!!
         }
     }
-
-
-    // Send Token to Mail to Reset Password
-    @OptIn(InternalAPI::class)
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun resetPassword(email: String) : String {
-        try {
-            val response : HttpResponse = client.post {
-                url("${ApiConfig.UAT_ACCESS_API}/auth/resetPassword")
-                contentType(ContentType.Application.Json)
-                parameter("email",email)
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-            }
-            if (response.status.isSuccess()){
-                return response.body()
-            }
-            else{
-                throw IOException(
-                    response.body<String>()
-                )
-            }
-        }
-        catch (e: Exception) {
-            println("reset password error Message ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
-
-
-    // Change Password with the received Token
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun changePasswordWithToken(token: String, newPassword: String) : String {
-        try {
-            val response : HttpResponse = client.post {
-
-                url("${ApiConfig.UAT_ACCESS_API}/auth/changePasswordWithToken")
-                contentType(ContentType.Application.Json)
-                header("X-Project-ID","0d98736c-5f90-41b4-b689-1b1935aab762")
-                parameter("token",token)
-                parameter("newPassword",newPassword)
-
-            }
-            if (response.status.isSuccess()){
-                return response.body()
-            }
-            else{
-                throw IOException(
-                    response.body<String>()
-                )
-            }
-        }
-        catch (e: Exception) {
-            println("change Password error Message ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
-
 }
+

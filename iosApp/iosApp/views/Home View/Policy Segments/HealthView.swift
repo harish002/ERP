@@ -61,8 +61,8 @@ struct HealthView: View {
     ]
     
     @State private var isDataFiltered = false
-    
-    
+
+
     var body: some View {
         VStack(spacing:0){
             VStack(spacing:0){
@@ -111,7 +111,7 @@ struct HealthView: View {
             
             VStack(spacing:0){
                 ScrollView(.vertical,showsIndicators: false){
-                    VStack(spacing:16){
+                    VStack(spacing:12){
                         
                         selectionView(selectionTitle: "Insurance Type", staticValue: "Insurance Type")
                         
@@ -134,7 +134,7 @@ struct HealthView: View {
                     .cornerRadius(12, corners: [.allCorners])
                     .padding([.horizontal,.vertical],16)
                 }
-           
+
                 Button {
                     let payload = GeneralPolicyRatePayload(
                         insurer_id: submittingValue["Insurer"] ?? "", renewal_type_id: submittingValue["Renewal Type"] ?? "",
@@ -525,16 +525,16 @@ struct HealthView: View {
                 }
             }
         }
-    
- 
-    
-    
+
+
+
+
     func searchGeneralPolicyRates(token : String, payload : GeneralPolicyRatePayload){
         Task.init{
             do
             {
                 let result = try await accessModel.searchGeneralPolicyRates(token: token, searchPayload: payload)
-                
+
                 if result {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                         snackBar.show(message: "Match Found.", title: "Success", type: .success)
@@ -547,7 +547,7 @@ struct HealthView: View {
                     })
                     self.isDataFiltered = result
                 }
-                
+
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -563,7 +563,7 @@ struct HealthView: View {
                 print("Data Fetching Failed -> \(description)")
                 snackBar.show(message: description, title: "Error", type: .error)
             }
-            
+
         }
     }
 }
