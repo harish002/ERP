@@ -86,8 +86,16 @@ struct ProfileView: View {
                         VStack(alignment:.leading,spacing:30){
 
                             AccountOptions(optionTitle: "Health Cashless", imageName: "health")
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    router.navigateTo(to: .healthCashless)
+                                }
                             
                             AccountOptions(optionTitle: "Motor Cashless", imageName: "motor")
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    router.navigateTo(to: .motorCashless)
+                                }
                             
                         }
                         .padding(.vertical,30)

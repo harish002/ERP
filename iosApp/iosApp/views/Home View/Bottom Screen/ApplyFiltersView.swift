@@ -82,8 +82,11 @@ struct ApplyFiltersView: View {
                     }
             }
             .padding(.horizontal,16)
-            .padding(.bottom,12)
-            .padding(.top,12)
+            .padding(.vertical,20)
+            .background(
+                Color(hex: "#E3FFF6")
+                .ignoresSafeArea(edges: .top) // Extend the gradient to ignore the safe area at the top
+            )
             
             ScrollView{
                 VStack(alignment:.leading,spacing:0){
@@ -382,11 +385,10 @@ struct ApplyFiltersView: View {
             }
             .padding(.horizontal,16)
             .padding(.vertical,16)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .stroke(Color(hex: "#949494"),lineWidth: 1.2)
-                    .shadow(color: Color(hex: "#000004"), radius: 0.3)
-            )
+            .overlay{
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color(hex: "#544C4C"),lineWidth: 1)
+            }
             .contentShape(Rectangle())
             .onTapGesture {
                 withAnimation{

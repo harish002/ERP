@@ -1156,6 +1156,49 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Renewal Type Using Policy Segment ID
+    @Published var getRenewalTypesByID : [RenewalTypesBySegmentIdData] = []
+    func getRenewalTypesByID(segmentId : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getRenewalTypeBySegmentId(segmentId: segmentId)
+                        if (!(response.data.isEmpty)) {
+                            self.getRenewalTypesByID = response.data
+                            print("Renewal Types with Id Data Fetched!")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Renewal Type With Ids Data is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
     // PPTs Types Using Policy Segment ID
     @Published var getPPtsTypes : [PPTsTypesData] = []
     func getPPTsTypesBySegmentId(segmentId : String) async throws {

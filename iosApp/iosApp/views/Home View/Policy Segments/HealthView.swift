@@ -17,7 +17,7 @@ struct HealthView: View {
     
     // Filter Lists
     @State private var insuranceTypesList : [InsuranceTypeUsingSegmentIDData] = []
-    @State private var renewalTypesList : [RenewalTypeData] = []
+    @State private var renewalTypesList : [RenewalTypesBySegmentIdData] = []
     @State private var slabTypesList : [SlabData] = []
     @State private var insurerGroupsList : [InsurerGroupData] = []
     @State private var policySegmentsList : [PolicySegmentResponse] = []
@@ -107,11 +107,13 @@ struct HealthView: View {
                     getAllPolicySegments()
                     getAllProductTypes()
                     getInsuranceTypeByPolicySegments(segmentId : "3b554917-a340-4682-9eac-3ffe13ec660f")
+                    getRenewalTypeByPolicySegments(segmentId: "3b554917-a340-4682-9eac-3ffe13ec660f")
+
             }
             
             VStack(spacing:0){
                 ScrollView(.vertical,showsIndicators: false){
-                    VStack(spacing:12){
+                    VStack(spacing:16){
                         
                         selectionView(selectionTitle: "Insurance Type", staticValue: "Insurance Type")
                         
@@ -187,7 +189,7 @@ struct HealthView: View {
                 self.policySegmentsList = value
             }
         })
-        .onReceive(accessModel.$renewalTypes, perform: {value in
+        .onReceive(accessModel.$getRenewalTypesByID, perform: {value in
             if !value.isEmpty {
                 self.renewalTypesList = value
             }
@@ -525,10 +527,33 @@ struct HealthView: View {
                 }
             }
         }
+    
+        // Renewal Type Using Policy Segment ID
+        func getRenewalTypeByPolicySegments(segmentId : String){
+            Task.init {
+                do
+                {
+                    try await accessModel.getRenewalTypesByID(segmentId: segmentId)
+                }
+                catch ApiError.networkFailure {
+                    // Handle network failure, e.g., show error Snackbar
+                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+                } catch ApiError.lowInternetConnection {
+                    // Handle low internet connection, e.g., show error Snackbar
+                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+                } catch ApiError.serverError(let status) {
+                    // Handle server errors, e.g., show error Snackbar
+                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+                } catch ApiError.unknownError(let description){
+                    // Handle unknown errors
+                    print("Data Fetching Failed -> \(description)")
+                    snackBar.show(message: description, title: "Error", type: .error)
+                }
+            }
+        }
 
-
-
-
+    
+    
     func searchGeneralPolicyRates(token : String, payload : GeneralPolicyRatePayload){
         Task.init{
             do

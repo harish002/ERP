@@ -35,7 +35,7 @@ struct HealthCashless: View {
         VStack(spacing:0){
             VStack(spacing:0){
                     
-                    HStack(spacing:0){
+                    HStack(spacing:8){
                         
                         Image("back")
                             .resizable()
@@ -72,7 +72,7 @@ struct HealthCashless: View {
             
             ScrollView(.vertical,showsIndicators: false){
                 ForEach(cashlessList,id: \.self){cashless in
-                    VStack{
+                    VStack(spacing:16){
                         HStack{
                             Text(cashless.name)
                                 .font(.custom("Poppins-SemiBold", size: 16))
@@ -104,9 +104,15 @@ struct HealthCashless: View {
                             
                         }
                     }
+                    .padding(.top,16)
                 }
             }
         }
+        .frame(maxWidth:.infinity,maxHeight: .infinity,alignment: .top)
+        .background(
+            Color(hex: "#F5F8FF")
+        )
+        .navigationBarBackButtonHidden()
     }
 }
 

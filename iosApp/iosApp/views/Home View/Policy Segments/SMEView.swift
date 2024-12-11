@@ -17,7 +17,7 @@ struct SMEView: View {
     
     // Filter Lists
     @State private var insuranceTypesList : [InsuranceTypeUsingSegmentIDData] = []
-    @State private var renewalTypesList : [RenewalTypeData] = []
+    @State private var renewalTypesList : [RenewalTypesBySegmentIdData] = []
     @State private var slabTypesList : [SlabData] = []
     @State private var insurerGroupsList : [InsurerGroupData] = []
     @State private var policySegmentsList : [PolicySegmentResponse] = []
@@ -107,6 +107,7 @@ struct SMEView: View {
                     getAllPolicySegments()
                     getAllProductTypes()
                     getInsuranceTypeByPolicySegments(segmentId : "3e2d3437-7949-4047-bb25-97392928423a")
+                    getRenewalTypeByPolicySegments(segmentId: "3e2d3437-7949-4047-bb25-97392928423a")
             }
             
             VStack(spacing:0){
@@ -187,7 +188,7 @@ struct SMEView: View {
                 self.policySegmentsList = value
             }
         })
-        .onReceive(accessModel.$renewalTypes, perform: {value in
+        .onReceive(accessModel.$getRenewalTypesByID, perform: {value in
             if !value.isEmpty {
                 self.renewalTypesList = value
             }
@@ -508,6 +509,30 @@ struct SMEView: View {
                 do
                 {
                     try await accessModel.getInsuranceTypeByPolicySegments(segmentId: segmentId)
+                }
+                catch ApiError.networkFailure {
+                    // Handle network failure, e.g., show error Snackbar
+                    snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+                } catch ApiError.lowInternetConnection {
+                    // Handle low internet connection, e.g., show error Snackbar
+                    snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+                } catch ApiError.serverError(let status) {
+                    // Handle server errors, e.g., show error Snackbar
+                    snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+                } catch ApiError.unknownError(let description){
+                    // Handle unknown errors
+                    print("Data Fetching Failed -> \(description)")
+                    snackBar.show(message: description, title: "Error", type: .error)
+                }
+            }
+        }
+    
+        // Renewal Type Using Policy Segment ID
+        func getRenewalTypeByPolicySegments(segmentId : String){
+            Task.init {
+                do
+                {
+                    try await accessModel.getRenewalTypesByID(segmentId: segmentId)
                 }
                 catch ApiError.networkFailure {
                     // Handle network failure, e.g., show error Snackbar

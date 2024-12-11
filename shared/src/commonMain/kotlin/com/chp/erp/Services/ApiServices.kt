@@ -22,6 +22,7 @@ import com.chp.lms.Services.Dataclass.ProductResponse
 import com.chp.lms.Services.Dataclass.RefreshToken
 import com.chp.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.chp.lms.Services.Dataclass.RenewalTypes
+import com.chp.lms.Services.Dataclass.RenewalTypesBySegmentIdResponse
 import com.chp.lms.Services.Dataclass.SearchPolicyRateData
 
 import io.ktor.client.call.body
@@ -831,6 +832,29 @@ class ApiServices {
             }
         } catch (e: Exception) {
             println("All PPts Types Using SegmentID Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Renewal Type Using Policy Segment ID
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getRenewalTypeBySegmentId(segmentId : String) : RenewalTypesBySegmentIdResponse {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/renewal_type/policy_segment/${segmentId}")
+                contentType(ContentType.Application.Json)
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Insurance Type Using SegmentID Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }

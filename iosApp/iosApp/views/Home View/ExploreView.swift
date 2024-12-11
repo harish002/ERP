@@ -106,62 +106,67 @@ struct ExploreView: View {
                             if !showAllPolicyRates.isEmpty {
                                 ScrollView(.vertical,showsIndicators: false){
                                     
-                                    ForEach(showAllPolicyRates, id: \.self){policyRate in
+                                    LazyVStack(spacing:16){
                                         
-                                        HStack(spacing:16){
+                                        ForEach(showAllPolicyRates, id: \.self){policyRate in
                                             
-                                            VStack(alignment:.leading,spacing:4){
+                                            HStack(spacing:16){
                                                 
-                                                Text(policyRate.insurance_type.name)
-                                                    .font(.custom("Poppins-Medium", size: 12))
-                                                    .foregroundStyle(Color("subtitle", bundle: nil))
-                                                    .lineLimit(1)
+                                                VStack(alignment:.leading,spacing:4){
+                                                    
+                                                    Text(policyRate.insurance_type.name)
+                                                        .font(.custom("Poppins-Medium", size: 12))
+                                                        .foregroundStyle(Color("subtitle", bundle: nil))
+                                                        .lineLimit(1)
+                                                    
+                                                    Text(policyRate.insurer.name)
+                                                        .font(.custom("Poppins-SemiBold", size: 16))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                        .lineLimit(1)
+                                                    
+                                                }
+                                                .frame(maxWidth:.infinity,alignment:.leading)
                                                 
-                                                Text(policyRate.insurer.name)
-                                                    .font(.custom("Poppins-SemiBold", size: 16))
-                                                    .foregroundStyle(Color("title", bundle: nil))
-                                                    .lineLimit(1)
+                                                
+                                                
+                                                HStack(spacing:2){
+                                                    Text("\(policyRate.payouts)")
+                                                        .font(.custom("Gilroy-Bold", size: 32))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                    
+                                                    Text("%")
+                                                        .font(.custom("Gilroy-Bold", size: 32))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                }
+                                                .frame(maxWidth:.infinity,alignment:.trailing)
                                                 
                                             }
                                             .frame(maxWidth:.infinity,alignment:.leading)
-                                            
-                                            
-                                            
-                                            HStack(spacing:2){
-                                                Text("\(policyRate.payouts)")
-                                                    .font(.custom("Gilroy-Bold", size: 32))
-                                                    .foregroundStyle(Color("title", bundle: nil))
-                                                
-                                                Text("%")
-                                                    .font(.custom("Gilroy-Bold", size: 32))
-                                                    .foregroundStyle(Color("title", bundle: nil))
-                                            }
-                                            .frame(maxWidth:.infinity,alignment:.trailing)
-                                            
-                                        }
-                                        .frame(maxWidth:.infinity,alignment:.leading)
-                                        .padding(.vertical,20)
-                                        .padding(.horizontal,20)
-                                        .background(
-                                            LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
-                                        )
-                                        .cornerRadius(12, corners: [.allCorners])
-                                        .padding(.horizontal,16)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            print("Policy Rate Selected")
-                                            withAnimation{
-                                                let id = policyRate.id
-                                                DispatchQueue.main.async {
-                                                    accessModel.policyRateId = id
+                                            .padding(.vertical,20)
+                                            .padding(.horizontal,20)
+                                            .background(
+                                                LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                            )
+                                            .cornerRadius(12, corners: [.allCorners])
+                                            .padding(.horizontal,16)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                print("Policy Rate Selected")
+                                                withAnimation{
+                                                    let id = policyRate.id
+                                                    DispatchQueue.main.async {
+                                                        accessModel.policyRateId = id
+                                                    }
+                                                    router.navigateTo(to: .policyratedetailview)
                                                 }
-                                                router.navigateTo(to: .policyratedetailview)
                                             }
+                                            
+                                            
                                         }
-                                    }
-                                    .onAppear{
-                                        withAnimation{
-                                            self.loader = false
+                                        .onAppear{
+                                            withAnimation{
+                                                self.loader = false
+                                            }
                                         }
                                     }
                                 }

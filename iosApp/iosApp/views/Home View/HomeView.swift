@@ -58,7 +58,8 @@ struct HomeView: View {
                             ProfileView(
                                 accessModel: accessModel,
                                 router: router, 
-                                navigationState: navigationState
+                                navigationState: navigationState,
+                                snackBar: snackBar
                             )
                             .transition(.trailingToLeading)
                             

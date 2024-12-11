@@ -992,6 +992,26 @@ data class PPTsTypesData(
     val status: Int
 )
 
+// Renewal Types Using Policy Segment ID
+// Response
+@Serializable
+data class RenewalTypesBySegmentIdResponse(
+    val message: String,
+    val data : List<RenewalTypesBySegmentIdData>
+)
+
+@Serializable
+data class RenewalTypesBySegmentIdData(
+    val name: String,
+    val remarks: String,
+    val description: String,
+    val policy_segment_id: String,
+    val id: String,
+    val policy_segment: PolicySegment,
+    val status: Int
+)
+
+
 // Search General Policy Rates
 // Payload
 @Serializable

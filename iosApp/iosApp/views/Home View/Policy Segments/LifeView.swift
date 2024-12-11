@@ -16,7 +16,7 @@ struct LifeView: View {
     
     // Filter Lists
     @State private var insuranceTypesList : [InsuranceTypeUsingSegmentIDData] = []
-    @State private var renewalTypesList : [RenewalTypeData] = []
+    @State private var renewalTypesList : [RenewalTypesBySegmentIdData] = []
     @State private var slabTypesList : [SlabData] = []
     @State private var insurerGroupsList : [InsurerGroupData] = []
     @State private var policySegmentsList : [PolicySegmentResponse] = []
@@ -112,6 +112,7 @@ struct LifeView: View {
                     getAllProductTypes()
                     getInsuranceTypeByPolicySegments(segmentId : "50ec3716-3e49-47ff-8b3d-c768700c9328")
                     getPPTypeByPolicySegments(segmentId: "50ec3716-3e49-47ff-8b3d-c768700c9328")
+                    getRenewalTypeByPolicySegments(segmentId: "50ec3716-3e49-47ff-8b3d-c768700c9328")
             }
             
             VStack(spacing:0){
@@ -145,7 +146,7 @@ struct LifeView: View {
                 Button {
                     let payload = GeneralPolicyRatePayload(
                         insurer_id: submittingValue["Insurer"] ?? "", renewal_type_id: submittingValue["Renewal Type"] ?? "",
-                        insurance_type_id: submittingValue["Insurance Type"] ?? "", policy_segment_id: "3b554917-a340-4682-9eac-3ffe13ec660f",
+                        insurance_type_id: submittingValue["Insurance Type"] ?? "", policy_segment_id: "50ec3716-3e49-47ff-8b3d-c768700c9328",
                         slab_id: submittingValue["Slab"] ?? "", product_id: submittingValue["Product"] ?? "",
                         ppt_id: "", insurer_group_id: submittingValue["Slab"] ?? "",
                         payouts: "", payins: "",
@@ -193,7 +194,7 @@ struct LifeView: View {
                 self.policySegmentsList = value
             }
         })
-        .onReceive(accessModel.$renewalTypes, perform: {value in
+        .onReceive(accessModel.$getRenewalTypesByID, perform: {value in
             if !value.isEmpty {
                 self.renewalTypesList = value
             }
@@ -568,6 +569,31 @@ struct LifeView: View {
         }
     }
     
+    // Renewal Type Using Policy Segment ID
+    func getRenewalTypeByPolicySegments(segmentId : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getRenewalTypesByID(segmentId: segmentId)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: description, title: "Error", type: .error)
+            }
+        }
+    }
+    
+    // Search Policy Data
     func searchGeneralPolicyRates(token : String, payload : GeneralPolicyRatePayload){
         Task.init{
             do
