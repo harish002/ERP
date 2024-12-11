@@ -37,6 +37,11 @@
 		2578D28B2D085F5A00460FF8 /* login.json in Resources */ = {isa = PBXBuildFile; fileRef = 2578D28A2D085F5A00460FF8 /* login.json */; };
 		2578D28D2D0863AC00460FF8 /* LifeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D28C2D0863AC00460FF8 /* LifeView.swift */; };
 		2578D28F2D0871C700460FF8 /* LifeDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D28E2D0871C700460FF8 /* LifeDataView.swift */; };
+		2578D2992D095D6E00460FF8 /* HealthCashless.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D2982D095D6E00460FF8 /* HealthCashless.swift */; };
+		2578D29B2D095D7F00460FF8 /* MotorCashless.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D29A2D095D7F00460FF8 /* MotorCashless.swift */; };
+		2578D29D2D09649C00460FF8 /* HelperFunctions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D29C2D09649700460FF8 /* HelperFunctions.swift */; };
+		2578D29F2D0966FB00460FF8 /* SMEView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D29E2D0966FB00460FF8 /* SMEView.swift */; };
+		2578D2A12D096ABD00460FF8 /* SMEDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2578D2A02D096ABD00460FF8 /* SMEDataView.swift */; };
 		25791BC72C932BF400B1079B /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791BC52C932BF400B1079B /* Router.swift */; };
 		25791BCA2C9336EE00B1079B /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791BC92C9336EE00B1079B /* MainView.swift */; };
 		25791BCF2C93374700B1079B /* LMSLoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25791BCB2C93374700B1079B /* LMSLoginView.swift */; };
@@ -181,6 +186,11 @@
 		2578D28A2D085F5A00460FF8 /* login.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = login.json; sourceTree = "<group>"; };
 		2578D28C2D0863AC00460FF8 /* LifeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeView.swift; sourceTree = "<group>"; };
 		2578D28E2D0871C700460FF8 /* LifeDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LifeDataView.swift; sourceTree = "<group>"; };
+		2578D2982D095D6E00460FF8 /* HealthCashless.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthCashless.swift; sourceTree = "<group>"; };
+		2578D29A2D095D7F00460FF8 /* MotorCashless.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotorCashless.swift; sourceTree = "<group>"; };
+		2578D29C2D09649700460FF8 /* HelperFunctions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperFunctions.swift; sourceTree = "<group>"; };
+		2578D29E2D0966FB00460FF8 /* SMEView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMEView.swift; sourceTree = "<group>"; };
+		2578D2A02D096ABD00460FF8 /* SMEDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMEDataView.swift; sourceTree = "<group>"; };
 		25791BC52C932BF400B1079B /* Router.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		25791BC92C9336EE00B1079B /* MainView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
 		25791BCB2C93374700B1079B /* LMSLoginView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LMSLoginView.swift; sourceTree = "<group>"; };
@@ -344,6 +354,8 @@
 			children = (
 				25791C5D2C9341E500B1079B /* ProfileView.swift */,
 				2578D27C2D05F5B600460FF8 /* EditProfileView.swift */,
+				2578D2982D095D6E00460FF8 /* HealthCashless.swift */,
+				2578D29A2D095D7F00460FF8 /* MotorCashless.swift */,
 			);
 			path = "Profile Screens";
 			sourceTree = "<group>";
@@ -354,6 +366,7 @@
 				2578D27F2D07051100460FF8 /* VehicleDataView.swift */,
 				2578D2862D07467D00460FF8 /* HealthDataView.swift */,
 				2578D28E2D0871C700460FF8 /* LifeDataView.swift */,
+				2578D2A02D096ABD00460FF8 /* SMEDataView.swift */,
 			);
 			path = "Segment Data Screens";
 			sourceTree = "<group>";
@@ -364,6 +377,7 @@
 				25791C662C9ACC2200B1079B /* UploadVehicleImageAndNumber.swift */,
 				2578D2842D0727F700460FF8 /* HealthView.swift */,
 				2578D28C2D0863AC00460FF8 /* LifeView.swift */,
+				2578D29E2D0966FB00460FF8 /* SMEView.swift */,
 			);
 			path = "Policy Segments";
 			sourceTree = "<group>";
@@ -624,6 +638,7 @@
 		7555FF7D242A565900829871 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				2578D29C2D09649700460FF8 /* HelperFunctions.swift */,
 				25CBC2BA2CA304FB00AF2EF2 /* iosApp.entitlements */,
 				058557BA273AAA24004C7B11 /* Assets.xcassets */,
 				7555FF82242A565900829871 /* ContentView.swift */,
@@ -923,10 +938,12 @@
 				25791C002C93392900B1079B /* EnrollCustomButton.swift in Sources */,
 				25791C522C933EE900B1079B /* LMSVerifyOtpView.swift in Sources */,
 				25791C5E2C9341E600B1079B /* ProfileView.swift in Sources */,
+				2578D29D2D09649C00460FF8 /* HelperFunctions.swift in Sources */,
 				25791BCF2C93374700B1079B /* LMSLoginView.swift in Sources */,
 				25791C0F2C93392900B1079B /* SearchBar.swift in Sources */,
 				25791C532C933EE900B1079B /* OTPSentFaliureView.swift in Sources */,
 				2578D28F2D0871C700460FF8 /* LifeDataView.swift in Sources */,
+				2578D29F2D0966FB00460FF8 /* SMEView.swift in Sources */,
 				25791BC72C932BF400B1079B /* Router.swift in Sources */,
 				25791C512C933EE900B1079B /* LMSLoginWithOtpView.swift in Sources */,
 				25791C072C93392900B1079B /* CustomHeader.swift in Sources */,
@@ -943,11 +960,14 @@
 				25791C082C93392900B1079B /* CustomSecureField.swift in Sources */,
 				25791C472C933E1E00B1079B /* HideKeyboard.swift in Sources */,
 				25791BFC2C93392900B1079B /* Bottombar.swift in Sources */,
+				2578D29B2D095D7F00460FF8 /* MotorCashless.swift in Sources */,
 				25791BFD2C93392900B1079B /* BottomBarButtonView.swift in Sources */,
 				25791C592C933F7900B1079B /* ResetPasswordView.swift in Sources */,
+				2578D2992D095D6E00460FF8 /* HealthCashless.swift in Sources */,
 				25791C5A2C933F7900B1079B /* VerifyResetPasswordOTPView.swift in Sources */,
 				25791C102C93392900B1079B /* SelectionView.swift in Sources */,
 				25791C3B2C933BD200B1079B /* Validations.swift in Sources */,
+				2578D2A12D096ABD00460FF8 /* SMEDataView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

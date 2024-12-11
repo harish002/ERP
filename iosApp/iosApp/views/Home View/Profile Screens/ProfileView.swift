@@ -13,6 +13,7 @@ struct ProfileView: View {
     @ObservedObject var accessModel : AccessServiceViewModel
     @ObservedObject var router : Router
     @ObservedObject var navigationState : NavigationState
+    @ObservedObject var snackBar : SnackbarModel
     
     @State private var nameInitialis : String = ""
 
@@ -56,8 +57,14 @@ struct ProfileView: View {
                                 }
                             
                             AccountOptions(optionTitle: "Vehicle History", imageName: "history")
+                                .onTapGesture {
+                                    snackBar.show(message: "Coming Soon", title: "New Feature", type: .info)
+                                }
                             
                             AccountOptions(optionTitle: "Update", imageName: "update")
+                                .onTapGesture {
+                                    snackBar.show(message: "Coming Soon", title: "New Feature", type: .info)
+                                }
                                 
                          
                         }
@@ -102,8 +109,16 @@ struct ProfileView: View {
                         VStack(alignment:.leading,spacing:30){
 
                             AccountOptions(optionTitle: "Privacy Policy", imageName: "privacy")
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    openLink("https://1clickpolicy.com/privacy-policy")
+                                }
                             
                             AccountOptions(optionTitle: "Terms and Conditions", imageName: "terms&conds")
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    openLink("https://1clickpolicy.com/terms-and-conditions")
+                                }
                             
                         }
                         .padding(.vertical,30)
@@ -123,6 +138,10 @@ struct ProfileView: View {
                         VStack(alignment:.leading,spacing:30){
                             
                             AccountOptions(optionTitle: "Report a Problem", imageName: "report")
+                                .contentShape(Rectangle())
+                                .onTapGesture {
+                                    openLink("https://1clickpolicy.com/complaint")
+                                }
                             
                             AccountOptions(optionTitle: "Log out", imageName: "logout")
                                 .contentShape(Rectangle())
@@ -177,12 +196,6 @@ struct ProfileView: View {
         .contentShape(Rectangle())
     }
     
-    private func openLink(_ urlString: String) {
-           if let url = URL(string: urlString) {
-               UIApplication.shared.open(url, options: [:], completionHandler: nil)
-           }
-    }
-    
 
     
     // Function to format the date string
@@ -207,7 +220,8 @@ struct ProfileView: View {
     ProfileView(
         accessModel: AccessServiceViewModel(),
         router: Router(),
-        navigationState: NavigationState()
+        navigationState: NavigationState(),
+        snackBar: SnackbarModel()
     )
 }
 
