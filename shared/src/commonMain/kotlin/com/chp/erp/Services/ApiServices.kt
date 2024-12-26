@@ -34,10 +34,7 @@ import com.chp.lms.Services.Dataclass.VehicleTypes
 import com.chp.lms.Services.Dataclass.VerifyOTP
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -45,8 +42,6 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
@@ -57,10 +52,6 @@ import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import okio.FileSystem
-import okio.Path.Companion.toPath
-import okio.SYSTEM
-import okio.buffer
 import kotlin.coroutines.cancellation.CancellationException
 
 
@@ -73,19 +64,17 @@ sealed class ApiException(message: String) : IOException(message) {
 @Serializable
 class ApiConfig {
     companion object {
-        @SerialName("ACCESS_API")
 
-        const val UAT_ACCESS_API = "https://api.1click.tech/api/access"
+        @SerialName("ACCESS_API")
+        const val  UAT_ACCESS_API = "https://api.1click.tech/api/access"
         const val ACCESS_API = "https://api.1clicktech.in/api/access"
 
-        const val UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications"
+        const val  UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications"
         const val NOTIFICATION_MANAGEMENT = "https://api.1clicktech.in/api/notifications"
 
         const val SALES_TOOL_API = "https://sales-tool-api.1click.tech"
-
     }
 }
-
 
 class ApiServices {
 
@@ -157,14 +146,12 @@ class ApiServices {
             val responseBody = response.body<String>()
             if (response.status.isSuccess()) {
                 return responseBody == "true"
-            }
-            else {
+            } else {
                 throw IOException(
                     response.body<FailedResponse>().message
                 )
             }
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             throw IOException(e.message.toString())
         }
     }
@@ -420,6 +407,38 @@ class ApiServices {
     }
 
     // Register Device to activate the push notification using Unique FCM Token
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun registerDeviceForNotification(
+        token: String,
+        projectId: String,
+        userId: String,
+        deviceToken: String
+    ):
+            RegisteredDeviceResponse {
+        try {
+            val response : HttpResponse = client.post {
+                url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/registeredDevices/register")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                parameter("userId", userId)
+                parameter("projectId", projectId)
+                parameter("deviceToken", deviceToken)
+            }
+
+            if (response.status.isSuccess()) {
+                return response.body()
+            } else {
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        } catch (e: Exception) {
+            println("Register Device error Message ${e.cause?.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // --------------------------------------------------------------------------------------------
 
 
     // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api
@@ -472,6 +491,8 @@ class ApiServices {
 
     // Motor Filters ---------------------------------------------------------------------------
     // Vehicle Details ---------------------------------------------------------------------------
+
+
     // Read all vehicle types
     @Throws(IOException::class, CancellationException::class)
     suspend fun getVehicleTypes(token: String): VehicleTypes {
@@ -522,6 +543,7 @@ class ApiServices {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/vehicle_brand/active")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -537,11 +559,13 @@ class ApiServices {
     }
 
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getVehicleModels(): VehicleModels {
+    suspend fun getVehicleModels(token : String): VehicleModels {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/vehicle_model/active")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -655,6 +679,7 @@ class ApiServices {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/renewal_type/all")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
 
             }
             if (response.status.isSuccess()) {
@@ -696,11 +721,12 @@ class ApiServices {
     // Health Filters -----------------------------------------------------------------------------
     // Slab Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllSlabTypes(): SlabResponse {
+    suspend fun getAllSlabTypes(token : String): SlabResponse {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/slab/")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -717,11 +743,12 @@ class ApiServices {
 
     // Product Types
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllProductTypes(): ProductResponse {
+    suspend fun getAllProductTypes(token : String): ProductResponse {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/product/")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -738,11 +765,12 @@ class ApiServices {
 
     // Insurer Groups Data
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllInsurerGroups(): InsurerGroupResponse {
+    suspend fun getAllInsurerGroups(token: String): InsurerGroupResponse {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/insurer_group/")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -759,11 +787,12 @@ class ApiServices {
 
     // Policy Segments
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getAllPolicySegments(): List<PolicySegmentResponse> {
+    suspend fun getAllPolicySegments(token: String): List<PolicySegmentResponse> {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/policy_segment/")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -780,11 +809,12 @@ class ApiServices {
 
     // Insurance Type Using Policy Segment ID
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getInsuranceTypeByPolicySegments(segmentId: String): InsuranceTypeUsingSegmentID {
+    suspend fun getInsuranceTypeByPolicySegments(segmentId: String, token: String): InsuranceTypeUsingSegmentID {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/insurance_type/policy_segment/${segmentId}")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -801,11 +831,12 @@ class ApiServices {
 
     // PPTs Types Using Policy Segment ID
     @Throws(IOException::class, CancellationException::class)
-    suspend fun getPPtsByPolicySegments(segmentId: String): PPTsTypesBySegmentId {
+    suspend fun getPPtsByPolicySegments(segmentId: String, token: String): PPTsTypesBySegmentId {
         try {
             val response: HttpResponse = client.get {
                 url("${ApiConfig.SALES_TOOL_API}/ppt/policy_segment/${segmentId}")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
             }
             if (response.status.isSuccess()) {
                 return response.body()
@@ -816,6 +847,30 @@ class ApiServices {
             }
         } catch (e: Exception) {
             println("All PPts Types Using SegmentID Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Renewal Type Using Policy Segment ID
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getRenewalTypeBySegmentId(segmentId : String, token: String) : RenewalTypesBySegmentIdResponse {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/renewal_type/policy_segment/${segmentId}")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Insurance Type Using SegmentID Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }
@@ -864,6 +919,7 @@ class ApiServices {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.SALES_TOOL_API}/general_policy_rates/search")
                 contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
                 parameter("skip", 1)
                 parameter("limit", 100)
                 body = Json.encodeToString(GeneralPolicyRatePayload.serializer(), searchData)
@@ -882,44 +938,6 @@ class ApiServices {
         }
     }
 
-    // Get Registration Number from Image
-    @OptIn(InternalAPI::class)
-    suspend fun getRegistrationNumberFromImage(
-        token: String,
-        filePath: String
-    ): GetRegistrationNumberResponse {
-        val cioClient = HttpClient(CIO)
-        try {
-
-            // Create a multipart form data request
-            val response: HttpResponse = client.submitFormWithBinaryData(
-                url = "https://sales-tool-api.1click.tech/ocr/vehicle_number",
-                formData = formData {
-                    // Use Okio to read the file as a source
-//                    val file = FileSystem.SYSTEM.metadata(filePath.toPath())
-                    val source = FileSystem.SYSTEM.source(filePath.toPath()).buffer()
-
-                    append("file", source.readByteArray(), Headers.build {
-                        append(HttpHeaders.Accept, ContentType.Application.Json)
-                        append(HttpHeaders.ContentType, "multipart/form-data")
-                        append("Authorization", token)
-                    })
-                }
-            )
-
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.body<String>()
-                )
-            }
-
-        } catch (e: Exception) {
-            println("Upload Image Error Message ${e.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
 
     // Get Vehicle Details for the Vehicle Number
     @Throws(IOException::class, CancellationException::class)
@@ -948,38 +966,9 @@ class ApiServices {
     }
 
 
-    // Register Device for Enabling Push Notification
-    @Throws(IOException::class, CancellationException::class)
-    suspend fun registerDeviceForNotification(
-        token: String,
-        projectId: String,
-        userId: String,
-        deviceToken: String
-    ):
-            RegisteredDeviceResponse {
-        try {
-            val response: HttpResponse = client.post {
-                url("${ApiConfig.UAT_NOTIFICATION_MANAGEMENT}/registeredDevices/register")
-                contentType(ContentType.Application.Json)
-                header("Authorization", "Bearer $token")
-                parameter("userId", userId)
-                parameter("projectId", projectId)
-                parameter("deviceToken", deviceToken)
-            }
 
-            if (response.status.isSuccess()) {
-                return response.body()
-            } else {
-                throw IOException(
-                    response.body<String>()
-                )
-            }
-        } catch (e: Exception) {
-            println("Register Device error Message ${e.cause?.message}")
-            throw e.message?.let { IOException(it) }!!
-        }
-    }
-    // --------------------------------------------------------------------------------------------
+
 
 
 }
+

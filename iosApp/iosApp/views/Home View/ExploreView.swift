@@ -51,7 +51,7 @@ struct ExploreView: View {
                         HStack(spacing:0){
                             Text("Sales Tools")
                                 .matchedGeometryEffect(id: "header", in: nameSpace)
-                                .font(.custom("Gilroy-Bold", size: 28))
+                                .font(.custom("Poppins-Bold", size: 28))
                                 .foregroundStyle(Color.black)
                             
                             Spacer()
@@ -62,15 +62,10 @@ struct ExploreView: View {
                                     .aspectRatio(contentMode: .fit)
                                     .frame(width: 18, height: 18)
                                     .foregroundStyle(Color(hex: "#FFFFFF"))
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        withAnimation{
-                                            isFilterSelected = true
-                                        }
-                                    }
+                                 
                                 
                                 Text("Filter")
-                                    .font(.custom("Gilroy-Medium", size: 12))
+                                    .font(.custom("Poppins-Medium", size: 12))
                                     .foregroundStyle(Color.white)
                             }
                             .padding(.vertical,6)
@@ -79,6 +74,12 @@ struct ExploreView: View {
                                 Color(hex: "#04C98B")
                             )
                             .cornerRadius(8, corners: [.allCorners])
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                withAnimation{
+                                    isFilterSelected = true
+                                }
+                            }
                         }
                         .padding(.horizontal,16)
                         .padding(.vertical,16)
@@ -106,62 +107,71 @@ struct ExploreView: View {
                             if !showAllPolicyRates.isEmpty {
                                 ScrollView(.vertical,showsIndicators: false){
                                     
-                                    ForEach(showAllPolicyRates, id: \.self){policyRate in
+                                    LazyVStack(spacing:16){
                                         
-                                        HStack(spacing:16){
+                                        ForEach(showAllPolicyRates, id: \.self){policyRate in
                                             
-                                            VStack(alignment:.leading,spacing:4){
+                                            HStack(spacing:16){
                                                 
-                                                Text(policyRate.insurance_type.name)
-                                                    .font(.custom("Poppins-Medium", size: 12))
-                                                    .foregroundStyle(Color("subtitle", bundle: nil))
-                                                    .lineLimit(1)
+                                                Image("image54")
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fit)
+                                                    .frame(width: 54, height: 54, alignment: .leading)
                                                 
-                                                Text(policyRate.insurer.name)
-                                                    .font(.custom("Poppins-SemiBold", size: 16))
-                                                    .foregroundStyle(Color("title", bundle: nil))
-                                                    .lineLimit(1)
+                                                VStack(alignment:.leading,spacing:4){
+                                                    
+                                                    Text(policyRate.insurance_type.name)
+                                                        .font(.custom("Poppins-Medium", size: 12))
+                                                        .foregroundStyle(Color("subtitle", bundle: nil))
+                                                        .lineLimit(1)
+                                                    
+                                                    Text(policyRate.insurer.name)
+                                                        .font(.custom("Poppins-SemiBold", size: 16))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                        .lineLimit(1)
+                                                    
+                                                }
+                                                .frame(maxWidth:.infinity,alignment:.leading)
+                                                
+                                                
+                                                HStack(spacing:2){
+                                                    Text("\(policyRate.payouts)")
+                                                        .font(.custom("Poppins-Medium", size: 24))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                    
+                                                    Text("%")
+                                                        .font(.custom("Poppins-Medium", size: 24))
+                                                        .foregroundStyle(Color("title", bundle: nil))
+                                                }
+                                                .frame(maxWidth:60,alignment:.trailing)
                                                 
                                             }
                                             .frame(maxWidth:.infinity,alignment:.leading)
-                                            
-                                            
-                                            
-                                            HStack(spacing:2){
-                                                Text("\(policyRate.payouts)")
-                                                    .font(.custom("Gilroy-Bold", size: 32))
-                                                    .foregroundStyle(Color("title", bundle: nil))
-                                                
-                                                Text("%")
-                                                    .font(.custom("Gilroy-Bold", size: 32))
-                                                    .foregroundStyle(Color("title", bundle: nil))
-                                            }
-                                            .frame(maxWidth:.infinity,alignment:.trailing)
-                                            
-                                        }
-                                        .frame(maxWidth:.infinity,alignment:.leading)
-                                        .padding(.vertical,20)
-                                        .padding(.horizontal,20)
-                                        .background(
-                                            LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
-                                        )
-                                        .cornerRadius(12, corners: [.allCorners])
-                                        .padding(.horizontal,16)
-                                        .contentShape(Rectangle())
-                                        .onTapGesture {
-                                            print("Policy Rate Selected")
-                                            withAnimation{
-                                                let id = policyRate.id
-                                                DispatchQueue.main.async {
-                                                    accessModel.policyRateId = id
+                                            .padding(.vertical,20)
+                                            .padding(.horizontal,16)
+                                            .background(
+                                                LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+                                            )
+                                            .cornerRadius(12, corners: [.allCorners])
+                                            .padding(.horizontal,16)
+                                            .contentShape(Rectangle())
+                                            .onTapGesture {
+                                                print("Policy Rate Selected")
+                                                withAnimation{
+                                                    let id = policyRate.id
+                                                    DispatchQueue.main.async {
+                                                        accessModel.policyRateId = id
+                                                    }
+                                                    router.navigateTo(to: .policyratedetailview)
                                                 }
-                                                router.navigateTo(to: .policyratedetailview)
                                             }
+                                            
+                                            
                                         }
-                                    }
-                                    .onAppear{
-                                        withAnimation{
-                                            self.loader = false
+                                        .onAppear{
+                                            withAnimation{
+                                                self.loader = false
+                                            }
                                         }
                                     }
                                 }
@@ -253,6 +263,9 @@ struct ExploreView: View {
                 fuelTypes(token: token)
                 allStates(token: token)
                 cityCategories(token: token)
+                vehicleBrands(token: token)
+                vehicleModels(token: token)
+                
             })
             
         }
@@ -501,6 +514,52 @@ struct ExploreView: View {
             do
             {
                 try await accessModel.getAllCitiesData(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func vehicleBrands(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getVehicleBrands(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func vehicleModels(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getVehicleModels(token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar

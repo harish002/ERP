@@ -99,13 +99,26 @@ struct iOSApp: App {
                                 )
                             
                             case .heathDataView:
-                                EmptyView()
+                                HealthDataView(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState,
+                                    snackBar: snackBarManager
+                                )
                             
                             case .healthview:
                                 HealthView(
                                     accessModel: accessViewModel,
                                     snackBar: snackBarManager,
                                     router: router
+                                )
+                                
+                            case .lifeDataView:
+                                LifeDataView(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState,
+                                    snackBar: snackBarManager
                                 )
                             
                             case .lifeview:
@@ -114,9 +127,33 @@ struct iOSApp: App {
                                     snackBar: snackBarManager,
                                     router: router
                                 )
+                            
+                            case .smeDataView:
+                                SMEDataView(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState,
+                                    snackBar: snackBarManager
+                                )
                                 
                             case .smeview:
-                                EmptyView()
+                                SMEView(
+                                    accessModel: accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router
+                                )
+                            case .motorCashless:
+                                MotorCashless(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState
+                                )
+                            case .healthCashless:
+                                HealthCashless(
+                                    accessModel: accessViewModel,
+                                    router: router,
+                                    navigationState: navigationState
+                                )
                                 
                             }
                             

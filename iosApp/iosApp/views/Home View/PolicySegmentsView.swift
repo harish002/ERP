@@ -91,6 +91,10 @@ struct PolicySegmentsView: View {
                             
                         case "SME":
                             print("SME Page Executed")
+                            withAnimation{
+                                self.isSheetClosed = false
+                            }
+                            router.navigateTo(to: .smeview)
                             
                             
                         default:
