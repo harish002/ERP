@@ -52,7 +52,7 @@ fun VehicleData(viewModel: ApiViewModel, mainNavController: NavController) {
         topBar = {
             Box(
                 modifier = Modifier
-                    .background(MaterialTheme.colorScheme.tertiaryContainer)
+                    .background(MaterialTheme.colorScheme.scrim)
             ) {
                 CenterAlignedTopAppBar(
                     navigationIcon = {

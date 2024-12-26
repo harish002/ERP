@@ -82,7 +82,6 @@ fun FilterScreen(
     val policyRatesList by viewModel.getPolicyRates.collectAsState()
 
 
-    val userData by viewModel.getUserdata.collectAsState()
     val vehiclType by viewModel.getVehicleTypes.collectAsState()
     val fuelType by viewModel.getFuelTypes.collectAsState()
     //location Details
@@ -217,7 +216,7 @@ fun FilterScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(Color(0xFFE3FFF6))
+                        .background(MaterialTheme.colorScheme.scrim)
                 ) {
                     TopAppBar(
                         modifier = Modifier
@@ -252,7 +251,7 @@ fun FilterScreen(
                                     ) {
                                         Icon(
                                             painter = painterResource(R.drawable.filtersvg),
-                                            tint = MaterialTheme.colorScheme.background,
+                                            tint = MaterialTheme.colorScheme.onSurface,
                                             modifier = Modifier
                                                 .padding(end = 6.dp)
                                                 .size(16.dp),
@@ -260,7 +259,7 @@ fun FilterScreen(
                                         )
                                         Text(
                                             "Filter",
-                                            color = MaterialTheme.colorScheme.background,
+                                            color = MaterialTheme.colorScheme.onSurface,
                                             style = MaterialTheme.typography.bodySmall
                                         )
                                     }
@@ -348,7 +347,9 @@ fun FilterScreen(
                 onDismissRequest = {
                     filterSheet = false
                 },
-                sheetState = sheetState
+                sheetState = sheetState,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                containerColor = MaterialTheme.colorScheme.background
             ) {
 
                 LazyColumn(
@@ -368,8 +369,8 @@ fun FilterScreen(
                                 val allCitiesDeferred = async { viewModel.getAllCities(token) }
                                 val allInsuranceTypesDeferred =
                                     async { viewModel.getAllInsuranceTypes(token) }
-//                                val allRenewalTypesDeferred =
-//                                    async { viewModel.getAllRenewalTypes(token) }
+                                val allRenewalTypesDeferred =
+                                    async { viewModel.getAllRenewalTypes(token) }
                                 val allInsurerTypesDeferred =
                                     async { viewModel.getAllInsurerTypes(token) }
                                 val allCityCategoryDeferred =
@@ -382,7 +383,7 @@ fun FilterScreen(
                                 allCitiesDeferred.await()
                                 allCityCategoryDeferred.await()
                                 allInsuranceTypesDeferred.await()
-//                                allRenewalTypesDeferred.await()
+                                allRenewalTypesDeferred.await()
                                 allInsurerTypesDeferred.await()
                                 loading = false
 

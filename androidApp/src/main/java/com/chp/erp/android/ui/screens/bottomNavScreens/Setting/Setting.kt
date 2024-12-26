@@ -1,8 +1,7 @@
-package com.chp.erp.android.ui.screens.bottomNavScreens
+package com.chp.erp.android.ui.screens.bottomNavScreens.Setting
 
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -16,11 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -41,7 +37,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.chp.erp.android.ERPTheme
@@ -60,10 +55,10 @@ fun Setting(
     val scrollState = rememberScrollState()
     var loading by remember { mutableStateOf(true) }
     var visible by remember { mutableStateOf(false) }
-    val gradient = Brush.linearGradient(
+   val gradient = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFFFFFFF),
-            Color(0xFFEBF1FF),
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.tertiaryContainer,
         ), // Customize your colors here
         start = Offset(100f, 0f),
         end = Offset(700f, 0f) // Adjust the end point for gradient direction
@@ -77,7 +72,7 @@ fun Setting(
             topBar = {
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.tertiaryContainer)
+                        .background(MaterialTheme.colorScheme.scrim)
                 ) {
                     TopAppBar(
                         title = {
@@ -136,9 +131,15 @@ fun Setting(
                                 }
                             }
 
-                            SettingComp(R.drawable.vehicle_history,"Vehicle History"){}
+                            SettingComp(R.drawable.vehicle_history,"Vehicle History"){
+                                Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
 
-                            SettingComp(R.drawable.update,"Update"){}
+                            }
+
+                            SettingComp(R.drawable.update,"Update"){
+                                Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
+
+                            }
 
                         }
                     }
@@ -186,7 +187,7 @@ fun Setting(
                                 // Create an Intent to open the URL
                                 val intent = Intent(
                                     Intent.ACTION_VIEW,
-                                    Uri.parse("https://1clickpolicy.com/about-us")
+                                    Uri.parse("https://1clickpolicy.com/terms-and-conditions")
                                 )
                                 try {
                                     context.startActivity(intent)
@@ -226,8 +227,20 @@ fun Setting(
 //                        .clickable { showPopup = !showPopup }
                                 .padding(6.dp),
                         ) {
-                            SettingComp(R.drawable.motor,"Motor Cashless"){}
-                            SettingComp(R.drawable.health,"Health Cashless"){}
+                            SettingComp(R.drawable.motor,"Motor Cashless"){
+                                BottomBarScreen.MotorCashless.route?.let { it1 ->
+                                    mainNavController.navigate(
+                                        it1
+                                    )
+                                }
+                            }
+                            SettingComp(R.drawable.health,"Health Cashless"){
+                                BottomBarScreen.MotorCashless.route?.let { it1 ->
+                                    mainNavController.navigate(
+                                        it1
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -254,7 +267,23 @@ fun Setting(
 //                        .clickable { showPopup = !showPopup }
                                 .padding(6.dp),
                         ) {
-                            SettingComp(R.drawable.report_problem,"Report a Problem"){}
+                            SettingComp(R.drawable.report_problem,"Report a Problem"){
+                                val intent = Intent(
+                                    Intent.ACTION_VIEW,
+                                    Uri.parse("https://1clickpolicy.com/complaint")
+                                )
+                                try {
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            "Failed to open link",
+                                            Toast.LENGTH_SHORT
+                                        )
+                                        .show()
+                                }
+                            }
                             SettingComp(R.drawable.log_out,"Log Out"){
                                 logout()
                             }

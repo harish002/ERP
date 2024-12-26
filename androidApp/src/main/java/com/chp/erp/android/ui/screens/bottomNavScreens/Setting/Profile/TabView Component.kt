@@ -1,4 +1,4 @@
-package com.chp.erp.android.ui.screens.bottomNavScreens.Profile
+package com.chp.erp.android.ui.screens.bottomNavScreens.Setting.Profile
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column

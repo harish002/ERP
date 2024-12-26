@@ -15,10 +15,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -27,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -39,6 +41,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,16 +50,21 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import androidx.navigation.NavController
+import coil.compose.SubcomposeAsyncImage
 import com.chp.erp.android.R
 import com.chp.erp.android.ui.bottombarGraph.BottomBarScreen
-import com.chp.erp.android.ui.component.Credential_Option
 import com.chp.lms.Services.Dataclass.CityCategoryData
 import com.chp.lms.Services.Dataclass.CityData
 import com.chp.lms.Services.Dataclass.FuelTypeData
+import com.chp.lms.Services.Dataclass.InsuranceType
 import com.chp.lms.Services.Dataclass.InsuranceTypeData
 import com.chp.lms.Services.Dataclass.InsurerData
+import com.chp.lms.Services.Dataclass.InsurerGroupData
+import com.chp.lms.Services.Dataclass.PPTsTypesData
 import com.chp.lms.Services.Dataclass.PolicyRateData
+import com.chp.lms.Services.Dataclass.ProductData
 import com.chp.lms.Services.Dataclass.RenewalTypeData
+import com.chp.lms.Services.Dataclass.SlabData
 import com.chp.lms.Services.Dataclass.StatesData
 import com.chp.lms.Services.Dataclass.VehicleData
 
@@ -69,12 +77,13 @@ fun PolicyListView(
     var showPopup by remember { mutableStateOf(false) }
     val gradient = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFFFFFFF),
-            Color(0xFFEBF1FF),
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.tertiaryContainer,
         ), // Customize your colors here
         start = Offset(100f, 0f),
         end = Offset(700f, 0f) // Adjust the end point for gradient direction
     )
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -95,15 +104,40 @@ fun PolicyListView(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp, vertical = 18.dp),
+                    .padding(6.dp, vertical = 18.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
 
                 ) {
 
+                SubcomposeAsyncImage(
+                    R.drawable.appstore, // Replace with your image URL
+                    contentDescription = "Description of the image", // Provide a description for accessibility
+                    modifier = Modifier
+                        .weight(0.2f)
+                        .size(54.dp)
+                        .border(1.dp, Color.White, shape = CircleShape) // Optional border
+                        .clip(RoundedCornerShape(50)),
+                    contentScale = ContentScale.FillBounds,
+                    loading = {
+                        // Show a loading indicator while the image is loading
+                        CircularProgressIndicator()
+                    },
+                    error = {
+                        R.drawable.appstore
+                        // Show an error image if loading fails
+
+
+                    }
+                )
+                Spacer(
+                    modifier = Modifier
+                        .padding(4.dp)
+                )
+
                 Column(
                     modifier = Modifier
-                        .weight(0.7f),
+                        .weight(0.6f),
                     verticalArrangement = Arrangement.Center,
                 ) {
                     data.insurance_type.name.let {
@@ -153,10 +187,8 @@ fun PolicyListView(
                         color = MaterialTheme.colorScheme.onSurface,
                         style = MaterialTheme.typography.displaySmall,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier
                             .padding(bottom = 2.dp)
-                            .weight(0.2f)
                     )
                 }
 
@@ -260,8 +292,8 @@ fun PolicyListView(
 fun GridItem(key: String, values: String) {
     val gradient = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFFFFFFF),
-            Color(0xFFEBF1FF),
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.tertiaryContainer,
         ), // Customize your colors here
         start = Offset(100f, 0f),
         end = Offset(700f, 0f) // Adjust the end point for gradient direction
@@ -734,7 +766,9 @@ fun SelectionRow(
             text = title,
             style = MaterialTheme.typography.bodyLarge,
             fontSize = 14.sp,
-            color = Color.Black,
+            color =
+//            Color.Black,
+            MaterialTheme.colorScheme.onSurface,
             modifier = Modifier.weight(1f)
         )
 
@@ -743,7 +777,7 @@ fun SelectionRow(
                 modifier = Modifier.size(16.dp)
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawCircle(Color(0xFF3960F6))
+                    drawCircle(Color(0xFFFFFFFF))
                     drawCircle(Color(0xFF3960F6), radius = 8.dp.toPx())
                 }
             }
@@ -752,7 +786,6 @@ fun SelectionRow(
 }
 
 //Working Selection View
-
 
 
 @Composable
@@ -793,7 +826,8 @@ fun SelectionView(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             TitleAndDropdownIndicator(
-                title = if (isSelected) selectionTitle else selectedValue.value[selectionTitle] ?: "",
+                title = if (isSelected) selectionTitle else selectedValue.value[selectionTitle]
+                    ?: "",
                 isDropdownVisible = isDropdownVisible
             )
             if (isDropdownVisible) {
@@ -837,8 +871,41 @@ fun DropdownMenu(
     selectedValue: MutableState<Map<String, String>>,
     dropDownViewSelected: MutableState<Map<String, Boolean>>
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-        listTypes?.forEach { item ->
+    val searchQuery = remember { mutableStateOf("") }
+    val filteredList = remember(searchQuery.value, listTypes) {
+        listTypes?.filter { item ->
+            getItemName(item).contains(searchQuery.value, ignoreCase = true)
+        }
+    }
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.padding(8.dp)
+    ) {
+        // Search TextField
+        androidx.compose.material.TextField(
+            value = searchQuery.value,
+            onValueChange = { searchQuery.value = it },
+            placeholder = {
+                Text(
+                    text = "Search...",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            singleLine = true,
+            colors = TextFieldDefaults.textFieldColors(
+                backgroundColor = MaterialTheme.colorScheme.surface,
+                cursorColor = MaterialTheme.colorScheme.primary,
+                focusedIndicatorColor = MaterialTheme.colorScheme.primary
+            )
+        )
+
+        // Filtered List
+        filteredList?.forEach { item ->
             SelectionRow(
                 title = getItemName(item),
                 isSelected = selectedValue.value[selectionTitle] == getItemName(item),
@@ -855,6 +922,7 @@ fun DropdownMenu(
     }
 }
 
+
 fun getItemName(item: Any): String {
     return when (item) {
         is FuelTypeData -> item.name
@@ -865,6 +933,11 @@ fun getItemName(item: Any): String {
         is InsuranceTypeData -> item.name
         is InsurerData -> item.name
         is RenewalTypeData -> item.name
+        is SlabData -> item.name
+        is InsurerGroupData -> item.name
+        is ProductData -> item.name
+        is InsuranceType -> item.name
+        is PPTsTypesData -> item.name
         is String -> item
         else -> ""
     }
@@ -894,160 +967,20 @@ fun updateSelection(
         is InsuranceTypeData -> mapOf("id" to item.id, "name" to item.name)
         is InsurerData -> mapOf("id" to item.id, "name" to item.name)
         is RenewalTypeData -> mapOf("id" to item.id, "name" to item.name)
+        is SlabData -> mapOf("id" to item.id, "name" to item.name)
+        is InsurerGroupData -> mapOf("id" to item.id, "name" to item.name)
+        is ProductData -> mapOf("id" to item.id, "name" to item.name)
+        is PPTsTypesData -> mapOf("id" to item.id, "name" to item.name)
+
         is String -> mapOf(selectionTitle to item)
         else -> emptyMap()
     }
-    selectedValue.value = newValue.toMutableMap().apply { put(selectionTitle, newValue["name"] ?: "") }
+    selectedValue.value =
+        newValue.toMutableMap().apply { put(selectionTitle, newValue["name"] ?: "") }
     dropDownViewSelected.value = dropDownViewSelected.value.toMutableMap().apply {
         put(selectionTitle, false)
     }
 }
-
-
-
-//test test
-
-//@Composable
-//fun SelectionView(
-//    selectionTitle: String,
-//    staticValue: String,
-//    selectedValue: MutableState<Map<String, String>>,
-//    dropDownViewSelected: MutableState<Map<String, Boolean>>,
-//    vehicleTypes: List<Any?>
-//){
-//    val isSelected = selectedValue.value[selectionTitle].isNullOrEmpty()
-//    val isDropdownVisible = dropDownViewSelected.value[selectionTitle] ?: false
-//
-//    Row(verticalAlignment = Alignment.CenterVertically,
-//        horizontalArrangement = Arrangement.SpaceBetween,
-//        modifier = Modifier
-//            .padding(vertical = 4.dp)
-//            .background(
-//                color = Color.Transparent,
-//                shape = RoundedCornerShape(8.dp)
-//            )
-//            .border(width = 1.2.dp, color = Color(0xFF949494), shape = RoundedCornerShape(8.dp))
-//            .clickable {
-//                dropDownViewSelected.value = dropDownViewSelected.value
-//                    .toMutableMap()
-//                    .apply {
-//                        put(
-//                            selectionTitle,
-//                            !(dropDownViewSelected.value[selectionTitle] ?: false)
-//                        )
-//                    }
-//            }
-//            .padding(16.dp),){
-//        Column(
-//            modifier = Modifier.weight(1f),
-//            horizontalAlignment = Alignment.Start,
-//            verticalArrangement = Arrangement.spacedBy(8.dp)
-//        ) {
-//            Text(
-//                text = selectionTitle,
-//                style = MaterialTheme.typography.bodyMedium,
-//                color = Color.Black,
-//            )
-//
-//            Column(
-//                horizontalAlignment = Alignment.Start,
-//                verticalArrangement = Arrangement.spacedBy(0.dp)
-//            ) {
-//                Row(
-//                    horizontalArrangement = Arrangement.SpaceBetween,
-//                    modifier = Modifier.fillMaxWidth()
-//                ) {
-//                    Text(
-//                        text = if (isSelected) staticValue else selectedValue.value[selectionTitle]
-//                            ?: "",
-//                        style = MaterialTheme.typography.bodyLarge,
-//                        fontWeight = FontWeight.Medium,
-//                        color = Color.Black,
-//                    )
-//
-//                }
-//
-//                if (isDropdownVisible) {
-//                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-//                        Row(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .clickable {
-//                                    selectedValue.value = selectedValue.value
-//                                        .toMutableMap()
-//                                        .apply {
-//                                            put(selectionTitle, "")
-//                                        }
-//                                    dropDownViewSelected.value =
-//                                        dropDownViewSelected.value
-//                                            .toMutableMap()
-//                                            .apply {
-//                                                put(selectionTitle, false)
-//                                            }
-//                                },
-//                            verticalAlignment = Alignment.CenterVertically
-//                        ) {
-////                        Text(
-////                            text = staticValue,
-////                            style = MaterialTheme.typography.bodyLarge,
-////                            fontSize = 14.sp
-////                        )
-////
-////                        Spacer(modifier = Modifier.weight(1f))
-//
-//                        }
-//
-//                        vehicleTypes.forEach { type ->
-//                            Row(
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .clickable {
-//                                        selectedValue.value =
-//                                            selectedValue.value
-//                                                .toMutableMap()
-//                                                .apply {
-//                                                    put(selectionTitle, type)
-//                                                }
-//                                        dropDownViewSelected.value =
-//                                            dropDownViewSelected.value
-//                                                .toMutableMap()
-//                                                .apply {
-//                                                    put(selectionTitle, false)
-//                                                }
-//                                    },
-//                                verticalAlignment = Alignment.CenterVertically
-//                            ) {
-//                                Text(
-//                                    text = type,
-//                                    style = MaterialTheme.typography.bodyLarge,
-//                                    fontSize = 14.sp,
-//                                    color = Color.Black,
-//                                    modifier = Modifier.weight(1f)
-//                                )
-//
-//                                if (selectedValue.value[selectionTitle] == type) {
-//                                    Box(
-//                                        modifier = Modifier.size(16.dp)
-//                                    ) {
-//                                        Canvas(modifier = Modifier.fillMaxSize()) {
-//                                            drawCircle(Color(0xFF3960F6))
-//                                            drawCircle(Color(0xFF3960F6), radius = 8.dp.toPx())
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//        Image(
-//            painter = painterResource(id = if(isDropdownVisible) R.drawable.union_1 else R.drawable.union_2),
-//            contentDescription = null,
-//            modifier = Modifier.padding(top = 5.dp)
-//        )
-//    }
-//}
 
 
 @OptIn(ExperimentalMaterial3Api::class)

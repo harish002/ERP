@@ -66,7 +66,7 @@ fun Poicy_Rate_Details(
             topBar = {
                 Box(
                     modifier = Modifier
-                        .background(MaterialTheme.colorScheme.tertiaryContainer)
+                        .background(MaterialTheme.colorScheme.scrim)
                 ) {
                     CenterAlignedTopAppBar(
                         navigationIcon = {
@@ -151,10 +151,10 @@ fun Poicy_Rate_Details(
 
 @Composable
 fun PolicyRateComp(data: PolicyRateData) {
-    val gradient = Brush.linearGradient(
+   val gradient = Brush.linearGradient(
         colors = listOf(
-            Color(0xFFFFFFFF),
-            Color(0xFFEBF1FF),
+            MaterialTheme.colorScheme.secondaryContainer,
+            MaterialTheme.colorScheme.tertiaryContainer,
         ), // Customize your colors here
         start = Offset(100f, 0f),
         end = Offset(700f, 0f) // Adjust the end point for gradient direction

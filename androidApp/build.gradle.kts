@@ -21,7 +21,7 @@ android {
         applicationId = "com.chp.erp.android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 4
+        versionCode = 5
         versionName = "1.0"
     }
     buildFeatures {
@@ -37,8 +37,12 @@ android {
     }
     buildTypes {
         getByName("release") {
-            isMinifyEnabled = false
+//            isMinifyEnabled = true
+//            isShrinkResources= true
+//
+//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
+
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
@@ -96,6 +100,10 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.14.2") // Use the latest version
     implementation ("com.squareup.okhttp3:logging-interceptor:4.10.0")
     implementation("com.airbnb.android:lottie-compose:5.0.3")
+
+    implementation ("androidx.compose.foundation:foundation:1.3.0") // For LazyVerticalGrid
+    implementation ("androidx.compose.foundation:foundation-layout:1.3.0") // For layout components
+
 
     implementation(libs.gson)
 

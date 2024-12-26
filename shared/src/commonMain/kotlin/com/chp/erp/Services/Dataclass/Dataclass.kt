@@ -425,6 +425,45 @@ data class VehicleType(
 
 //-----------------------------------------------------------------
 
+// Read All Active Vehicle Brands ----------------------------------
+// Response
+@Serializable
+data class VehicleBrands(
+    val message: String,
+    val data : List<BrandData>
+)
+
+@Serializable
+data class BrandData(
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+//-----------------------------------------------------------------
+
+// Read All Active Vehicle Models ------------------------------------------
+// Response
+@Serializable
+data class VehicleModels(
+    val message: String,
+    val data : List<ModelData>
+)
+@Serializable
+data class ModelData(
+    val id: String,
+    val name: String,
+    val vehicle_brand_id: String,
+    val vehicle_type_id: String
+)
+//-----------------------------------------------------------------
+
 // Read all Vehicle Types ------------------------------------------
 // Response Body
 @Serializable
@@ -467,46 +506,6 @@ data class FuelTypeData(
 
 //-----------------------------------------------------------------------------
 
-// Real All Vehicle Brands
-@Serializable
-data class VehicleBrandTypes(
-    val message: String,
-    val data : List<VehicleBrandData>
-)
-
-@Serializable
-data class VehicleBrandData(
-    val name: String,
-    val description: String,
-    val id: String,
-    val created_at: String,
-    val created_by: String? = null,
-    val updated_at: String? = null,
-    val updated_by: String? = null,
-    val deleted_at: String? = null,
-    val deleted_by: String? = null,
-    val status: Int
-)
-
-// Read All Active Vehicle Models
-// Response
-@Serializable
-data class VehicleModels(
-    val id: String,
-    val name: String,
-    val description: String,
-    val vehicle_brand_id: String,
-    val vehicle_type_id: String,
-    val vehicle_brand: VehicleBrand,
-    val vehicle_type: VehicleType,
-    val created_at: String? = null,
-    val created_by: String? = null,
-    val updated_at: String? = null,
-    val updated_by: String? = null,
-    val deleted_at: String? = null,
-    val deleted_by: String? = null,
-    val status: Int
-)
 
 
 // Read all States ----------------------------------------------------------

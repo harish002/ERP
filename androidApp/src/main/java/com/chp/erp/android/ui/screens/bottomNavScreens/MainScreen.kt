@@ -56,19 +56,6 @@ fun MainScreen(
     logout: () -> Unit
 ) {
     var isBottomNavigationEnabled by remember { mutableStateOf(true) }
-    var isModalSheetVisible by remember { mutableStateOf(false) }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-
-    val gradient = Brush.linearGradient(
-        colors = listOf(
-            Color(0xFF1f2add),
-            Color(0xFF00de81),
-        ),
-        start = Offset(40f, 0f),
-        end = Offset(1400f, 0f)
-    )
-
-
 
     val navBackStackEntry by mainNavController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route
@@ -76,6 +63,7 @@ fun MainScreen(
 
     ERPTheme {
         Scaffold(
+            backgroundColor = MaterialTheme.colorScheme.scrim,
             bottomBar = {
                 if (bottomBarDestination) {
                     BottomNav(navController = mainNavController, context)
@@ -103,22 +91,6 @@ fun MainScreen(
 
 
 
-        }
-        if (isModalSheetVisible) {
-            ModalBottomSheet(
-                modifier = Modifier
-                    .fillMaxHeight(0.9f)
-                    .fillMaxWidth(),
-                onDismissRequest = {
-                    isModalSheetVisible = false
-                },
-                sheetState = sheetState
-            ) {
-                Text("Test")
-                Text("Test")
-                Text("Test")
-                Text("Test")
-            }
         }
     }
 }

@@ -34,39 +34,44 @@ fun ERPTheme(
 //            primary = Color(0xFF3085FE),
             //primary uper wala nhi kholna hai
 
+            primary = Color(0xFF00de81),
+            secondary = Color(0xFF03DAC5),
+            tertiary = Color(0xFF3700B3),
+            surface = Color(0xFFF8F8F8),
+            onSurface = Color(0xFFe2e2e2),
+            background = Color(0xFF111422),//Some changes
+//            background = Color(0xFFF8F8F8),
+            onBackground = Color(0xFFF8F8F8),
+            onPrimary = Color.DarkGray,
+            error = Color(0xFFF63939),
+            onSecondary = Color(0xFF4E4E4E),
+            onSurfaceVariant = Color(0xFF00de81),
+            surfaceContainer = Color(0xFF515151),
+            secondaryContainer = Color(0xFF111422),
+            tertiaryContainer = Color(0xFF1B1E2F),
+            surfaceContainerLow = Color(0xFFFFFFFF),
+            scrim = Color(0xFF1B1E2F)
+
 //            primary = Color(0xFF1F2ADC),
 //            secondary = Color(0xFF03DAC5),
 //            tertiary = Color(0xFF3700B3),
 //            surface = Color(0xFFF8F8F8),
-//            onSurface = Color(0xFFe2e2e2),
-//            background = Color(0xFF212121),//Some changes
+//            onSurface = Color(0xFF333333),
+//            background = Color(0xFFF5F8FF),
+////            background = Color(0xFFF8F8F8),//Some changes
 ////            background = Color(0xFFF8F8F8),
-//            onBackground = Color(0xFFF8F8F8),
-//            onPrimary = Color.DarkGray,
 //            error = Color(0xFFF63939),
+//            onBackground = Color(0xFFF8F8F8),
 //            onSecondary = Color(0xFF4E4E4E),
+//            onPrimary = Color.White,
 //            onSurfaceVariant = Color(0xFF00de81),
-//            surfaceContainer = Color(0xFF515151),
+//            surfaceContainer = Color(0xFFe2e2e2),
 //            tertiaryContainer = Color(0xFFE3FFF6),
 //            surfaceContainerLow = Color(0xFFFFFFFF)
 
-            primary = Color(0xFF1F2ADC),
-            secondary = Color(0xFF03DAC5),
-            tertiary = Color(0xFF3700B3),
-            surface = Color(0xFFF8F8F8),
-            onSurface = Color(0xFF333333),
-            background = Color(0xFFF5F8FF),
-//            background = Color(0xFFF8F8F8),//Some changes
-//            background = Color(0xFFF8F8F8),
-            error = Color(0xFFF63939),
-            onBackground = Color(0xFFF8F8F8),
-            onSecondary = Color(0xFF4E4E4E),
-            onPrimary = Color.White,
-            onSurfaceVariant = Color(0xFF00de81),
-            surfaceContainer = Color(0xFFe2e2e2),
-            tertiaryContainer = Color(0xFFE3FFF6),
-            surfaceContainerLow = Color(0xFFFFFFFF)
         )
+
+
     } else {
         lightColorScheme(
 //            primary = Color(0xFF3085FE),
@@ -84,8 +89,11 @@ fun ERPTheme(
             onPrimary = Color.White,
             onSurfaceVariant = Color(0xFF00de81),
             surfaceContainer = Color(0xFFe2e2e2),
-            tertiaryContainer = Color(0xFFE3FFF6),
-            surfaceContainerLow = Color(0xFFFFFFFF)
+            secondaryContainer = Color(0xFFFFFFFF),
+            tertiaryContainer = Color(0xFFEBF1FF),
+            surfaceContainerLow = Color(0xFFFFFFFF),
+            scrim = Color(0xFFE3FFF6)
+
 
         )
     }
@@ -172,8 +180,8 @@ fun ERPTheme(
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
-                window.statusBarColor = colors.tertiaryContainer.toArgb()
-                window.navigationBarColor = colors.onSurface.toArgb()
+            window.statusBarColor = colors.scrim.toArgb()
+            window.navigationBarColor = colors.onSurface.toArgb()
             val windowInsetsController = WindowInsetsControllerCompat(window, view)
 
 //             Check if status bar icons should be dark (light background)

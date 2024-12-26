@@ -74,6 +74,7 @@ fun CustBtn(
     )
     //for runtime error solving
     val alphaValue = if (isblue) 0.05f else 0.03f
+
     val color = Color(0xFF000000).copy(alpha = alphaValue)
 
     OutlinedButton(

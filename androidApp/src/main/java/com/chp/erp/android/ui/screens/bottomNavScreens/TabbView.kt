@@ -26,9 +26,9 @@ fun DetailsTabbedView(
     selectedTab: DetailTabData,
     onTabSelected: (DetailTabData) -> Unit,
     selectedColor: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    unselectedColor: Color = Color(0xFFF5F8FF),
+    unselectedColor: Color = MaterialTheme.colorScheme.scrim,
     selectedBorder: Color = MaterialTheme.colorScheme.onSurfaceVariant,
-    unselectedBorder: Color = Color(0xFFF5F8FF)
+    unselectedBorder: Color = MaterialTheme.colorScheme.scrim
 ) {
     if (tabItems.isEmpty()) return
 

@@ -1,4 +1,4 @@
-package com.chp.erp.android.ui.screens.bottomNavScreens.Profile
+package com.chp.erp.android.ui.screens.bottomNavScreens.Setting.Network
 
 import android.annotation.SuppressLint
 import androidx.compose.material3.ExperimentalMaterial3Api
