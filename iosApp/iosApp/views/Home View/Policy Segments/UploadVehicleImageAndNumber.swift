@@ -75,6 +75,8 @@ struct UploadVehicleImageAndNumber: View {
     @State private var renewalTypes : RenewalTypeData?
     @State private var insurerType : InsurerData?
     
+    @State private var selectedViewAllTitle = ""
+    
     // Filter Lists - Variables
     @State private var vehicleTypeList : [VehicleData] = []
     @State private var fuelTypeList : [FuelTypeData] = []
@@ -84,6 +86,8 @@ struct UploadVehicleImageAndNumber: View {
     @State private var insuranceTypesList : [InsuranceTypeData] = []
     @State private var renewalTypesList : [RenewalTypeData] = []
     @State private var insurerTypeList : [InsurerData] = []
+    @State private var vehicleBrands : [BrandData] = []
+    @State private var vehicleModels : [ModelData] = []
     let NCBTypes : [String] = ["Yes", "No"]
     
     
@@ -96,7 +100,9 @@ struct UploadVehicleImageAndNumber: View {
        "City" : false,
        "Insurance Type" : false,
        "Renewal Type" : false,
-       "Insurer" : false
+       "Insurer" : false,
+       "Vehicle Brand" : false,
+       "Vehicle Model" : false
     ]
     
     // Value Selected from the Filter
@@ -109,7 +115,9 @@ struct UploadVehicleImageAndNumber: View {
         "City" : "",
         "Insurance Type" : "",
         "Renewal Type" : "",
-        "Insurer" : ""
+        "Insurer" : "",
+        "Vehicle Brand" : "",
+        "Vehicle Model": ""
     ]
     
     @State private var submittingValue : [String : String] = [
@@ -121,7 +129,9 @@ struct UploadVehicleImageAndNumber: View {
         "City" : "",
         "Insurance Type" : "",
         "Renewal Type" : "",
-        "Insurer" : ""
+        "Insurer" : "",
+        "Vehicle Brand" : "",
+        "Vehicle Model": ""
     ]
     
     // Policy Rate Data Variables
@@ -277,6 +287,16 @@ struct UploadVehicleImageAndNumber: View {
         .onReceive(accessModel.$insurerTypes, perform: {values in
             if !values.isEmpty{
                 self.insurerTypeList = values
+            }
+        })
+        .onReceive(accessModel.$vehicleBrands, perform: {values in
+            if !values.isEmpty{
+                self.vehicleBrands = values
+            }
+        })
+        .onReceive(accessModel.$vehicleModels, perform: {values in
+            if !values.isEmpty{
+                self.vehicleModels = values
             }
         })
        
@@ -498,9 +518,9 @@ struct UploadVehicleImageAndNumber: View {
                         .resizable()
                         .frame(width: 20,height: 20)
                         .foregroundStyle(Color(hex: "#000000"))
-                        .padding(.bottom,3)
+                        .padding(.bottom,5)
                 }
-                
+                .padding(.horizontal,16)
                 
                 if dropDownViewSelected[selectionTitle] ?? false {
                     VStack(alignment:.leading,spacing:16){
@@ -510,20 +530,14 @@ struct UploadVehicleImageAndNumber: View {
                                 .foregroundStyle(Color(hex: "#C4C4C4"))
                            
                             Spacer()
-                            
-                            if selectedValue[selectionTitle] == "" {
-                                Circle()
-                                    .fill(Color(hex: "#3960F6"))
-                                    .frame(width: 6, height: 6)
-                                    .overlay(content: {
-                                        Circle()
-                                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
-                                            .frame(width: 12,height: 12)
-                                    })
-                                    
-                            }
+                           
                         }
-                        .padding(.top,8)
+                        .padding(.horizontal,16)
+                        .padding(.vertical,16)
+                        .background(
+                            selectedValue[selectionTitle] == "" ?
+                            Color(hex: "#E3FFF6") : Color.clear
+                        )
                         .contentShape(Rectangle())
                         .onTapGesture {
                             withAnimation{
@@ -590,6 +604,19 @@ struct UploadVehicleImageAndNumber: View {
                                     singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
                                 }
                                 
+                                case "Vehicle Brand":
+                                if let brand = singleList as? BrandData {
+                                    singleFilterValue(title: selectionTitle, value: brand.name, valueId: brand.id)
+                                }
+                                
+                                case "Vehicle Model":
+                               
+                                if let model = singleList as? ModelData {
+                                    if model.vehicle_brand_id == submittingValue["Vehicle Brand"] {
+                                        singleFilterValue(title: selectionTitle, value: model.name, valueId: model.id)
+                                    }
+                                }
+                                
                                 default :
                                     EmptyView()
                             }
@@ -603,7 +630,6 @@ struct UploadVehicleImageAndNumber: View {
                 }
                 
             }
-            .padding(.horizontal,16)
             .padding(.vertical,12)
             .overlay{
                 RoundedRectangle(cornerRadius: 6)
@@ -626,18 +652,14 @@ struct UploadVehicleImageAndNumber: View {
                 .foregroundStyle(Color(hex: "#000000"))
             
             Spacer()
-            
-            if selectedValue[title] == value {
-                Circle()
-                    .fill(Color(hex: "#3960F6"))
-                    .frame(width: 6, height: 6)
-                    .overlay(content: {
-                        Circle()
-                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
-                            .frame(width: 12,height: 12)
-                    })
-            }
+           
         }
+        .padding(.horizontal,16)
+        .padding(.vertical,16)
+        .background(
+            selectedValue[title] == value ?
+            Color(hex: "#E3FFF6") : Color.clear
+        )
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation{
@@ -925,9 +947,25 @@ struct UploadVehicleImageAndNumber: View {
             
             ScrollView(.vertical,showsIndicators: false){
                 VStack(spacing:12){
-                    selectionView(selectionTitle: "Vehicle Type", staticValue: "Vehicle Type")
+                    SelectionViewWithImage(
+                        accessModel: accessModel,
+                        selectionTitle: "Vehicle Type",
+                        image: "",
+                        filtersList: getFilterList(for: "Vehicle Type")
+                    ){ value in
+                        submittingValue["Vehicle Type"] = value
+                    }
                     
                     selectionView(selectionTitle: "Fuel Type", staticValue: "Fuel Type")
+                    
+                    ScrollableSelectionView(
+                        accessModel: accessModel,
+                        selectionTitle: "Vehicle Brand",
+                        image: "",
+                        onTapOfCard: {value,title  in
+                            submittingValue["Vehicle Brand"] = value
+                        }
+                    )
                     
                     selectionView(selectionTitle: "NCB", staticValue: "Status")
                     
@@ -935,7 +973,14 @@ struct UploadVehicleImageAndNumber: View {
                     
                     selectionView(selectionTitle: "City Category", staticValue: "City Category")
                     
-                    selectionView(selectionTitle: "City", staticValue: "City")
+                    ScrollableSelectionView(
+                        accessModel: accessModel,
+                        selectionTitle: "City",
+                        image: "",
+                        onTapOfCard: {value,title  in
+                            submittingValue["City"] = value
+                        }
+                    )
                     
                     selectionView(selectionTitle: "Insurance Type", staticValue: "Insurance Type")
                     
@@ -1010,6 +1055,13 @@ struct UploadVehicleImageAndNumber: View {
             return renewalTypesList  // Returning the full array of `RenewalTypeData` objects
         case "Insurer":
             return insurerTypeList  // Returning the full array of `InsurerData` objects
+            
+        case "Vehicle Brand":
+            return vehicleBrands
+            
+        case "Vehicle Model":
+            return vehicleModels
+            
         default:
             return []
         }

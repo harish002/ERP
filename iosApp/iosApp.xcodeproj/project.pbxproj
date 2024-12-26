@@ -117,6 +117,8 @@
 		2585D7432CAEBC4A0017D4DC /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 2585D7422CAEBC4A0017D4DC /* Lottie */; };
 		25CBC2BE2CA30F8F00AF2EF2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 25CBC2BD2CA30F8F00AF2EF2 /* GoogleService-Info.plist */; };
 		25CBC2CA2CA5592F00AF2EF2 /* NotificationServiceExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 25CBC2C32CA5592F00AF2EF2 /* NotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		25E42DEA2D13FEED00D0D82E /* SelectionViewWithImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E42DE92D13FEED00D0D82E /* SelectionViewWithImage.swift */; };
+		25E42DEC2D153B2300D0D82E /* DetailedFilterSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25E42DEB2D153B2300D0D82E /* DetailedFilterSection.swift */; };
 		2F5115AFC85DCC5AC8E88A70 /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5CD7274F290F4A4B76C15F46 /* Pods_iosApp.framework */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
@@ -265,6 +267,8 @@
 		25CBC2BA2CA304FB00AF2EF2 /* iosApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = iosApp.entitlements; sourceTree = "<group>"; };
 		25CBC2BD2CA30F8F00AF2EF2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		25CBC2C32CA5592F00AF2EF2 /* NotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = NotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		25E42DE92D13FEED00D0D82E /* SelectionViewWithImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionViewWithImage.swift; sourceTree = "<group>"; };
+		25E42DEB2D153B2300D0D82E /* DetailedFilterSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailedFilterSection.swift; sourceTree = "<group>"; };
 		5CD7274F290F4A4B76C15F46 /* Pods_iosApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_iosApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF7B242A565900829871 /* Sales Tool.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Sales Tool.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -518,6 +522,8 @@
 				25791BF82C93392900B1079B /* SearchBar.swift */,
 				25791BF92C93392900B1079B /* SelectionView.swift */,
 				25791BFA2C93392900B1079B /* TrialPage.swift */,
+				25E42DE92D13FEED00D0D82E /* SelectionViewWithImage.swift */,
+				25E42DEB2D153B2300D0D82E /* DetailedFilterSection.swift */,
 			);
 			path = components;
 			sourceTree = "<group>";
@@ -930,6 +936,7 @@
 				25791BFF2C93392900B1079B /* ColumnCards.swift in Sources */,
 				25791C012C93392900B1079B /* FullLengthCard.swift in Sources */,
 				2578D2852D0727F700460FF8 /* HealthView.swift in Sources */,
+				25E42DEC2D153B2300D0D82E /* DetailedFilterSection.swift in Sources */,
 				25791BFE2C93392900B1079B /* CategoryComponent.swift in Sources */,
 				25791C4F2C933EE900B1079B /* LMSOTPSentView.swift in Sources */,
 				2558021F2CA2A5C400F1AAEC /* PushNotificationFile.swift in Sources */,
@@ -944,6 +951,7 @@
 				25791C532C933EE900B1079B /* OTPSentFaliureView.swift in Sources */,
 				2578D28F2D0871C700460FF8 /* LifeDataView.swift in Sources */,
 				2578D29F2D0966FB00460FF8 /* SMEView.swift in Sources */,
+				25E42DEA2D13FEED00D0D82E /* SelectionViewWithImage.swift in Sources */,
 				25791BC72C932BF400B1079B /* Router.swift in Sources */,
 				25791C512C933EE900B1079B /* LMSLoginWithOtpView.swift in Sources */,
 				25791C072C93392900B1079B /* CustomHeader.swift in Sources */,

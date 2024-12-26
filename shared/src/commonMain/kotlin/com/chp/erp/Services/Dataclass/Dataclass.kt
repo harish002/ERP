@@ -241,11 +241,8 @@ data class VerifyOTP(
     val mobileNumber: String,
     val otp: String
 )
-//-----------------------------------------------------------------------------
 
-
-// Module 2 ------------------------------------------------------------------
-// Get In-App Notifications -------------------------------------------------
+// Get App Notifications -------------------------------------------------
 // Response Body
 @Serializable
 data class GetNotificationsResponse(
@@ -255,7 +252,23 @@ data class GetNotificationsResponse(
     val content: String
 )
 
+// Register Devices for Push Notification
+// Response
+@Serializable
+data class RegisteredDeviceResponse(
+    val id: String? = null,
+    val remarks: String? = null,
+    val createdDate: String? = null,
+    val createdBy: String? = null,
+    val lastModifiedDate: String? = null,
+    val lastModifiedBy: String? = null,
+    val version: Int? = null,
+    val projectId: String? = null,
+    val userId: String? = null,
+    val deviceTokens: List<String>? = emptyList()
+)
 //-----------------------------------------------------------------------------
+
 
 // Module 2 - Sales Tools Filter Apis /  Policy Rates ---------------------------------------------
 // Read All Policy Rates ------------------------------------------
@@ -297,6 +310,8 @@ data class PolicyRateData(
 
 @Serializable
 data class City(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val state_id: String,
@@ -354,7 +369,10 @@ data class Insurer(
     val id: String,
     val name: String,
     val status: Int,
+    val remarks : String? = null,
     val description: String? = null,
+    val media_id : String? = null,
+    val media_url : String? = null,
     val created_at: String? = null,
     val insurer_groups : List<String>? = emptyList()
 )
@@ -398,6 +416,8 @@ data class States(
 
 @Serializable
 data class VehicleBrand(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val id: String,
@@ -412,6 +432,8 @@ data class VehicleBrand(
 
 @Serializable
 data class VehicleType(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val id: String,
@@ -426,6 +448,48 @@ data class VehicleType(
 
 //-----------------------------------------------------------------
 
+// Read All Active Vehicle Brands ----------------------------------
+// Response
+@Serializable
+data class VehicleBrands(
+    val message: String,
+    val data : List<BrandData>
+)
+
+@Serializable
+data class BrandData(
+    val media_id : String? = null,
+    val media_url : String? = null,
+    val name: String,
+    val description: String? = null,
+    val id: String,
+    val created_at: String? = null,
+    val created_by: String? = null,
+    val updated_at: String? = null,
+    val updated_by: String? = null,
+    val deleted_at: String? = null,
+    val deleted_by: String? = null,
+    val status: Int
+)
+//-----------------------------------------------------------------
+
+// Read All Active Vehicle Models ------------------------------------------
+// Response
+@Serializable
+data class VehicleModels(
+    val message: String,
+    val data : List<ModelData>
+)
+@Serializable
+data class ModelData(
+    val id: String,
+    val name: String,
+    val vehicle_brand_id: String,
+    val vehicle_type_id: String
+)
+//-----------------------------------------------------------------
+
+
 // Read all Vehicle Types ------------------------------------------
 // Response Body
 @Serializable
@@ -436,6 +500,8 @@ data class VehicleTypes(
 
 @Serializable
 data class VehicleData(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val id: String,
@@ -468,46 +534,6 @@ data class FuelTypeData(
 
 //-----------------------------------------------------------------------------
 
-// Real All Vehicle Brands
-@Serializable
-data class VehicleBrandTypes(
-    val message: String,
-    val data : List<VehicleBrandData>
-)
-
-@Serializable
-data class VehicleBrandData(
-    val name: String,
-    val description: String,
-    val id: String,
-    val created_at: String,
-    val created_by: String? = null,
-    val updated_at: String? = null,
-    val updated_by: String? = null,
-    val deleted_at: String? = null,
-    val deleted_by: String? = null,
-    val status: Int
-)
-
-// Read All Active Vehicle Models
-// Response
-@Serializable
-data class VehicleModels(
-    val id: String,
-    val name: String,
-    val description: String,
-    val vehicle_brand_id: String,
-    val vehicle_type_id: String,
-    val vehicle_brand: VehicleBrand,
-    val vehicle_type: VehicleType,
-    val created_at: String? = null,
-    val created_by: String? = null,
-    val updated_at: String? = null,
-    val updated_by: String? = null,
-    val deleted_at: String? = null,
-    val deleted_by: String? = null,
-    val status: Int
-)
 
 
 // Read all States ----------------------------------------------------------
@@ -559,6 +585,8 @@ data class AllCities(
 
 @Serializable
 data class CityData(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val state_id: String,
@@ -846,23 +874,7 @@ data class Financer_details(
 
 //--------------------------------------------------------------------------------
 
-// Register Devices for Push Notification
-// Response
-@Serializable
-data class RegisteredDeviceResponse(
-    val id: String? = null,
-    val remarks: String? = null,
-    val createdDate: String? = null,
-    val createdBy: String? = null,
-    val lastModifiedDate: String? = null,
-    val lastModifiedBy: String? = null,
-    val version: Int? = null,
-    val projectId: String? = null,
-    val userId: String? = null,
-    val deviceTokens: List<String>? = emptyList()
-)
 
-//-------------------------------------------------------------------------------
 // Health Filters ---------------------------------------------------------------
 // Slab
 // Response

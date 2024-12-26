@@ -96,25 +96,24 @@ struct LMSLoginView: View {
                             Task.init{
                                 let (status,message) = try await accessModel.login(user: user)
                                 if status {
-                                    if isUserVerified {
-                                        errorStatus = false
-                                        snackBar.show(message: "LOGIN SUCCESSFUL", title: "Success", type: .success)
-                                        isSignupSheetActive = false
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.01, execute: {
-                                            withAnimation{
-                                                router.navigateTo(to: .homescreen)
-                                            }
-                                        })
-                                       
-                                    }
-                                    else {
+//                                    if isUserVerified {}
+//                                    else {
+//                                        withAnimation{
+//                                            errorStatus = false
+//                                            selectedTabIs.isVerifyAccountTrue["Login"] = true
+//                                            selectedTabIs.isVerifyAccountTrue["SignIn"] = false
+//                                            selectedTabIs._selectedTab = .verifyAccountView
+//                                        }
+//                                    }
+                                    
+                                    errorStatus = false
+                                    snackBar.show(message: "LOGIN SUCCESSFUL", title: "Success", type: .success)
+                                    isSignupSheetActive = false
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.01, execute: {
                                         withAnimation{
-                                            errorStatus = false
-                                            selectedTabIs.isVerifyAccountTrue["Login"] = true
-                                            selectedTabIs.isVerifyAccountTrue["SignIn"] = false
-                                            selectedTabIs._selectedTab = .verifyAccountView
+                                            router.navigateTo(to: .homescreen)
                                         }
-                                    }
+                                    })
                                  
                                 }
                                 else {

@@ -115,48 +115,9 @@ struct HomeView: View {
                         print("NavigationStack is not Empty!")
                     }
                     
-                    let token = retrieveToken() ?? ""
-                    let userId = retrieveUserId() ?? ""
+                    let isRegistered = retrieveDeviceRegisteredForPushNotification() ?? false
+                    requestNotificationAuthorization(isActive: isRegistered)
                     
-                    
-                    Task.init{
-                        // Get User Data who is Logged In
-                        do
-                        {
-                            _ = try await accessModel.getUserData(token: token, userId: userId)
-
-                        }
-                        catch ApiError.networkFailure {
-                            // Handle network failure, e.g., show error Snackbar
-                            snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                        } catch ApiError.lowInternetConnection {
-                            // Handle low internet connection, e.g., show error Snackbar
-                            snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                        } catch ApiError.serverError(let status) {
-                            // Handle server errors, e.g., show error Snackbar
-                            snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                        } catch ApiError.unknownError(let description){
-                            // Handle unknown errors
-                            print("Data Fetching Failed -> \(description)")
-                            snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-                        }
-                    }
-                    
-                    
-                    // After login success
-                    requestNotificationAuthorization()
-                    
-                    let name = retrieveName() ?? "Full Name"
-                    self.userName = name
-                    
-                    let initial = retrieveInitials() ?? "?"
-                    self.nameInitials = initial
-
-                }
-                .onChange(of: granted){value in
-                    if !(value) {
-                        snackBar.show(message: "To receive notifications, please enable permissions from your device's settings.", title: "Permission Denied", type: .warning)
-                    }
                 }
         }
     
@@ -175,23 +136,6 @@ struct HomeView: View {
         self.userName = nameOfUser
     }
     
-    func requestNotificationAuthorization(){
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { success, error in
-            if success {
-                print("Permission Granted")
-                self.granted = success
-                DispatchQueue.main.async {
-                    UIApplication.shared.registerForRemoteNotifications()
-                }
-                
-            }
-            else {
-                print("Permission Denied")
-                self.granted = success
-            }
-        }
-        
-    }
     
     // Get Policy Rates
     func getPolicyRatesList(token : String){
@@ -218,6 +162,97 @@ struct HomeView: View {
             }
         }
     }
+    
+    // Requesting Permission for Notifications
+    func requestNotificationAuthorization(isActive: Bool) {
+        if !isActive {
+            UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { success, error in
+                handleNotificationAuthorization(success: success, error: error)
+            }
+        }
+        else {
+            UNUserNotificationCenter.current().getNotificationSettings { settings in
+                DispatchQueue.main.async {
+                    switch settings.authorizationStatus {
+                    case .notDetermined:
+                        // Re-request permission if not determined
+                        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { success, error in
+                            handleNotificationAuthorization(success: success, error: error)
+                        }
+                    case .denied:
+                        // Show settings alert for denied permissions
+                        showSettingsAlert()
+                        
+                    case .authorized, .provisional, .ephemeral:
+                        // Permission already granted
+                        print("Notifications already authorized")
+                        
+                    @unknown default:
+                        break
+                    }
+                }
+            }
+        }
+    }
+
+    func handleNotificationAuthorization(success: Bool, error: Error?) {
+        if success {
+            print("Permission Granted")
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+            Task {
+                await registerDeviceForNotificationsIfNeeded()
+            }
+        } else {
+            print("Permission Denied")
+            showSettingsAlert()
+            saveDeviceRegisteredForPushNotification(isRegistered: false)
+        }
+    }
+
+    func registerDeviceForNotificationsIfNeeded() async {
+        let token = retrieveToken() ?? ""
+        let fcmToken = appDelepgate.fcmToken
+        let userId = retrieveUserId() ?? ""
+
+        do {
+            let _ = try await accessModel.registerDeviceForNotification(
+                token: token,
+                projectId: "d0f634d2-0862-491c-accd-662a2e06b106",
+                userId: userId,
+                deviceToken: fcmToken
+            )
+        }
+        catch {
+            print("Error registering device: \(error)")
+            snackBar.show(message: "Failed to register device. Please try again later.", title: "Error", type: .error)
+        }
+    }
+    
+    func showSettingsAlert() {
+        let alert = UIAlertController(
+            title: "Notifications Disabled",
+            message: "To receive notifications, please enable permissions in the Settings.",
+            preferredStyle: .alert
+        )
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Open Settings", style: .default, handler: { _ in
+            if let appSettings = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(appSettings, options: [:], completionHandler: nil)
+            }
+        }))
+        
+        DispatchQueue.main.async {
+            if let rootVC = UIApplication.shared.windows.first?.rootViewController {
+                rootVC.present(alert, animated: true, completion: nil)
+            }
+        }
+    }
+
+    
+
     
     
 }
@@ -258,4 +293,30 @@ struct HomeView: View {
 //        snackBar: snackBar,
 //        navigationState: navigationState
 //    )
+//}
+
+//let token = retrieveToken() ?? ""
+//let userId = retrieveUserId() ?? ""
+//
+//Task.init{
+//    // Get User Data who is Logged In
+//    do
+//    {
+//        _ = try await accessModel.getUserData(token: token, userId: userId)
+//
+//    }
+//    catch ApiError.networkFailure {
+//        // Handle network failure, e.g., show error Snackbar
+//        snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+//    } catch ApiError.lowInternetConnection {
+//        // Handle low internet connection, e.g., show error Snackbar
+//        snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+//    } catch ApiError.serverError(let status) {
+//        // Handle server errors, e.g., show error Snackbar
+//        snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+//    } catch ApiError.unknownError(let description){
+//        // Handle unknown errors
+//        print("Data Fetching Failed -> \(description)")
+//        snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+//    }
 //}

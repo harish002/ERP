@@ -412,12 +412,57 @@ class AccessServiceViewModel : ObservableObject {
         }
     }
     
+    // Notifications API's
+    // Register Device for Enabling Push Notification
+    func registerDeviceForNotification ( token: String, projectId: String, userId: String, deviceToken: String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task{
+                    do
+                    {
+                        let response = try await ApiServices().registerDeviceForNotification(token: token, projectId: projectId, userId: userId, deviceToken: deviceToken)
+                        
+                        if !response.isEqual(nil){
+                            saveDeviceRegisteredForPushNotification(isRegistered: true)
+                            print("Device Registered Successfully for PushNotifications")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            saveDeviceRegisteredForPushNotification(isRegistered: false)
+                            print("Device Not Registered!")
+                        }
+                    }
+                    catch let error as ApiException{
+                        switch error {
+                            
+                        case is ApiException.NoInternetException :
+                            saveDeviceRegisteredForPushNotification(isRegistered: false)
+                            continuation.resume(throwing: ApiExceptionError.noInternet)
+                            
+                        case is ApiException.TimeoutException :
+                            saveDeviceRegisteredForPushNotification(isRegistered: false)
+                            continuation.resume(throwing: ApiExceptionError.timeout)
+                            
+                        case let unknown as ApiException.UnknownException :
+                            saveDeviceRegisteredForPushNotification(isRegistered: false)
+                            continuation.resume(throwing: ApiExceptionError.unknown(unknown.description()))
+                            
+                        default:
+                            saveDeviceRegisteredForPushNotification(isRegistered: false)
+                            continuation.resume(throwing: ApiExceptionError.unknown("An unexpected error occurred"))
+                            
+                        }
+                    }
+                    catch {
+                        saveDeviceRegisteredForPushNotification(isRegistered: false)
+                        continuation.resume(throwing: ApiExceptionError.unknown(error.localizedDescription))
+                    }
+                    
+                }
+            }
+        }
+    }
     
-    // ---------------------------------------------------------xx----------------------------------------------------------------
-    
-    
-    
-
     // Get In-App Notifications
     func getNotifications(token:String, projectID : String) async throws -> [GetNotificationsResponse]{
         return try await withCheckedThrowingContinuation { continuation in
@@ -458,6 +503,14 @@ class AccessServiceViewModel : ObservableObject {
             }
         }
     }
+    
+    
+    // ---------------------------------------------------------xx----------------------------------------------------------------
+    
+    
+    
+
+
     
     // Module 2 - Sales Tools Filter Apis / Policy Rates Get Api -----------------------------------------------------
     // Read all Policy Rates
@@ -555,6 +608,92 @@ class AccessServiceViewModel : ObservableObject {
                         let response = try await ApiServices().getPolicyRateDataUsingId(token: token, policyRateId: id)
                         self.singlePolicyRate = response
                         continuation.resume(returning: response)
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Read all vehicle brands types
+    @Published var vehicleBrands : [BrandData] = []
+    func getVehicleBrands(token : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getVehicleBrands(token: token)
+                        if (!(response.data.isEmpty)) {
+                            self.vehicleBrands = response.data
+                            print("Vehicle Brands Fetched.")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Vehicle Brands is empty!")
+                            continuation.resume(returning: ())
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // Read all vehicle brands types
+    @Published var vehicleModels : [ModelData] = []
+    func getVehicleModels(token : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getVehicleModels(token: token)
+                        if (!(response.data.isEmpty)) {
+                            self.vehicleModels = response.data
+                            print("Vehicle Models Data Fetched.")
+                            continuation.resume(returning: ())
+                        }
+                        else {
+                            print("Vehicle Models Data is empty!")
+                            continuation.resume(returning: ())
+                        }
                         
                     }
                     catch let error as NSError {
@@ -943,13 +1082,13 @@ class AccessServiceViewModel : ObservableObject {
     // Health Filters
     // Slab Types
     @Published var slabTypes : [SlabData] = []
-    func getAllSlabTypes() async throws {
+    func getAllSlabTypes(token : String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getAllSlabTypes()
+                        let response = try await ApiServices().getAllSlabTypes(token: token)
                         if (!(response.data?.isEmpty ?? false)) {
                             self.slabTypes = response.data ?? []
                             print("Slab Types Data Fetched!")
@@ -986,13 +1125,13 @@ class AccessServiceViewModel : ObservableObject {
     
     // Insurer Groups Data
     @Published var insurerGroupsData : [InsurerGroupData] = []
-    func getAllInsurerGroups() async throws {
+    func getAllInsurerGroups(token : String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getAllInsurerGroups()
+                        let response = try await ApiServices().getAllInsurerGroups(token: token)
                         if (!(response.data.isEmpty)) {
                             self.insurerGroupsData = response.data
                             print("Insurer Groups Data Fetched!")
@@ -1029,13 +1168,13 @@ class AccessServiceViewModel : ObservableObject {
     
     // Policy Segments
     @Published var policySegments : [PolicySegmentResponse] = []
-    func getAllPolicySegments() async throws {
+    func getAllPolicySegments(token : String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getAllPolicySegments()
+                        let response = try await ApiServices().getAllPolicySegments(token: token)
                         if (!(response.isEmpty)) {
                             self.policySegments = response
                             print("Policy Segments Data Fetched!")
@@ -1072,13 +1211,13 @@ class AccessServiceViewModel : ObservableObject {
     
     // Product Types
     @Published var productTypes : [ProductData] = []
-    func getAllProductTypes() async throws {
+    func getAllProductTypes(token : String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getAllProductTypes()
+                        let response = try await ApiServices().getAllProductTypes(token: token)
                         if (!(response.data.isEmpty)) {
                             self.productTypes = response.data
                             print("Product Types Data Fetched!")
@@ -1115,13 +1254,13 @@ class AccessServiceViewModel : ObservableObject {
     
     // Insurance Type Using Policy Segment ID
     @Published var getInsuranceTypes : [InsuranceTypeUsingSegmentIDData] = []
-    func getInsuranceTypeByPolicySegments(segmentId : String) async throws {
+    func getInsuranceTypeByPolicySegments(segmentId : String, token : String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getInsuranceTypeByPolicySegments(segmentId: segmentId)
+                        let response = try await ApiServices().getInsuranceTypeByPolicySegments(segmentId: segmentId, token: token)
                         if (!(response.data.isEmpty)) {
                             self.getInsuranceTypes = response.data
                             print("Insurance Types with Id Data Fetched!")
@@ -1158,13 +1297,13 @@ class AccessServiceViewModel : ObservableObject {
     
     // Renewal Type Using Policy Segment ID
     @Published var getRenewalTypesByID : [RenewalTypesBySegmentIdData] = []
-    func getRenewalTypesByID(segmentId : String) async throws {
+    func getRenewalTypesByID(segmentId : String, token : String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getRenewalTypeBySegmentId(segmentId: segmentId)
+                        let response = try await ApiServices().getRenewalTypeBySegmentId(segmentId: segmentId, token: token)
                         if (!(response.data.isEmpty)) {
                             self.getRenewalTypesByID = response.data
                             print("Renewal Types with Id Data Fetched!")
@@ -1201,13 +1340,13 @@ class AccessServiceViewModel : ObservableObject {
     
     // PPTs Types Using Policy Segment ID
     @Published var getPPtsTypes : [PPTsTypesData] = []
-    func getPPTsTypesBySegmentId(segmentId : String) async throws {
+    func getPPTsTypesBySegmentId(segmentId : String, token : String) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
-                        let response = try await ApiServices().getPPtsByPolicySegments(segmentId: segmentId)
+                        let response = try await ApiServices().getPPtsByPolicySegments(segmentId: segmentId, token: token)
                         if (!(response.data.isEmpty)) {
                             self.getPPtsTypes = response.data
                             print("PPTs Types with Id Data Fetched!")

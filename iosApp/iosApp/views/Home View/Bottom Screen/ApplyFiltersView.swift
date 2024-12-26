@@ -25,7 +25,9 @@ struct ApplyFiltersView: View {
        "City" : false,
        "Insurance Type" : false,
        "Renewal Type" : false,
-       "Insurer" : false
+       "Insurer" : false,
+       "Vehicle Brand" : false,
+       "Vehicle Model" : false
     ]
     
     
@@ -38,7 +40,9 @@ struct ApplyFiltersView: View {
         "City" : "",
         "Insurance Type" : "",
         "Renewal Type" : "",
-        "Insurer" : ""
+        "Insurer" : "",
+        "Vehicle Brand" : "",
+        "Vehicle Model": ""
     ]
     
     @State private var submittingValue : [String : String] = [
@@ -50,12 +54,17 @@ struct ApplyFiltersView: View {
         "City" : "",
         "Insurance Type" : "",
         "Renewal Type" : "",
-        "Insurer" : ""
+        "Insurer" : "",
+        "Vehicle Brand" : "",
+        "Vehicle Model": ""
     ]
     
+    @State private var searchText: String = "" // State for search text
     
-    let vehicleTypes = ["HE", "Car", "Truck"]
+    @State private var isViewAllSheetActive = false
+    @State private var selectedViewAllTitle = ""
     
+    // All the filters options List
     @State private var vehicleType : [VehicleData] = []
     @State private var fuelType : [FuelTypeData] = []
     @State private var statesData : [StatesData] = []
@@ -64,6 +73,8 @@ struct ApplyFiltersView: View {
     @State private var insuranceTypes : [InsuranceTypeData] = []
     @State private var renewalTypes : [RenewalTypeData] = []
     @State private var insurerType : [InsurerData] = []
+    @State private var vehicleBrands : [BrandData] = []
+    @State private var vehicleModels : [ModelData] = []
     
     let NCBTypes : [String] = ["Yes", "No"]
     
@@ -71,8 +82,8 @@ struct ApplyFiltersView: View {
         VStack(alignment:.leading,spacing:0){
             HStack(spacing:0){
                 Text("Filters")
-                    .font(.custom("Gilroy-Bold", size: 32))
-                
+                    .font(.custom("Poppins-SemiBold", size: 24))
+            
                 Spacer()
                 
                 Image("close-button")
@@ -81,121 +92,143 @@ struct ApplyFiltersView: View {
                         applyFiltersViewClosed()
                     }
             }
-            .padding(.horizontal,16)
             .padding(.vertical,20)
+            .padding(.horizontal,16)
             .background(
                 Color(hex: "#E3FFF6")
                 .ignoresSafeArea(edges: .top) // Extend the gradient to ignore the safe area at the top
             )
             
-            ScrollView{
-                VStack(alignment:.leading,spacing:0){
-                    Text("Vehicle Details")
-                        .font(.custom("Gilroy-Bold", size: 22))
-                        .padding(.bottom,16)
-                        .padding(.top,20)
+            VStack(spacing:0){
+                ScrollView(.vertical,showsIndicators: false){
                     
-                    VStack(spacing:16){
-                        selectionView(selectionTitle: "Vehicle Type", staticValue: "Select Vehicle Type")
+                    VStack(alignment:.leading,spacing:16){
+                        
+                        
+                        SelectionViewWithImage(
+                            accessModel: accessModel,
+                            selectionTitle: "Vehicle Type",
+                            image: "",
+                            filtersList: getFilterList(for: "Vehicle Type")
+                        ){ value in
+                            submittingValue["Vehicle Type"] = value
+                        }
+                        
+
+                        ScrollableSelectionView(
+                            accessModel: accessModel,
+                            selectionTitle: "Vehicle Brand",
+                            image: "",
+                            onTapOfCard: {value,title  in
+                                submittingValue["Vehicle Brand"] = value
+                                self.selectedViewAllTitle = title
+                            }
+                        )
+                        
+                        selectionView(selectionTitle: "Vehicle Model", staticValue: "Select Vehicle Model")
                         
                         selectionView(selectionTitle: "Fuel Type", staticValue: "Select Fuel Type")
                         
                         selectionView(selectionTitle: "NCB", staticValue: "Select Status")
-                    }
-                    
-                    Divider()
-                        .padding(.vertical,20)
-                    
-                    Text("Location Details")
-                        .font(.custom("Gilroy-Bold", size: 22))
-                        .padding(.bottom,16)
-                       
-                    
-                    VStack(spacing:16){
+                        
+                        
                         selectionView(selectionTitle: "State", staticValue: "Select State")
                         
                         selectionView(selectionTitle: "City Category", staticValue: "Select City Category")
                         
-                        selectionView(selectionTitle: "City", staticValue: "Select City")
-                    }
-                    
-                    Divider()
-                        .padding(.vertical,20)
-                    
-                    Text("Policy Details")
-                        .font(.custom("Gilroy-Bold", size: 22))
-                        .padding(.bottom,16)
-                    
-                    VStack(spacing:16){
+                        
+                        ScrollableSelectionView(
+                            accessModel: accessModel,
+                            selectionTitle: "City",
+                            image: "",
+                            onTapOfCard: {value,title  in
+                                submittingValue["City"] = value
+                            }
+                        )
+                        
                         selectionView(selectionTitle: "Insurance Type", staticValue: "Select Insurance Type")
                         
                         selectionView(selectionTitle: "Renewal Type", staticValue: "Select Renewal Type")
                         
                         selectionView(selectionTitle: "Insurer", staticValue: "Select Insurer")
                     }
+                    .padding(.horizontal,2)
+          
+                }
+            }
+            .padding(.horizontal,16)
+            .padding(.vertical,16)
+            .background(
+                LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
+            )
+            .cornerRadius(12, corners: [.allCorners])
+            
+            Spacer()
+            
+            
+            VStack(alignment: .leading,spacing: 0){
+                LMSCustomButton(
+                    isButtonActive: true,
+                    buttonTitle: "Apply Filters"
+                ){
+                    let payload = SearchPolicyRatePayload(
+                        state_id: submittingValue["State"] ?? "",
+                        city_id: submittingValue["City"] ?? "",
+                        city_category_id: submittingValue["City Category"] ?? "",
+                        vehicle_type_id: submittingValue["Vehicle Type"] ?? "",
+                        vehicle_model_id: "",
+                        renewal_type_id: submittingValue["Renewal Type"] ?? "",
+                        insurance_type_id: submittingValue["Insurance Type"] ?? "",
+                        insurer_id: submittingValue["Insurer"] ?? "",
+                        fuel_type_id: submittingValue["Fuel Type"] ?? "",
+                        status: submittingValue["NCB"] ?? "0", page: 1, size: 50
+                    )
+                    print("Apply Filter Payload -> \(payload)")
+                    let token = retrieveToken() ?? ""
                     
-                    
-                    LMSCustomButton(
-                        isButtonActive: true,
-                        buttonTitle: "Apply Filters"
-                    ){
-                        let payload = SearchPolicyRatePayload(
-                            state_id: submittingValue["State"] ?? "",
-                            city_id: submittingValue["City"] ?? "",
-                            city_category_id: submittingValue["City Category"] ?? "",
-                            vehicle_type_id: submittingValue["Vehicle Type"] ?? "",
-                            vehicle_model_id: "",
-                            renewal_type_id: submittingValue["Renewal Type"] ?? "",
-                            insurance_type_id: submittingValue["Insurance Type"] ?? "",
-                            insurer_id: submittingValue["Insurer"] ?? "",
-                            fuel_type_id: submittingValue["Fuel Type"] ?? "",
-                            status: submittingValue["NCB"] ?? "0", page: 1, size: 50
-                        )
-                        print("Apply Filter Payload -> \(payload)")
-                        let token = retrieveToken() ?? ""
-                        
-                        Task.init{
-                            do
-                            {
-                                let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
-                                if result {
-                                    applyFiltersViewClosed()
-                                }
-                                else {
-                                    applyFiltersViewClosed()
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                                        snackBar.show(message: "No Data Found, for the filters applied.", title: "No Data", type: .warning)
-                                    })
-                                   
-                                }
+                    Task.init{
+                        do
+                        {
+                            let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
+                            if result {
+                                applyFiltersViewClosed()
                             }
-                            catch ApiError.networkFailure {
-                                // Handle network failure, e.g., show error Snackbar
-                                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-                            } catch ApiError.lowInternetConnection {
-                                // Handle low internet connection, e.g., show error Snackbar
-                                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-                            } catch ApiError.serverError(let status) {
-                                // Handle server errors, e.g., show error Snackbar
-                                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-                            } catch ApiError.unknownError(let description){
-                                // Handle unknown errors
-                                print("Data Fetching Failed -> \(description)")
-                                snackBar.show(message: description, title: "Error", type: .error)
+                            else {
+                                applyFiltersViewClosed()
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
+                                    snackBar.show(message: "No Data Found, for the filters applied.", title: "No Data", type: .warning)
+                                })
+                                
                             }
-                            
+                        }
+                        catch ApiError.networkFailure {
+                            // Handle network failure, e.g., show error Snackbar
+                            snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+                        } catch ApiError.lowInternetConnection {
+                            // Handle low internet connection, e.g., show error Snackbar
+                            snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+                        } catch ApiError.serverError(let status) {
+                            // Handle server errors, e.g., show error Snackbar
+                            snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+                        } catch ApiError.unknownError(let description){
+                            // Handle unknown errors
+                            print("Data Fetching Failed -> \(description)")
+                            snackBar.show(message: description, title: "Error", type: .error)
                         }
                         
                     }
-                    .padding(.vertical,16)
-                    
                     
                 }
-                .padding(.horizontal,16)
             }
+            .padding(.horizontal,16)
+            .padding(.vertical,16)
+            
+           
+         
         }
+        .background(Color(hex: "#F5F8FF"))
         .onAppear{
-            let token = retrieveToken() ?? ""
+            let _ = retrieveToken() ?? ""
 
         }
         .onReceive(accessModel.$vehicleTypes, perform: {values in
@@ -238,11 +271,21 @@ struct ApplyFiltersView: View {
                 insurerType = values
             }
         })
+        .onReceive(accessModel.$vehicleBrands, perform: {values in
+            if !values.isEmpty{
+                self.vehicleBrands = values
+            }
+        })
+        .onReceive(accessModel.$vehicleModels, perform: {values in
+            if !values.isEmpty{
+                self.vehicleModels = values
+            }
+        })
         
         
-        
-  
     }
+    
+
     
     
     @ViewBuilder
@@ -250,58 +293,71 @@ struct ApplyFiltersView: View {
         
         let filters = getFilterList(for: selectionTitle)
         
+        @State var searchText : String = ""
+        
         VStack(alignment:.leading,spacing:8){
             Text(selectionTitle)
-                .font(.custom("Gilroy-SemiBold", size: 16))
+                .font(.custom("Poppins-SemiBold", size: 16))
                 .padding(.leading,5)
             
             VStack(alignment:.leading,spacing:0){
                 HStack(spacing:0){
                     
-                    if selectedValue[selectionTitle] == "" {
-                        Text(staticValue)
-                            .font(.custom("Gilroy-Medium", size: 14))
-                    }
-                    else {
-                        if let value = selectedValue[selectionTitle]  {
-                            Text(value)
-                                .font(.custom("Gilroy-Medium", size: 14))
+                    if let value = selectedValue[selectionTitle]  {
+                        if selectedValue[selectionTitle] == "" {
+                            Text(staticValue)
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#C4C4C4"))
+                                .onAppear{
+                                    print("\(selectionTitle) -> \(value)")
+                                }
                         }
                         else {
-                            Text(staticValue)
-                                .font(.custom("Gilroy-Medium", size: 14))
+                            Text(value)
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#000000"))
+                                .onAppear{
+                                    print("\(selectionTitle) -> \(value)")
+                                }
                         }
-                       
+                        
+                    }
+                    else {
+                        Text(staticValue)
+                            .font(.custom("Poppins-Medium", size: 14))
+                            .foregroundStyle(Color(hex: "#C4C4C4"))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
                     }
                     
                     Spacer()
                     
-                    Image("union-1")
-                        .padding(.top,5)
+                    Image("dropdown")
+                        .resizable()
+                        .frame(width: 20,height: 20)
+                        .foregroundStyle(Color(hex: "#000000"))
+                        .padding(.bottom,5)
                 }
+                .padding(.horizontal,16)
                 
                 
                 if dropDownViewSelected[selectionTitle] ?? false {
-                    VStack(alignment:.leading,spacing:16){
+                    VStack(alignment:.leading,spacing:0){
+                        
                         HStack{
                             Text(staticValue)
-                                .font(.custom("Gilroy-Medium", size: 14))
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#C4C4C4"))
                            
                             Spacer()
                             
-                            if selectedValue[selectionTitle] == "" {
-                                Circle()
-                                    .fill(Color(hex: "#3960F6"))
-                                    .frame(width: 9, height: 9)
-                                    .overlay(content: {
-                                        Circle()
-                                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
-                                            .frame(width: 16,height: 16)
-                                    })
-                                    
-                            }
                         }
-                        .padding(.top,8)
+                        .padding(.horizontal,16)
+                        .padding(.vertical,16)
+                        .background(
+                            selectedValue[selectionTitle] == "" ?
+                            Color(hex: "#E3FFF6") : Color.clear
+                        )
                         .contentShape(Rectangle())
                         .onTapGesture {
                             withAnimation{
@@ -368,12 +424,22 @@ struct ApplyFiltersView: View {
                                     singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
                                 }
                                 
+                                case "Vehicle Brand":
+                                if let brand = singleList as? BrandData {
+                                    singleFilterValue(title: selectionTitle, value: brand.name, valueId: brand.id)
+                                }
+                                
+                                case "Vehicle Model":
+                               
+                                if let model = singleList as? ModelData {
+                                    if model.vehicle_brand_id == submittingValue["Vehicle Brand"] {
+                                        singleFilterValue(title: selectionTitle, value: model.name, valueId: model.id)
+                                    }
+                                }
+                                
                                 default :
                                     EmptyView()
                             }
-                            
-                            
-                            
                             
                         }
                         
@@ -383,8 +449,7 @@ struct ApplyFiltersView: View {
                 }
                 
             }
-            .padding(.horizontal,16)
-            .padding(.vertical,16)
+            .padding(.vertical,12)
             .overlay{
                 RoundedRectangle(cornerRadius: 6)
                     .stroke(Color(hex: "#544C4C"),lineWidth: 1)
@@ -402,22 +467,18 @@ struct ApplyFiltersView: View {
     func singleFilterValue(title: String,value: String, valueId : String) -> some View{
         HStack{
             Text(value)
-                .font(.custom("Gilroy-Medium", size: 14))
+                .font(.custom("Poppins-Medium", size: 14))
+                .foregroundStyle(Color(hex: "#000000"))
             
             Spacer()
-            
-            
-            if selectedValue[title] == value {
-                Circle()
-                    .fill(Color(hex: "#3960F6"))
-                    .frame(width: 9, height: 9)
-                    .overlay(content: {
-                        Circle()
-                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
-                            .frame(width: 16,height: 16)
-                    })
-            }
+             
         }
+        .padding(.horizontal,16)
+        .padding(.vertical,16)
+        .background(
+            selectedValue[title] == value ?
+            Color(hex: "#E3FFF6") : Color.clear
+        )
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation{
@@ -449,8 +510,211 @@ struct ApplyFiltersView: View {
             return renewalTypes  // Returning the full array of `RenewalTypeData` objects
         case "Insurer":
             return insurerType  // Returning the full array of `InsurerData` objects
+        case "Vehicle Brand":
+            return vehicleBrands
+        case "Vehicle Model":
+            return vehicleModels
         default:
             return []
+        }
+    }
+    
+    
+    // Search Field Option
+    @ViewBuilder
+    func searchSelectionView(selectionTitle: String, staticValue: String) -> some View {
+        let filters = getFilterList(for: selectionTitle)
+        
+        
+        VStack(alignment: .leading, spacing: 8) {
+            Text(selectionTitle)
+                .font(.custom("Poppins-SemiBold", size: 16))
+                .padding(.leading, 5)
+            
+            VStack(alignment: .leading, spacing: 0) {
+                HStack(spacing: 0) {
+                    if let value = selectedValue[selectionTitle] {
+                        if value.isEmpty {
+                            Text(staticValue)
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#C4C4C4"))
+                        } else {
+                            Text(value)
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#000000"))
+                        }
+                    } else {
+                        Text(staticValue)
+                            .font(.custom("Poppins-Medium", size: 14))
+                            .foregroundStyle(Color(hex: "#C4C4C4"))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    Spacer()
+                    Image("dropdown")
+                        .resizable()
+                        .frame(width: 20, height: 20)
+                        .foregroundStyle(Color(hex: "#000000"))
+                        .padding(.bottom, 5)
+                }
+                .padding(.horizontal, 16)
+                
+                // Dropdown results based on `searchText`
+                if dropDownViewSelected[selectionTitle] ?? false {
+                    LazyVStack(alignment: .leading, spacing: 0) {
+                        // Search Field
+                        TextField("Search...", text: $searchText)
+                            .font(.custom("Poppins-Medium", size: 14))
+                            .foregroundStyle(searchText.isEmpty ? Color(hex: "#C4C4C4") : Color(hex: "#000000"))
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 16)
+                        
+                        // Static Value Selection
+                        HStack {
+                            Text(staticValue)
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#C4C4C4"))
+                            Spacer()
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 16)
+                        .background(
+                            selectedValue[selectionTitle]?.isEmpty ?? true
+                                ? Color(hex: "#E3FFF6")
+                                : Color.clear
+                        )
+                        .contentShape(Rectangle())
+                        .onTapGesture {
+                            withAnimation {
+                                selectedValue[selectionTitle] = ""
+                                submittingValue[selectionTitle] = ""
+                                dropDownViewSelected[selectionTitle] = false
+                            }
+                        }
+                        
+                        ForEach(filters.filter {
+                            searchText.isEmpty || matchesSearchCriteria(item: $0, searchText: searchText, selectionTitle: selectionTitle)
+                        }.indices, id: \.self) { i in
+                            let singleList = filters[i]
+                            
+                            switch selectionTitle {
+                            case "Vehicle Type":
+                                if let vehicle = singleList as? VehicleData {
+                                    singleFilterValue(title: selectionTitle, value: vehicle.name, valueId: vehicle.id)
+                                }
+                            case "Fuel Type":
+                                if let fuel = singleList as? FuelTypeData {
+                                    singleFilterValue(title: selectionTitle, value: fuel.name, valueId: fuel.id)
+                                }
+                            case "NCB":
+                                if let ncb = singleList as? String {
+                                    let id = ncb == "Yes" ? "1" : "0"
+                                    singleFilterValue(title: selectionTitle, value: ncb, valueId: id)
+                                }
+                            case "State":
+                                if let state = singleList as? StatesData {
+                                    singleFilterValue(title: selectionTitle, value: state.name, valueId: state.id)
+                                }
+                            case "City Category":
+                                if let cityCategory = singleList as? CityCategoryData {
+                                    singleFilterValue(title: selectionTitle, value: cityCategory.name, valueId: cityCategory.id)
+                                }
+                            case "City":
+                                if let city = singleList as? CityData {
+//                                    singleFilterValue(title: selectionTitle, value: city.name, valueId: city.id)
+                                    searchSingleFilterValue(title: selectionTitle, value: city.name, valueId: city.id, searchText: searchText)
+                                }
+                            case "Insurance Type":
+                                if let insurance = singleList as? InsuranceTypeData {
+                                    singleFilterValue(title: selectionTitle, value: insurance.name, valueId: insurance.id)
+                                }
+                            case "Renewal Type":
+                                if let renewal = singleList as? RenewalTypeData {
+                                    singleFilterValue(title: selectionTitle, value: renewal.name, valueId: renewal.id)
+                                }
+                            case "Insurer":
+                                if let insurer = singleList as? InsurerData {
+                                    singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
+                                }
+                            default:
+                                EmptyView()
+                            }
+                        }
+                    }
+                    .padding(.top, 8)
+                }
+            }
+            .padding(.vertical, 12)
+            .overlay {
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color(hex: "#544C4C"), lineWidth: 1)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation{
+                    dropDownViewSelected[selectionTitle]?.toggle()
+                }
+            }
+            .gesture(DragGesture().onChanged { _ in })
+
+        }
+        
+    }
+    
+    @ViewBuilder
+    func searchSingleFilterValue(title: String, value: String, valueId: String, searchText: String) -> some View {
+        // Check if the value matches the searchText or if searchText is empty
+        if searchText.isEmpty || value.lowercased().contains(searchText.lowercased()) {
+            HStack {
+                Text(value)
+                    .font(.custom("Poppins-Medium", size: 14))
+                    .foregroundStyle(Color(hex: "#000000"))
+                
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 16)
+            .background(
+                selectedValue[title] == value
+                    ? Color(hex: "#E3FFF6")
+                    : Color.clear
+            )
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation {
+                    selectedValue[title] = value
+                    submittingValue[title] = valueId
+                    dropDownViewSelected[title] = false
+                    print("\(String(describing: selectedValue[title])) : \(String(describing: submittingValue[title]))")
+                }
+            }
+        }
+    }
+
+    
+    
+    private func matchesSearchCriteria(item: Any, searchText: String, selectionTitle: String) -> Bool {
+        switch selectionTitle {
+        case "Vehicle Type":
+            return (item as? VehicleData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "Fuel Type":
+            return (item as? FuelTypeData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "State":
+            return (item as? StatesData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "City Category":
+            return (item as? CityCategoryData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "City":
+            return (item as? CityData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "Insurance Type":
+            return (item as? InsuranceTypeData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "Renewal Type":
+            return (item as? RenewalTypeData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "Insurer":
+            return (item as? InsurerData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+        case "NCB":
+            return (item as? String)?.lowercased().contains(searchText.lowercased()) ?? false
+        default:
+            return false
         }
     }
     

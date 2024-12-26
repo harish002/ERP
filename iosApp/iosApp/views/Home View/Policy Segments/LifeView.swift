@@ -288,11 +288,13 @@ struct LifeView: View {
                         .resizable()
                         .frame(width: 20,height: 20)
                         .foregroundStyle(Color(hex: "#000000"))
+                        .padding(.bottom,5)
                 }
+                .padding(.horizontal,16)
                 
                 
                 if dropDownViewSelected[selectionTitle] ?? false {
-                    VStack(alignment:.leading,spacing:16){
+                    VStack(alignment:.leading,spacing:0){
                         HStack{
                             Text(staticValue)
                                 .font(.custom("Poppins-Medium", size: 14))
@@ -300,19 +302,13 @@ struct LifeView: View {
                            
                             Spacer()
                             
-                            if selectedValue[selectionTitle] == "" {
-                                Circle()
-                                    .fill(Color(hex: "#3960F6"))
-                                    .frame(width: 6, height: 6)
-                                    .overlay(content: {
-                                        Circle()
-                                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
-                                            .frame(width: 12,height: 12)
-                                    })
-                                    
-                            }
                         }
-                        .padding(.top,8)
+                        .padding(.horizontal,16)
+                        .padding(.vertical,16)
+                        .background(
+                            selectedValue[selectionTitle] == "" ?
+                            Color(hex: "#E3FFF6") : Color.clear
+                        )
                         .contentShape(Rectangle())
                         .onTapGesture {
                             withAnimation{
@@ -336,7 +332,7 @@ struct LifeView: View {
                                 }
                                 
                                 case "Renewal Type":
-                                if let renewal = singleList as? RenewalTypeData {
+                                if let renewal = singleList as? RenewalTypesBySegmentIdData {
                                     singleFilterValue(title: selectionTitle, value: renewal.name, valueId: renewal.id)
                                 }
                                 
@@ -378,7 +374,6 @@ struct LifeView: View {
                 }
                 
             }
-            .padding(.horizontal,16)
             .padding(.vertical,12)
             .overlay{
                 RoundedRectangle(cornerRadius: 6)
@@ -401,18 +396,14 @@ struct LifeView: View {
                 .foregroundStyle(Color(hex: "#000000"))
             
             Spacer()
-            
-            if selectedValue[title] == value {
-                Circle()
-                    .fill(Color(hex: "#3960F6"))
-                    .frame(width: 6, height: 6)
-                    .overlay(content: {
-                        Circle()
-                            .stroke(Color(hex: "#3960F6"),lineWidth: 1)
-                            .frame(width: 12,height: 12)
-                    })
-            }
+        
         }
+        .padding(.horizontal,16)
+        .padding(.vertical,16)
+        .background(
+            selectedValue[title] == value ?
+            Color(hex: "#E3FFF6") : Color.clear
+        )
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation{
@@ -427,10 +418,11 @@ struct LifeView: View {
     // Apis
     // Slab Types
     func allSlabTypes(){
+        let token = retrieveToken() ?? ""
         Task.init {
             do
             {
-                try await accessModel.getAllSlabTypes()
+                try await accessModel.getAllSlabTypes(token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -451,10 +443,11 @@ struct LifeView: View {
     
     // Insurer Groups Data
     func getAllInsurerGroups(){
+        let token = retrieveToken() ?? ""
         Task.init {
             do
             {
-                try await accessModel.getAllInsurerGroups()
+                try await accessModel.getAllInsurerGroups(token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -475,10 +468,11 @@ struct LifeView: View {
     
     // Policy Segments
     func getAllPolicySegments(){
+        let token = retrieveToken() ?? ""
         Task.init {
             do
             {
-                try await accessModel.getAllPolicySegments()
+                try await accessModel.getAllPolicySegments(token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -499,10 +493,11 @@ struct LifeView: View {
     
     // Product Types
     func getAllProductTypes(){
+        let token = retrieveToken() ?? ""
         Task.init {
             do
             {
-                try await accessModel.getAllProductTypes()
+                try await accessModel.getAllProductTypes(token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -523,10 +518,11 @@ struct LifeView: View {
     
     // Insurance Type Using Policy Segment ID
     func getInsuranceTypeByPolicySegments(segmentId : String){
+        let token = retrieveToken() ?? ""
         Task.init {
             do
             {
-                try await accessModel.getInsuranceTypeByPolicySegments(segmentId: segmentId)
+                try await accessModel.getInsuranceTypeByPolicySegments(segmentId: segmentId, token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -547,10 +543,11 @@ struct LifeView: View {
     
     // PPTs Type Using Policy Segment ID
     func getPPTypeByPolicySegments(segmentId : String){
+        let token = retrieveToken() ?? ""
         Task.init {
             do
             {
-                try await accessModel.getPPTsTypesBySegmentId(segmentId: segmentId)
+                try await accessModel.getPPTsTypesBySegmentId(segmentId: segmentId, token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
@@ -571,10 +568,11 @@ struct LifeView: View {
     
     // Renewal Type Using Policy Segment ID
     func getRenewalTypeByPolicySegments(segmentId : String){
+        let token = retrieveToken() ?? ""
         Task.init {
             do
             {
-                try await accessModel.getRenewalTypesByID(segmentId: segmentId)
+                try await accessModel.getRenewalTypesByID(segmentId: segmentId, token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar

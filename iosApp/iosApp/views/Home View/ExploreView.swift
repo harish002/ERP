@@ -51,7 +51,7 @@ struct ExploreView: View {
                         HStack(spacing:0){
                             Text("Sales Tools")
                                 .matchedGeometryEffect(id: "header", in: nameSpace)
-                                .font(.custom("Gilroy-Bold", size: 28))
+                                .font(.custom("Poppins-Bold", size: 28))
                                 .foregroundStyle(Color.black)
                             
                             Spacer()
@@ -62,15 +62,10 @@ struct ExploreView: View {
                                     .aspectRatio(contentMode: .fit)
                                     .frame(width: 18, height: 18)
                                     .foregroundStyle(Color(hex: "#FFFFFF"))
-                                    .contentShape(Rectangle())
-                                    .onTapGesture {
-                                        withAnimation{
-                                            isFilterSelected = true
-                                        }
-                                    }
+                                 
                                 
                                 Text("Filter")
-                                    .font(.custom("Gilroy-Medium", size: 12))
+                                    .font(.custom("Poppins-Medium", size: 12))
                                     .foregroundStyle(Color.white)
                             }
                             .padding(.vertical,6)
@@ -79,6 +74,12 @@ struct ExploreView: View {
                                 Color(hex: "#04C98B")
                             )
                             .cornerRadius(8, corners: [.allCorners])
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                withAnimation{
+                                    isFilterSelected = true
+                                }
+                            }
                         }
                         .padding(.horizontal,16)
                         .padding(.vertical,16)
@@ -112,6 +113,11 @@ struct ExploreView: View {
                                             
                                             HStack(spacing:16){
                                                 
+                                                Image("image54")
+                                                    .resizable()
+                                                    .aspectRatio(contentMode: .fit)
+                                                    .frame(width: 54, height: 54, alignment: .leading)
+                                                
                                                 VStack(alignment:.leading,spacing:4){
                                                     
                                                     Text(policyRate.insurance_type.name)
@@ -128,22 +134,21 @@ struct ExploreView: View {
                                                 .frame(maxWidth:.infinity,alignment:.leading)
                                                 
                                                 
-                                                
                                                 HStack(spacing:2){
                                                     Text("\(policyRate.payouts)")
-                                                        .font(.custom("Gilroy-Bold", size: 32))
+                                                        .font(.custom("Poppins-Medium", size: 24))
                                                         .foregroundStyle(Color("title", bundle: nil))
                                                     
                                                     Text("%")
-                                                        .font(.custom("Gilroy-Bold", size: 32))
+                                                        .font(.custom("Poppins-Medium", size: 24))
                                                         .foregroundStyle(Color("title", bundle: nil))
                                                 }
-                                                .frame(maxWidth:.infinity,alignment:.trailing)
+                                                .frame(maxWidth:60,alignment:.trailing)
                                                 
                                             }
                                             .frame(maxWidth:.infinity,alignment:.leading)
                                             .padding(.vertical,20)
-                                            .padding(.horizontal,20)
+                                            .padding(.horizontal,16)
                                             .background(
                                                 LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
                                             )
@@ -258,6 +263,9 @@ struct ExploreView: View {
                 fuelTypes(token: token)
                 allStates(token: token)
                 cityCategories(token: token)
+                vehicleBrands(token: token)
+                vehicleModels(token: token)
+                
             })
             
         }
@@ -506,6 +514,52 @@ struct ExploreView: View {
             do
             {
                 try await accessModel.getAllCitiesData(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func vehicleBrands(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getVehicleBrands(token: token)
+            }
+            catch ApiError.networkFailure {
+                // Handle network failure, e.g., show error Snackbar
+                snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
+            } catch ApiError.lowInternetConnection {
+                // Handle low internet connection, e.g., show error Snackbar
+                snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
+            } catch ApiError.serverError(let status) {
+                // Handle server errors, e.g., show error Snackbar
+                snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
+            } catch ApiError.unknownError(let description){
+                // Handle unknown errors
+                print("Data Fetching Failed -> \(description)")
+                snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
+            }
+        }
+    }
+    
+    func vehicleModels(token : String){
+        Task.init {
+            do
+            {
+                try await accessModel.getVehicleModels(token: token)
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar

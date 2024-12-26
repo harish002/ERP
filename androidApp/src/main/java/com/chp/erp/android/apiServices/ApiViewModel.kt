@@ -759,9 +759,11 @@ class ApiViewModel : ViewModel() {
     ):String {
         return try {
             val response = withContext(Dispatchers.IO) {
-                ApiServices().setregisterDeviceForNotification(
+                ApiServices().registerDeviceForNotification(
                     token,
-                    projectId, userId, deviceToken
+                    projectId,
+                    userId,
+                    deviceToken
                 )
             }
             Log.d("Success registerDeviceForNotification", response.toString())

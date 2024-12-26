@@ -124,3 +124,18 @@ func clearDeviceRegistration(){
 }
 
 
+// Save the Employee Information ID Locally
+func saveDeviceRegisteredForPushNotification(isRegistered : Bool){
+    clearDeviceRegisteredForPushNotification()
+    UserDefaults.standard.set(isRegistered, forKey: "PushNotification")
+}
+
+func retrieveDeviceRegisteredForPushNotification() -> Bool? {
+    let token = UserDefaults.standard.bool(forKey: "PushNotification")
+    return token
+}
+
+func clearDeviceRegisteredForPushNotification(){
+    UserDefaults.standard.removeObject(forKey: "PushNotification")
+}
+
