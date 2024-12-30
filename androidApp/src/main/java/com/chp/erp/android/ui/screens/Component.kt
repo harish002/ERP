@@ -89,7 +89,8 @@ fun PolicyListView(
             .fillMaxWidth()
             .clickable {
 //                showPopup = !showPopup
-                BottomBarScreen.Poicy_Rate_Details.route?.let { mainNavController.navigate("$it/${data.id}") }
+                BottomBarScreen.Poicy_Rate_Details.
+                route?.let { mainNavController.navigate("$it/${data.id}") }
             }
             .padding(6.dp)
             .clip(RoundedCornerShape(12.dp)),

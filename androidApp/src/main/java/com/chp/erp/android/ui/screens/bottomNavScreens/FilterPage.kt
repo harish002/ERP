@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -78,6 +79,7 @@ fun FilterScreen(
 
     val context = LocalContext.current
     var loading by remember { mutableStateOf(true) }
+    var dataloading by remember { mutableStateOf(true) }
 
     val policyRatesList by viewModel.getPolicyRates.collectAsState()
 
@@ -200,6 +202,7 @@ fun FilterScreen(
                     )
                 }
             }
+            dataloading = false
         }
 
 
@@ -314,30 +317,37 @@ fun FilterScreen(
 //                        PolicyListView(i, index + 1)
 //                    }
 //                }
-                if (policyRatesList.isEmpty()) {
-                    item {
-                        // Display a message when there are no items
-                        Image(
-                            painter = painterResource(R.drawable.not_found),
-                            contentDescription = "Not Found Image"
-                        )
-                        Text(
-                            text = "No Data Available",
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(16.dp), // Add some padding for better appearance
-                            style = MaterialTheme.typography.labelMedium, // Use appropriate text style
-                            color = MaterialTheme.colorScheme.onSurface // Adjust color as needed
-                        )
-                    }
-                } else {
-                    // If there are items, display them in the list
-                    itemsIndexed(policyRatesList) { index, item ->
-                        if (item != null) {
-                            //REOPEN
-                            PolicyListView(item, index + 1, mainNavController)
+                if(dataloading == false){
+                    if (policyRatesList.isEmpty()) {
+                        item {
+                            // Display a message when there are no items
+                            Image(
+                                painter = painterResource(R.drawable.not_found),
+                                contentDescription = "Not Found Image"
+                            )
+                            Text(
+                                text = "No Data Available",
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp), // Add some padding for better appearance
+                                style = MaterialTheme.typography.labelMedium, // Use appropriate text style
+                                color = MaterialTheme.colorScheme.onSurface // Adjust color as needed
+                            )
                         }
+                    } else {
+                        // If there are items, display them in the list
+                        itemsIndexed(policyRatesList) { index, item ->
+                            if (item != null) {
+                                //REOPEN
+                                PolicyListView(item, index + 1, mainNavController)
+                            }
+                        }
+                    }
+                }else{
+                    item{
+                        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+                            CircularProgressIndicator() }
                     }
                 }
             }

@@ -27,32 +27,11 @@ import com.chp.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.chp.lms.Services.Dataclass.SlabResponse
 import com.chp.lms.Services.Dataclass.UserData
 import com.chp.lms.Services.Dataclass.UserDetails
+import com.chp.lms.Services.Dataclass.VehicleBrands
 import com.chp.lms.Services.Dataclass.VehicleTypes
 import com.chp.lms.Services.Dataclass.VerifyOTP
 import com.chp.lms.android.Services.Methods
-import com.example.lms.Services.Dataclass.AllCities
-import com.example.lms.Services.Dataclass.AllCityCategories
-import com.example.lms.Services.Dataclass.FuelTypes
-import com.example.lms.Services.Dataclass.GetAllStates
-import com.example.lms.Services.Dataclass.GetUserData
-import com.example.lms.Services.Dataclass.GetVehicleDetails
-import com.example.lms.Services.Dataclass.InsuranceTypeUsingSegmentID
-import com.example.lms.Services.Dataclass.InsuranceTypes
-import com.example.lms.Services.Dataclass.InsurerGroupResponse
-import com.example.lms.Services.Dataclass.InsurerTypes
-import com.example.lms.Services.Dataclass.PPTsTypesBySegmentId
-import com.example.lms.Services.Dataclass.PolicyRateData
-import com.example.lms.Services.Dataclass.PolicySegmentResponse
-import com.example.lms.Services.Dataclass.ProductResponse
-import com.example.lms.Services.Dataclass.RegisteredDeviceResponse
-import com.example.lms.Services.Dataclass.RenewalTypes
-import com.example.lms.Services.Dataclass.SearchPolicyRatePayload
-import com.example.lms.Services.Dataclass.SlabResponse
-import com.example.lms.Services.Dataclass.UserDetails
-import com.example.lms.Services.Dataclass.VehicleTypes
-import com.example.lms.Services.Dataclass.VerifyOTP
-import com.example.lms.Services.Dataclass.UserData
-import com.example.lms.lms.Services.ApiServices
+
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -353,6 +332,28 @@ class ApiViewModel : ViewModel() {
 
     }
 
+    private var _getVehicleBrand = MutableStateFlow<VehicleBrands?>(null)
+    val getVehicleBrands: MutableStateFlow<VehicleBrands?> = _getVehicleBrand
+
+    suspend fun getAllVehicleBrands(token: String): VehicleBrands? {
+        return try {
+            val deferredResponse = viewModelScope.async {
+                ApiServices().getVehicleBrands(token)
+            }
+            val response = deferredResponse.await()
+            Log.d("Vehicle Brands", response.toString())
+            _getVehicleBrand.value = response
+            return response
+        } catch (e: Exception) {
+            Log.e(
+                "get Vehicle Brands",
+                e.message ?: "Unknown error"
+            )
+            null // Return null in case of an exception
+        }
+
+    }
+
 
     private var _getFuelTypes = MutableStateFlow<FuelTypes?>(null)
     val getFuelTypes: MutableStateFlow<FuelTypes?> = _getFuelTypes
@@ -513,10 +514,10 @@ class ApiViewModel : ViewModel() {
     private var _getAllSlabTypes = MutableStateFlow<SlabResponse?>(null)
     val getAllSlabTypes: MutableStateFlow<SlabResponse?> = _getAllSlabTypes
 
-    suspend fun getAllSlabTypes(): SlabResponse? {
+    suspend fun getAllSlabTypes(token: String): SlabResponse? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getAllSlabTypes()
+                ApiServices().getAllSlabTypes(token)
             }
             val response = deferredResponse.await()
             Log.d("getAllSlabTypes", response.toString())
@@ -536,17 +537,16 @@ class ApiViewModel : ViewModel() {
     private var _getInsurerGroups = MutableStateFlow<InsurerGroupResponse?>(null)
     val getInsurerGroupsObj1: MutableStateFlow<InsurerGroupResponse?> = _getInsurerGroups
 
-    suspend fun getInsurerGroups(): InsurerGroupResponse? {
+    suspend fun getInsurerGroups(token: String): InsurerGroupResponse? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getAllInsurerGroups()
+                ApiServices().getAllInsurerGroups(token)
             }
             val response = deferredResponse.await()
             Log.d("get all InsurerGroups", response.toString())
             _getInsurerGroups.value = response
             return response
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(
                 "get InsurerGroups error",
                 e.message ?: "Unknown error"
@@ -559,17 +559,18 @@ class ApiViewModel : ViewModel() {
     private var _getPolicySegments = MutableStateFlow<List<PolicySegmentResponse?>>(emptyList())
     val getPolicySegments: StateFlow<List<PolicySegmentResponse?>> = _getPolicySegments
 
-    suspend fun getPolicySegments(): List<PolicySegmentResponse>? {
+    suspend fun getPolicySegments(token: String): List<PolicySegmentResponse>? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getAllPolicySegments()
+                ApiServices().getAllPolicySegments(
+                    token
+                )
             }
             val response = deferredResponse.await()
             Log.d("getgetPolicySegments", response.toString())
             _getPolicySegments.value = response
             return response
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(
                 "getPolicySegments",
                 e.message ?: "Unknown error"
@@ -582,17 +583,16 @@ class ApiViewModel : ViewModel() {
     private var _getProductTypes = MutableStateFlow<ProductResponse?>(null)
     val getProductTypes: MutableStateFlow<ProductResponse?> = _getProductTypes
 
-    suspend fun getProductTypes(): ProductResponse? {
+    suspend fun getProductTypes(token: String): ProductResponse? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getAllProductTypes()
+                ApiServices().getAllProductTypes(token)
             }
             val response = deferredResponse.await()
             Log.d("getAllProductTypes", response.toString())
             _getProductTypes.value = response
             return response
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(
                 "getProductTypes",
                 e.message ?: "Unknown error"
@@ -605,17 +605,16 @@ class ApiViewModel : ViewModel() {
     private var _getInsuranceTypeByID = MutableStateFlow<InsuranceTypeUsingSegmentID?>(null)
     val getInsuranceTypeByID: MutableStateFlow<InsuranceTypeUsingSegmentID?> = _getInsuranceTypeByID
 
-    suspend fun getInsuranceTypeByPolicySegments(segmentId : String): InsuranceTypeUsingSegmentID? {
+    suspend fun getInsuranceTypeByPolicySegments(segmentId: String,token: String): InsuranceTypeUsingSegmentID? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getInsuranceTypeByPolicySegments(segmentId)
+                ApiServices().getInsuranceTypeByPolicySegments(segmentId, token )
             }
             val response = deferredResponse.await()
             Log.d("getAllByPolicySegments", response.toString())
             _getInsuranceTypeByID.value = response
             return response
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(
                 "getInsuranceTypeByID",
                 e.message ?: "Unknown error"
@@ -628,17 +627,16 @@ class ApiViewModel : ViewModel() {
     private var _getPPtsTypes = MutableStateFlow<PPTsTypesBySegmentId?>(null)
     val getPPtsTypes: MutableStateFlow<PPTsTypesBySegmentId?> = _getPPtsTypes
 
-    suspend fun getPPTsTypesBySegmentId(segmentId : String): PPTsTypesBySegmentId? {
+    suspend fun getPPTsTypesBySegmentId(segmentId: String,token: String): PPTsTypesBySegmentId? {
         return try {
             val deferredResponse = viewModelScope.async {
-                ApiServices().getPPtsByPolicySegments(segmentId)
+                ApiServices().getPPtsByPolicySegments(segmentId, token)
             }
             val response = deferredResponse.await()
             Log.d("getAllTypesBySegmentId", response.toString())
             _getPPtsTypes.value = response
             return response
-        }
-        catch (e: Exception) {
+        } catch (e: Exception) {
             Log.e(
                 "getPPtsTypes",
                 e.message ?: "Unknown error"
@@ -646,10 +644,6 @@ class ApiViewModel : ViewModel() {
             null // Return null in case of an exception
         }
     }
-
-
-
-
 
 
     private var _getfilterPolicyRateData = MutableStateFlow<List<PolicyRateData?>>(emptyList())
@@ -841,7 +835,7 @@ class ApiViewModel : ViewModel() {
 
     suspend fun resetPassword(
         email: String,
-    ):String {
+    ): String {
         return try {
             val response = withContext(Dispatchers.IO) {
                 ApiServices().resetPassword(

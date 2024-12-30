@@ -173,11 +173,23 @@ fun SMEView(context: Context, viewModel: ApiViewModel, mainNavController: NavHos
 
                         }
                         // Use async to call multiple suspend functions concurrently
-                        val slabDataDeferred = async { viewModel.getAllSlabTypes() }
-                        val productDeferred = async { viewModel.getProductTypes() }
-                        val insuranceGroupDeferred = async { viewModel.getInsurerGroups() }
+                        val slabDataDeferred = async {
+                            Methods().retrieve_userID(context)?.let {
+                                viewModel.getAllSlabTypes(
+                                    it
+                                )
+                            }
+                        }
+                        val productDeferred = async { Methods().retrieve_userID(context)
+                            ?.let { viewModel.getProductTypes(it) } }
+                        val insuranceGroupDeferred = async { Methods().retrieve_userID(context)
+                            ?.let { viewModel.getInsurerGroups(it) } }
                         val insuranceTypesBySegmentIdDeffered =
-                            async { viewModel.getInsuranceTypeByPolicySegments("3e2d3437-7949-4047-bb25-97392928423a") }
+                            async { Methods().retrieve_userID(context)?.let {
+                                viewModel.getInsuranceTypeByPolicySegments("3e2d3437-7949-4047-bb25-97392928423a",
+                                    it
+                                )
+                            } }
 
 
                         // Await all results

@@ -196,12 +196,28 @@ fun LifeView(context: Context, viewModel: ApiViewModel, mainNavController: NavHo
 
                         }
                         // Use async to call multiple suspend functions concurrently
-                        val slabDataDeferred = async { viewModel.getAllSlabTypes() }
-                        val productDeferred = async { viewModel.getProductTypes() }
-                        val pptDeferred = async { viewModel.getPPTsTypesBySegmentId("50ec3716-3e49-47ff-8b3d-c768700c9328") }
-                        val insuranceGroupDeferred = async { viewModel.getInsurerGroups() }
+                        val slabDataDeferred = async { Methods().retrieve_userID(context)
+                            ?.let { viewModel.getAllSlabTypes(it) } }
+                        val productDeferred = async {
+                            Methods().retrieve_userID(context)?.let {
+                                viewModel.getProductTypes(
+                                    it
+                                )
+                            }
+                        }
+                        val pptDeferred = async { Methods().retrieve_userID(context)?.let {
+                            viewModel.getPPTsTypesBySegmentId("50ec3716-3e49-47ff-8b3d-c768700c9328",
+                                it
+                            )
+                        } }
+                        val insuranceGroupDeferred = async { Methods().retrieve_userID(context)
+                            ?.let { viewModel.getInsurerGroups(it) } }
                         val insuranceTypesBySegmentIdDeffered =
-                            async { viewModel.getInsuranceTypeByPolicySegments("50ec3716-3e49-47ff-8b3d-c768700c9328") }
+                            async { Methods().retrieve_userID(context)?.let {
+                                viewModel.getInsuranceTypeByPolicySegments("50ec3716-3e49-47ff-8b3d-c768700c9328",
+                                    it
+                                )
+                            } }
 
 
                         // Await all results

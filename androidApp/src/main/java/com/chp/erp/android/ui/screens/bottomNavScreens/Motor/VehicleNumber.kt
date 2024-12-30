@@ -15,39 +15,55 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -70,7 +86,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -88,6 +103,7 @@ import com.chp.erp.android.ui.screens.bottomNavScreens.Camera.copyUriToFile
 import com.chp.erp.android.ui.screens.bottomNavScreens.DetailTabData
 import com.chp.erp.android.ui.screens.bottomNavScreens.DetailsTabbedView
 import com.chp.erp.android.ui.screens.bottomNavScreens.createSelectionState
+import com.chp.lms.Services.Dataclass.BrandData
 import com.chp.lms.Services.Dataclass.CityCategoryData
 import com.chp.lms.Services.Dataclass.CityData
 import com.chp.lms.Services.Dataclass.FuelTypeData
@@ -97,6 +113,8 @@ import com.chp.lms.Services.Dataclass.PolicyRateData
 import com.chp.lms.Services.Dataclass.RenewalTypeData
 import com.chp.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.chp.lms.Services.Dataclass.StatesData
+import com.chp.lms.Services.Dataclass.VehicleBrand
+import com.chp.lms.Services.Dataclass.VehicleBrands
 import com.chp.lms.Services.Dataclass.VehicleData
 import com.chp.lms.android.Services.Methods
 import kotlinx.coroutines.async
@@ -386,7 +404,7 @@ fun UploadImageContent(
                 )
             } else {
                 Image(
-                    painter = painterResource(id = R.drawable.land_scape),
+                    painter = painterResource(id = R.drawable.dummy_image),
                     contentDescription = "Placeholder Image",
                     modifier = Modifier
                         .padding(80.dp)
@@ -509,11 +527,13 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
 
     var xyzdata = remember { mutableListOf<PolicyRateData?>() }
 
+
     // Assuming getVehicleDetails is provided by some data source
     val getVehicleDetails by viewModel.getVehicleDetails.collectAsState()
 
     // Vehicle Details
     val (vehicleTypeState, vehicleTypeDropdownState) = createSelectionState()
+    val (vehicleBrandState, vehicleBrandDropdownState) = createSelectionState()
     val (fuelTypeState, fuelTypeDropdownState) = createSelectionState()
     val (ncbState, ncbDropdownState) = createSelectionState()
     // Policy Details
@@ -527,6 +547,7 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
 
     //for filter data collection
     val vehiclType by viewModel.getVehicleTypes.collectAsState()
+    val vehiclBrand by viewModel.getVehicleBrands.collectAsState()
     val fuelType by viewModel.getFuelTypes.collectAsState()
     //location Details
     val allState by viewModel.getAllStates.collectAsState()
@@ -539,6 +560,7 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
 
 
     var vehicle_Type by mutableStateOf<VehicleData?>(null)
+    var vehicle_Brand by mutableStateOf<VehicleBrand?>(null)
     var fuel_Type by mutableStateOf<FuelTypeData?>(null)
     var states_Data by mutableStateOf<StatesData?>(null)
     var city_Categories by mutableStateOf<CityCategoryData?>(null)
@@ -549,6 +571,7 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
 
 
     val vehicleTypes = vehiclType?.data
+    val vehicleBrandTypes = vehiclBrand?.data
     val fuelTypes = fuelType?.data
     val ncbTypes = listOf("YES", "NO")  // Static for NCB Type
     val states = allState?.data
@@ -689,6 +712,45 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
         }
     }
 
+//    fun loadVehicleBrand(accessModel: ApiViewModel) {
+//        // Get the vehicle type from vehicle details
+//        val vehicleBrand = getVehicleDetails?.result?.vehicle_type
+//        Log.d("vehicleBrand from submit resp:", vehicleType.toString())
+//
+//        // Retrieve the list of vehicle types
+//        val vehicleTypeDataList = accessModel.getVehicleTypes.value?.data
+//
+//        Log.d("vehicleTypeDataList resp:", vehicleTypeDataList.toString())
+//
+//        // Find the matching vehicle type
+//        val vehicle =
+//            vehicleTypeDataList?.firstOrNull { it.name.equals(vehicleType, ignoreCase = true) }
+//
+//        // Log the found vehicle type name if it exists
+//        vehicle?.name?.let { Log.d("vehicleType Value:", it) }
+//
+//        if (vehicle != null) {
+//            // Set the found vehicle type to states_Data or any appropriate variable
+//            vehicle_Type = vehicle // Assuming you have a variable to hold selected vehicle type
+//
+//            // Update the selection state with the vehicle type's name
+//            vehicleTypeState.value = mapOf("name" to vehicle.name)
+//
+//            Log.d("value func", vehicleTypeState.toString())
+//            vehicleTypeState.value = mapOf(
+//                "id" to vehicle.id,
+//                "name" to vehicle.name
+//            ).toMutableMap().apply {
+//                put("Vehicle Type", vehicle.name)
+//            }
+//
+//        } else {
+//            // Handle case where no matching vehicle type is found
+//            vehicle_Type = null // Optionally reset or clear vehicle_Type
+//            vehicleTypeState.value = emptyMap() // Clear or reset the selection state
+//        }
+//    }
+
     fun loadCities(accessModel: ApiViewModel) {
         // Get the permanent district name from vehicle details
         val districtName = getVehicleDetails?.result?.permanent_district_name?.lowercase()
@@ -792,6 +854,8 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
                     // Use async to call multiple suspend functions concurrently
                     val vehicleTypesDeferred =
                         async { viewModel.getAllVehicleTypes(token) }
+                    val vehicleBrandsDeferred =
+                        async { viewModel.getAllVehicleBrands(token) }
                     val statesDeferred = async { viewModel.getAllStates(token) }
                     val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
                     val allCitiesDeferred = async { viewModel.getAllCities(token) }
@@ -806,6 +870,7 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
                     // Await all results
 //                        userDeferred.await()
                     vehicleTypesDeferred.await()
+                    vehicleBrandsDeferred.await()
                     statesDeferred.await()
                     fuelTypesDeferred.await()
                     allCitiesDeferred.await()
@@ -963,46 +1028,60 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
+
+                Text(
+                    "Select Vehicle Brand",
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFFC4C4C4),
+                    modifier = Modifier.padding(8.dp)
+                )
+                Spacer(Modifier.padding(2.dp))
+                vehicleBrandTypes?.let { nonNullVehicleBrand ->
+                    val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
+
+                    VehicleBrandSelection(
+                        vehicleBrand = nonNullVehicleBrand,
+                        selectedValue = vehicleBrandState,
+                        selectionTitle = "VehicleBrand",
+                        onItemSelected = { i ->
+                            selectedValue.value =
+                                mapOf("VehicleBrand" to getItemBrandName(i))
+                        }
+                    )
+                }
 // Vehicle Type SelectionView
 //                item {
-                Text("Select Vechicle Brand")
-
-                LazyRow {
-                   items(4) {
-                       Card() {
-                           SubcomposeAsyncImage(
-                               model =
-//                "https://1clicktech-uat-public.s3.ap-south-1.amazonaws.com/39382812-b9b0-4ada-ae35-f77c8a794f41_3a3f2d35-8167-4708-9ef0-bdaa980989f9.avif",
-//               "https://raw.githubusercontent.com/link-u/avif-sample-images/refs/heads/master/kimono.rotate270.avif",
-                               R.drawable.appstore, // Replace with your image URL
-                               contentDescription = "Description of the image", // Provide a description for accessibility
-                               modifier = Modifier
-                                   .size(60.dp)
-                                   .border(1.dp, Color.White, shape = CircleShape) // Optional border
-                                   .clip(RoundedCornerShape(50)),
-                               contentScale = ContentScale.FillBounds,
-                               loading = {
-                                   // Show a loading indicator while the image is loading
-                                   CircularProgressIndicator()
-                               },
-                               error = {
-                                   // Show an error image if loading fails
-
-
-                               }
-                           )
-                       }
-                   }
+                Spacer(Modifier.padding(8.dp))
+                val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
+                vehicleTypes?.let { nonNullVehicleTypes ->
+                    VehicleTypeSelection(
+                        vehicleTypes = nonNullVehicleTypes,
+                        selectedValue = vehicleTypeState,
+                        selectionTitle = "VehicleType",
+                        onItemSelected = { i ->
+                            selectedValue.value = mapOf("VehicleType" to getItemName(i))
+//                            vehicleTypeState.value =
+//                                mapOf("VehicleType" to getItemName(vehicleTypeDropdownState))
+                        }
+                    )
                 }
-
-
-                SelectionView(
-                    selectionTitle = "Vehicle Type",
-                    staticValue = "Please select a vehicle",
-                    selectedValue = vehicleTypeState,
-                    dropDownViewSelected = vehicleTypeDropdownState,
-                    listTypes = vehicleTypes
+                Text(
+                    "Vehicle Type",
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFFC4C4C4)
                 )
+
+
+//                SelectionView(
+//                    selectionTitle = "Vehicle Type",
+//                    staticValue = "Please select a vehicle",
+//                    selectedValue = vehicleTypeState,
+//                    dropDownViewSelected = vehicleTypeDropdownState,
+//                    listTypes = vehicleTypes
+//                )
+
 
                 // Fuel Type SelectionView
                 SelectionView(
@@ -1042,13 +1121,41 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
                 )
 
                 // City SelectionView
-                SelectionView(
-                    selectionTitle = "City",
-                    staticValue = "Please select a city",
-                    selectedValue = cityState,
-                    dropDownViewSelected = cityDropdownState,
-                    listTypes = cities
+//                SelectionView(
+//                    selectionTitle = "City",
+//                    staticValue = "Please select a city",
+//                    selectedValue = cityState,
+//                    dropDownViewSelected = cityDropdownState,
+//                    listTypes = cities
+//                )
+
+                Spacer(Modifier.padding(8.dp))
+                Text(
+                    "Select City",
+                    maxLines = 1,
+                    textAlign = TextAlign.Center,
+                    color = Color(0xFFC4C4C4)
                 )
+//                val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
+                Spacer(modifier = Modifier.height(4.dp))
+
+                cities?.let { i ->
+                    val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
+
+                    VehicleCitySelection(
+                        city = i,
+                        selectedValue = cityState,
+                        selectionTitle = "City",
+                        onItemSelected = { i ->
+//                            cityState.value =
+//                                mapOf("VehicleBrand" to getItemCityName(cityDropdownState))
+                            selectedValue.value = mapOf("VehicleType" to getItemCityName(i))
+
+                        }
+                    )
+                }
+                Spacer(modifier = Modifier.height(4.dp))
+
 //                            Divider(modifier = Modifier.padding(), color = Color.Black, thickness = 1.dp)
                 // Insurance Type SelectionView
                 SelectionView(
@@ -1102,13 +1209,15 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
                     size = 20
                 )
                 coroutineScope.launch {
-                    Methods()
-                        .retrieve_Token(context)
-                        ?.let { it1 ->
-                            viewModel.filterPolicyRateData(
-                                it1, filterpayload
-                            )
-                        }
+                    val result= Methods().retrieve_Token(context)?.let { it1 ->
+                        viewModel.filterPolicyRateData(
+                            it1, filterpayload
+                        )
+                    }
+                    if (result != null) {
+                        viewModel.updatePolicyRates(result)
+                    }
+
                 }
             }
         }
@@ -1117,4 +1226,579 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
     }
 
 
+}
+
+
+@Composable
+fun VehicleTypeSelection(
+    vehicleTypes: List<Any>,
+    selectedValue: MutableState<Map<String, String>>,
+    selectionTitle: String,
+    onItemSelected: (Any) -> Unit
+) {
+    val searchQuery = remember { mutableStateOf("") }
+    val filteredVehicleTypes = remember(searchQuery.value, vehicleTypes) {
+        vehicleTypes.filter { type ->
+            getItemName(type).contains(searchQuery.value, ignoreCase = true)
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+
+        // LazyRow for Vehicle Types
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(filteredVehicleTypes) { vehicleType ->
+                val isSelected = selectedValue.value[selectionTitle] == getItemName(vehicleType)
+//                val isSelected = true
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .padding(4.dp)
+                        .clickable {
+                            selectedValue.value = mapOf(selectionTitle to getItemName(vehicleType))
+                            onItemSelected(vehicleType)
+                        }
+
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .size(100.dp)
+                            .border(
+                                width = if (isSelected) 2.dp else 1.dp, // Increase the selected border width
+                                color = if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurface,
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize(1f)
+                                .background(Color.White)
+                        ) {
+                            SubcomposeAsyncImage(
+                                model = getItemImageUrl(vehicleType),
+                                contentDescription = "Vehicle Type Image",
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier.fillMaxSize()
+                                    ,
+                                loading = { CircularProgressIndicator() },
+                                error = {
+                                    Image(
+                                        painter = painterResource(R.drawable.dummy_image),
+                                        contentDescription = "Error Image",
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = getItemName(vehicleType),
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(100.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+        }
+    }
+}
+
+// Helper Functions
+fun getItemName(item: Any): String {
+    // Replace with the logic to extract the name from your data model
+    return (item as? VehicleData)?.name ?: "Unknown"
+}
+
+fun getItemImageUrl(item: Any): String {
+    // Replace with the logic to extract the image URL from your data model
+    return (item as? VehicleData)?.media_url ?: ""
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VehicleBrandSelection(
+    vehicleBrand: List<Any>,
+    selectedValue: MutableState<Map<String, String>>,
+    selectionTitle: String,
+    onItemSelected: (Any) -> Unit
+) {
+    val searchQuery = remember { mutableStateOf("") }
+    val showBottomSheet = remember { mutableStateOf(false) }
+    val lazyListState = rememberLazyListState() // LazyListState for auto-scroll
+
+    // Filtered list based on the search query
+    val filteredVehicleBrand = remember(searchQuery.value, vehicleBrand) {
+        vehicleBrand.filter { type ->
+            getItemBrandName(type).contains(searchQuery.value, ignoreCase = true)
+        }
+    }
+
+    // Limited list to show only 7 items in the main view
+    val displayedVehicleBrand = remember(filteredVehicleBrand) {
+        filteredVehicleBrand.take(7)
+    }
+
+    // Identify the selected vehicle brand's index
+    val selectedIndex = remember(selectedValue.value, vehicleBrand) {
+        filteredVehicleBrand.indexOfFirst {
+            getItemBrandName(it) == selectedValue.value[selectionTitle]
+        }
+    }
+
+    // Auto-scroll to the selected item when it changes
+    LaunchedEffect(selectedIndex) {
+        if (selectedIndex in displayedVehicleBrand.indices) {
+            lazyListState.animateScrollToItem(selectedIndex)
+        }
+    }
+
+    if (showBottomSheet.value) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet.value = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        ) {
+            Box(
+                Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) { // Search TextField
+                androidx.compose.material.TextField(
+                    value = searchQuery.value,
+                    onValueChange = { searchQuery.value = it },
+                    placeholder = {
+                        Text(
+                            text = "Search...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(bottom = 8.dp),
+                    singleLine = true,
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+            // Bottom Sheet Content
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(4),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(filteredVehicleBrand) { vehicleBrand ->
+                    val isSelected =
+                        selectedValue.value[selectionTitle] == getItemBrandName(vehicleBrand)
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedValue.value = mapOf(selectionTitle to getItemBrandName(vehicleBrand))
+                                onItemSelected(vehicleBrand)
+                                showBottomSheet.value = false // Close the bottom sheet
+                            }
+                            .padding(8.dp),
+                    ) {
+                        SubcomposeAsyncImage(
+                            model = getItemImageBrandUrl(vehicleBrand),
+                            contentDescription = "Vehicle Brand Image",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(48.dp)
+                                .border(
+                                    width = if (isSelected) 2.dp else 1.dp,
+                                    color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                                ),
+                            loading = { CircularProgressIndicator() },
+                            error = {
+                                Image(
+                                    painter = painterResource(R.drawable.dummy_image),
+                                    contentDescription = "Error Image",
+                                    modifier = Modifier.size(48.dp)
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(
+                            modifier = Modifier.width(48.dp),
+                            textAlign = TextAlign.Center,
+                            text = getItemBrandName(vehicleBrand),
+                            maxLines = 1,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        // LazyRow for Vehicle Brands
+        LazyRow(
+            state = lazyListState, // Attach the LazyListState for scrolling
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            items(displayedVehicleBrand) { vehicleBrand ->
+                val isSelected =
+                    selectedValue.value[selectionTitle] == getItemBrandName(vehicleBrand)
+
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .clickable {
+                            selectedValue.value = mapOf(selectionTitle to getItemBrandName(vehicleBrand))
+                            onItemSelected(vehicleBrand)
+                        }
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .size(79.dp, 74.dp)
+                            .border(
+                                width = if (isSelected) 2.dp else 1.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                        ) {
+                            SubcomposeAsyncImage(
+                                model = getItemImageBrandUrl(vehicleBrand),
+                                contentDescription = "Vehicle Brand Image",
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier,
+                                loading = { CircularProgressIndicator() },
+                                error = {
+                                    Image(
+                                        painter = painterResource(R.drawable.dummy_image),
+                                        contentDescription = "Error Image",
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = getItemBrandName(vehicleBrand),
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(100.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            // "View More" Button
+            if (filteredVehicleBrand.size > 7) {
+                item {
+                    Card(
+                        modifier = Modifier
+                            .size(79.dp, 74.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                        ) {
+                            Text(
+                                textAlign = TextAlign.Center,
+                                text = "View All",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable {
+                                    showBottomSheet.value = true // Show the bottom sheet
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+// Helper Functions
+fun getItemBrandName(item: Any): String {
+    // Replace with the logic to extract the name from your data model
+    return (item as? BrandData)?.name.toString()
+}
+
+fun getItemImageBrandUrl(item: Any): String {
+    // Replace with the logic to extract the image URL from your data model
+    return (item as? BrandData)?.media_url ?: ""
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VehicleCitySelection(
+    city: List<Any>,
+    selectedValue: MutableState<Map<String, String>>,
+    selectionTitle: String,
+    onItemSelected: (Any) -> Unit
+) {
+    val searchQuery = remember { mutableStateOf("") }
+    val showBottomSheet = remember { mutableStateOf(false) }
+    val lazyListState = rememberLazyListState()
+
+    // Filtered list based on the search query
+    val filteredCityList = remember(searchQuery.value, city) {
+        city.filter { type ->
+            getItemCityName(type).contains(searchQuery.value, ignoreCase = true)
+        }
+    }
+
+    // Identify the selected city's index
+    val selectedCityIndex = remember(selectedValue.value, city) {
+        filteredCityList.indexOfFirst { getItemCityName(it) == selectedValue.value[selectionTitle] }
+    }
+
+    // Ensure selected city appears first in the list
+    val displayedCityList = remember(filteredCityList, selectedCityIndex) {
+        if (selectedCityIndex in filteredCityList.indices) {
+            listOf(filteredCityList[selectedCityIndex]) +
+                    filteredCityList.filterIndexed { index, _ -> index != selectedCityIndex }
+        } else {
+            filteredCityList
+        }.take(7)
+    }
+
+    LaunchedEffect(selectedValue.value) {
+        val firstIndex = displayedCityList.indexOfFirst {
+            getItemCityName(it) == selectedValue.value[selectionTitle]
+        }
+        if (firstIndex >= 0) {
+            lazyListState.animateScrollToItem(firstIndex)
+        }
+    }
+
+    if (showBottomSheet.value) {
+        ModalBottomSheet(
+            onDismissRequest = { showBottomSheet.value = false },
+            sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
+        ) {
+            // Search bar and grid layout for bottom sheet content
+            Box(
+                Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                androidx.compose.material.TextField(
+                    value = searchQuery.value,
+                    onValueChange = { searchQuery.value = it },
+                    placeholder = {
+                        Text(
+                            text = "Search...",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(bottom = 8.dp),
+                    singleLine = true,
+                    colors = TextFieldDefaults.textFieldColors(
+                        backgroundColor = MaterialTheme.colorScheme.surface,
+                        cursorColor = MaterialTheme.colorScheme.primary,
+                        focusedIndicatorColor = MaterialTheme.colorScheme.primary
+                    )
+                )
+            }
+            LazyVerticalGrid(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(18.dp),
+                columns = GridCells.Fixed(4),
+                horizontalArrangement = Arrangement.Center,
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                items(filteredCityList) { city ->
+                    val isSelected = getItemCityName(city) == selectedValue.value[selectionTitle]
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                selectedValue.value =
+                                    mapOf(selectionTitle to getItemCityName(city))
+                                onItemSelected(city)
+                                showBottomSheet.value = false // Close the bottom sheet
+                            }
+                            .padding(8.dp),
+                    ) {
+                        SubcomposeAsyncImage(
+                            model = getItemCityImageUrl(city),
+                            contentDescription = "City Image",
+                            contentScale = ContentScale.FillBounds,
+                            modifier = Modifier.size(48.dp),
+                            loading = { CircularProgressIndicator() },
+                            error = {
+                                Image(
+                                    painter = painterResource(R.drawable.dummy_image),
+                                    contentDescription = "Error Image",
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            }
+                        )
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Text(
+                            modifier = Modifier.width(48.dp),
+                            textAlign = TextAlign.Center,
+                            text = getItemCityName(city),
+                            maxLines = 1,
+                            color = if (isSelected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        LazyRow(
+            state = lazyListState,
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(1.dp)
+        ) {
+            items(displayedCityList) { city ->
+                val isSelected = getItemCityName(city) == selectedValue.value[selectionTitle]
+
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.clickable {
+                        selectedValue.value =
+                            mapOf(selectionTitle to getItemCityName(city))
+                        onItemSelected(city)
+                    }
+                ) {
+                    Card(
+                        modifier = Modifier
+                            .size(79.dp, 74.dp)
+                            .border(
+                                width = if (isSelected) 2.dp else 1.dp,
+                                color = if (isSelected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurface,
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                        ) {
+                            SubcomposeAsyncImage(
+                                model = getItemCityImageUrl(city),
+                                contentDescription = "City Image",
+                                contentScale = ContentScale.FillBounds,
+                                modifier = Modifier,
+                                loading = { CircularProgressIndicator() },
+                                error = {
+                                    Image(
+                                        painter = painterResource(R.drawable.dummy_image),
+                                        contentDescription = "Error Image",
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                            )
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = getItemCityName(city),
+                        maxLines = 1,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.width(100.dp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            if (filteredCityList.size > 7) {
+                item {
+                    Card(
+                        modifier = Modifier
+                            .size(79.dp, 74.dp)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            ),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color.White
+                        )
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color.White)
+                        ) {
+                            Text(
+                                textAlign = TextAlign.Center,
+                                text = "View All",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.clickable {
+                                    showBottomSheet.value = true
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+
+
+// Helper Functions
+fun getItemCityName(item: Any): String {
+    return (item as? CityData)?.name.toString()
+}
+
+fun getItemCityImageUrl(item: Any): String {
+    return (item as? CityData)?.media_url ?: ""
 }

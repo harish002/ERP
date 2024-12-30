@@ -194,11 +194,20 @@ fun HealthView(context: Context, viewModel: ApiViewModel, mainNavController: Nav
 
                         }
                         // Use async to call multiple suspend functions concurrently
-                        val slabDataDeferred = async { viewModel.getAllSlabTypes() }
-                        val productDeferred = async { viewModel.getProductTypes() }
-                        val insuranceGroupDeferred = async { viewModel.getInsurerGroups() }
+                        val slabDataDeferred = async { Methods().retrieve_userID(context)
+                            ?.let { viewModel.getAllSlabTypes(it) } }
+                        val productDeferred = async { Methods().retrieve_userID(context)
+                            ?.let { viewModel.getProductTypes(it) } }
+                        val insuranceGroupDeferred = async { Methods().retrieve_userID(context)
+                            ?.let { viewModel.getInsurerGroups(it) } }
                         val insuranceTypesBySegmentIdDeffered =
-                            async { viewModel.getInsuranceTypeByPolicySegments("3b554917-a340-4682-9eac-3ffe13ec660f") }
+                            async {
+                                Methods().retrieve_userID(context)?.let {
+                                    viewModel.getInsuranceTypeByPolicySegments("3b554917-a340-4682-9eac-3ffe13ec660f",
+                                        it
+                                    )
+                                }
+                            }
 
 
                         // Await all results

@@ -3,6 +3,7 @@ package com.chp.lms.Services.Dataclass
 import kotlinx.coroutines.internal.synchronized
 import kotlinx.serialization.Serializable
 
+
 // Module 1 ------------------------------------------------------------------
 // Login Api Data Classes ----------------------
 // Login Request Body
@@ -106,7 +107,7 @@ data class DepartmentX(
     val id: String,
     val level: Int,
     val name: String,
-    )
+)
 @Serializable
 data class Verification(
     val type: String,
@@ -139,6 +140,7 @@ data class CurrentOrganisation(
 data class Project(
     val id: String,
     val name: String,
+    val subject: String? = null,
     val department: DepartmentX?= null,//String in Example
     val roles: List<String>?= emptyList(),
     val createdDate: String?= null,
@@ -194,7 +196,7 @@ data class GetUserData(
     val username: String,
     val email: String?=null,
     val userData: UserData
-    )
+)
 
 
 // Register Api Data Classes ----------------------
@@ -240,11 +242,8 @@ data class VerifyOTP(
     val mobileNumber: String,
     val otp: String
 )
-//-----------------------------------------------------------------------------
 
-
-// Module 2 ------------------------------------------------------------------
-// Get In-App Notifications -------------------------------------------------
+// Get App Notifications -------------------------------------------------
 // Response Body
 @Serializable
 data class GetNotificationsResponse(
@@ -254,7 +253,23 @@ data class GetNotificationsResponse(
     val content: String
 )
 
+// Register Devices for Push Notification
+// Response
+@Serializable
+data class RegisteredDeviceResponse(
+    val id: String? = null,
+    val remarks: String? = null,
+    val createdDate: String? = null,
+    val createdBy: String? = null,
+    val lastModifiedDate: String? = null,
+    val lastModifiedBy: String? = null,
+    val version: Int? = null,
+    val projectId: String? = null,
+    val userId: String? = null,
+    val deviceTokens: List<String>? = emptyList()
+)
 //-----------------------------------------------------------------------------
+
 
 // Module 2 - Sales Tools Filter Apis /  Policy Rates ---------------------------------------------
 // Read All Policy Rates ------------------------------------------
@@ -296,6 +311,8 @@ data class PolicyRateData(
 
 @Serializable
 data class City(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val state_id: String,
@@ -353,7 +370,10 @@ data class Insurer(
     val id: String,
     val name: String,
     val status: Int,
+    val remarks : String? = null,
     val description: String? = null,
+    val media_id : String? = null,
+    val media_url : String? = null,
     val created_at: String? = null,
     val insurer_groups : List<String>? = emptyList()
 )
@@ -397,6 +417,8 @@ data class States(
 
 @Serializable
 data class VehicleBrand(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val id: String,
@@ -411,6 +433,8 @@ data class VehicleBrand(
 
 @Serializable
 data class VehicleType(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val id: String,
@@ -435,6 +459,8 @@ data class VehicleBrands(
 
 @Serializable
 data class BrandData(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val id: String,
@@ -464,6 +490,7 @@ data class ModelData(
 )
 //-----------------------------------------------------------------
 
+
 // Read all Vehicle Types ------------------------------------------
 // Response Body
 @Serializable
@@ -474,6 +501,8 @@ data class VehicleTypes(
 
 @Serializable
 data class VehicleData(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val id: String,
@@ -557,6 +586,8 @@ data class AllCities(
 
 @Serializable
 data class CityData(
+    val media_id : String? = null,
+    val media_url : String? = null,
     val name: String,
     val description: String? = null,
     val state_id: String,
@@ -644,7 +675,7 @@ data class InsurerData(
     val id: String,
     val name: String,
     val status: Int,
-    val description: String? = null,
+    val description: String?= null,
     val created_at: String? = null
 )
 
@@ -844,23 +875,7 @@ data class Financer_details(
 
 //--------------------------------------------------------------------------------
 
-// Register Devices for Push Notification
-// Response
-@Serializable
-data class RegisteredDeviceResponse(
-    val id: String? = null,
-    val remarks: String? = null,
-    val createdDate: String? = null,
-    val createdBy: String? = null,
-    val lastModifiedDate: String? = null,
-    val lastModifiedBy: String? = null,
-    val version: Int? = null,
-    val projectId: String? = null,
-    val userId: String? = null,
-    val deviceTokens: List<String>? = emptyList()
-)
 
-//-------------------------------------------------------------------------------
 // Health Filters ---------------------------------------------------------------
 // Slab
 // Response
@@ -879,7 +894,7 @@ data class SlabData(
     val name: String,
     val status: Int,
     val remarks: String,
-    val description: String
+    val description: String?=null
 )
 
 @Serializable
@@ -990,10 +1005,30 @@ data class PPTsTypesData(
     val status: Int
 )
 
+// Renewal Types Using Policy Segment ID
+// Response
+@Serializable
+data class RenewalTypesBySegmentIdResponse(
+    val message: String,
+    val data : List<RenewalTypesBySegmentIdData>
+)
+
+@Serializable
+data class RenewalTypesBySegmentIdData(
+    val name: String,
+    val remarks: String,
+    val description: String?= null,
+    val policy_segment_id: String,
+    val id: String,
+    val policy_segment: PolicySegment,
+    val status: Int
+)
+
+
 // Search General Policy Rates
 // Payload
 @Serializable
- data class GeneralPolicyRatePayload(
+data class GeneralPolicyRatePayload(
     val insurer_id: String,
     val renewal_type_id: String,
     val insurance_type_id: String,
@@ -1005,7 +1040,7 @@ data class PPTsTypesData(
     val payouts: String,
     val payins: String,
     val remarks: String,
-    val description: String
+    val description: String?= null
 )
 
 // Response

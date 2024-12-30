@@ -57,8 +57,6 @@ fun Poicy_Rate_Details(
 
 
 
-
-
     ERPTheme {
         Scaffold(
             modifier = Modifier

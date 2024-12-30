@@ -22,6 +22,7 @@ import com.chp.lms.Services.Dataclass.ProductResponse
 import com.chp.lms.Services.Dataclass.RefreshToken
 import com.chp.lms.Services.Dataclass.RegisteredDeviceResponse
 import com.chp.lms.Services.Dataclass.RenewalTypes
+import com.chp.lms.Services.Dataclass.RenewalTypesBySegmentIdResponse
 import com.chp.lms.Services.Dataclass.SearchPolicyRateData
 import com.chp.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.chp.lms.Services.Dataclass.SlabResponse
@@ -97,7 +98,7 @@ class ApiServices {
                 url("${ApiConfig.ACCESS_API}/verification/mobile/$userid")
                 contentType(ContentType.Application.Json)
             }
-            val responseBody = response.body<String>()
+//            val responseBody = response.body<String>()
             if (response.status.isSuccess()) {
                 return Pair(response.status, response.status.description)
             } else {

@@ -106,6 +106,7 @@ fun MainNavGraph(
                 Setting(mainNavController, context, logout)
             }
         }
+
         BottomBarScreen.Notification.route?.let { it1 ->
             composable(route = it1) {
                 Notification(mainNavController, viewModel, context)
