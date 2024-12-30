@@ -106,7 +106,7 @@ struct NotificationView: View {
         .background(Color(hex: "#F8F8F8"))
         .onAppear{
             let token = retrieveToken() ?? ""
-            let id = "c319ab33-dbf1-45e7-b566-521cfecfb3e5"
+            let id = "3f37d107-ac73-4ef4-b62a-0aa63e590efe"
             
             Task{
                 do

@@ -171,6 +171,7 @@ struct VehicleDataView: View {
                             
                             Spacer()
                         }
+                        .frame(maxWidth: .infinity,alignment: .center)
                     }
                 }
             }
@@ -183,7 +184,7 @@ struct VehicleDataView: View {
             Color(hex: "#F5F8FF")
         )
         .navigationBarBackButtonHidden()
-        .onReceive(accessModel.$policyRatesData, perform: { policy in
+        .onReceive(accessModel.$searchPolicyRatesData, perform: { policy in
             if !policy.isEmpty {
                 self.showAllPolicyRates = policy
             }
@@ -207,7 +208,7 @@ struct VehicleDataView: View {
                 }
                 else {
                     self.loader = false
-                    self.showAllPolicyRates = response
+                    self.showAllPolicyRates = []
                 }
             }
             catch ApiError.networkFailure {

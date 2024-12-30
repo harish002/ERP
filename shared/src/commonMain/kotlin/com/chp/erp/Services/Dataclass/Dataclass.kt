@@ -674,8 +674,11 @@ data class InsurerData(
     val id: String,
     val name: String,
     val status: Int,
-    val description: String,
-    val created_at: String? = null
+    val description: String? = null,
+    val media_id : String? = null,
+    val media_url : String? = null,
+    val created_at: String? = null,
+    val insurer_groups : List<InsurerGroupData>? = emptyList()
 )
 
 //-----------------------------------------------------------------------------

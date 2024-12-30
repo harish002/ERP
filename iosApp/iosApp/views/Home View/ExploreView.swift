@@ -112,11 +112,35 @@ struct ExploreView: View {
                                         ForEach(showAllPolicyRates, id: \.self){policyRate in
                                             
                                             HStack(spacing:16){
-                                                
-                                                Image("image54")
-                                                    .resizable()
-                                                    .aspectRatio(contentMode: .fit)
-                                                    .frame(width: 54, height: 54, alignment: .leading)
+                                                Rectangle()
+                                                    .frame(width: 54,height: 54,alignment: .center)
+                                                    .foregroundStyle(Color(hex: "#ffffff"))
+                                                    .overlay(alignment:.leading,content: {
+                                                        let imageURL = URL(string: policyRate.insurer.media_url ?? "")
+                                                        AsyncImage(url: imageURL) { phase in
+                                                            if let image = phase.image {
+                                                                image
+                                                                    .resizable()
+                                                                    .scaledToFit()
+                                                                    .clipShape(Rectangle())
+                                                                    .padding(12)
+                                                            }
+                                                            else if phase.error != nil {
+                                                                Image(systemName: "exclamationmark.triangle.fill")
+                                                                    .resizable()
+                                                                    .aspectRatio(contentMode: .fit)
+                                                                    .frame(width: 20, height: 20, alignment: .center)
+                                                                
+                                                            }
+                                                            else {
+                                                                Image(systemName: "exclamationmark.triangle.fill")
+                                                                    .resizable()
+                                                                    .aspectRatio(contentMode: .fit)
+                                                                    .frame(width: 20, height: 20, alignment: .center)
+                                                            }
+                                                        }
+                                                    })
+
                                                 
                                                 VStack(alignment:.leading,spacing:4){
                                                     

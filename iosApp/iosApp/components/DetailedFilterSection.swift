@@ -13,7 +13,7 @@ struct DetailedFilterSection: View {
     
     @ObservedObject var accessModel : AccessServiceViewModel
     let selectionTitle : String
-    let filtersList : [Any]
+    var filtersList : [Any]
     let onTapOfCard : (String) -> Void
     @Binding var isViewAllScreenActive : Bool
     @Binding var selectedValue: String? // Bind to parent
@@ -31,6 +31,8 @@ struct DetailedFilterSection: View {
     @State private var cityCategories : [CityCategoryData] = []
     @State private var cityData : [CityData] = []
     @State private var vehicleBrands : [BrandData] = []
+    
+    @State private var matchingIndices: [Int] = []
     
     
     var body: some View {
@@ -63,25 +65,26 @@ struct DetailedFilterSection: View {
             
             ScrollView(.vertical,showsIndicators: false){
                 LazyVGrid(columns: columns,spacing: 15){
-                    ForEach(filtersList.filter {
-                        searchText.isEmpty || matchesSearchCriteria(item: $0,selectionTitle: selectionTitle)
-                    }.indices,id: \.self){i in
+                    ForEach(matchingIndices,id: \.self){i in
                             let singleList = filtersList[i]
-                            
                             switch selectionTitle {
                             case "Vehicle Brand":
                                 if let brand = singleList as? BrandData {
                                     CardComponent(title: selectionTitle,
                                                   value: brand.name,
                                                   valueId: brand.id,
-                                                  isSelected: brand.id == selectedValue)
+                                                  isSelected: brand.id == selectedValue,
+                                                  imageURl: brand.media_url ?? ""
+                                    )
                                 }
                             case "City":
                                 if let city = singleList as? CityData {
                                     CardComponent(title: selectionTitle,
                                                   value: city.name,
                                                   valueId: city.id,
-                                                  isSelected: city.id == selectedValue)
+                                                  isSelected: city.id == selectedValue,
+                                                  imageURl: city.media_url ?? ""
+                                    )
                                 }
                                 
                             default :
@@ -92,12 +95,20 @@ struct DetailedFilterSection: View {
                 .padding(.horizontal,16)
                 .padding(.vertical,2)
             }
+            .onChange(of: searchText) { newValue in
+                // Trigger view updates when `searchText` changes
+                matchingIndices = getMatchingIndices(searchValue: newValue, selectionTitle: selectionTitle)
+
+            }
         }
         .padding(.vertical,16)
         .background(
             Color(hex: "#FFFFFF")
         )
         .frame(maxWidth: .infinity,maxHeight: .infinity,alignment: .top)
+        .onAppear{
+            self.matchingIndices = Array(filtersList.indices) // Display all items initially
+        }
         .onReceive(accessModel.$vehicleTypes, perform: {values in
             if !values.isEmpty{
                 vehicleType = values
@@ -121,37 +132,49 @@ struct DetailedFilterSection: View {
     
     }
     
+    // Function to return matching indices
+        private func getMatchingIndices(searchValue: String, selectionTitle: String) -> [Int] {
+            if searchValue.isEmpty {
+                return Array(filtersList.indices) // Return all indices if search text is empty
+            }
+            return filtersList.enumerated().compactMap { index, item in
+                matchesSearchCriteria(item: item, searchValue: searchValue, selectionTitle: selectionTitle) ? index : nil
+            }
+        }
+    
+    private func logSearchTerm(_ term: String) {
+        print("User searched for: \(term)")
+    }
+    
     @ViewBuilder
-    func CardComponent(title : String, value:String, valueId : String, isSelected : Bool) -> some View {
+    func CardComponent(title : String, value:String, valueId : String, isSelected : Bool, imageURl : String) -> some View {
         VStack(alignment:.center,spacing: 15){
             Rectangle()
                 .stroke(isSelected ? Color(hex: "#1F2ADC") : Color(hex: "#544C4C").opacity(0.2), style: .init(lineWidth: 2))
                 .background(isSelected ? Color(hex: "#E3FFF6") : Color(hex: "#FFFFFF"))
                 .frame(width: 79,height: 74)
                 .overlay(alignment:.center,content: {
-                    let imageURL = URL(string: "https://picsum.photos/200/300")
+                    let imageURL = URL(string: imageURl)
                     AsyncImage(url: imageURL) { phase in
                         if let image = phase.image {
-                            Image("delhi")
+                            image
                                 .resizable()
-                                .scaledToFill()
-                                .clipShape(Rectangle())
+//                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 79,height: 74)
                                 .padding(2)
                         }
                         else if phase.error != nil {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                            Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20, alignment: .center)
-                                .foregroundStyle(Color(hex: "#C4C4C4"))
+                                .frame(width: 79,height: 74)
                                 
                         }
                         else {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                            Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20, alignment: .center)
-                                .foregroundStyle(Color(hex: "#C4C4C4"))
+                                .frame(width: 79,height: 74)
                                 
                         }
                     }
@@ -192,19 +215,19 @@ struct DetailedFilterSection: View {
         }
     }
     
-    private func matchesSearchCriteria(item: Any, selectionTitle: String) -> Bool {
+    private func matchesSearchCriteria(item: Any,searchValue : String, selectionTitle: String) -> Bool {
         switch selectionTitle {
         case "Vehicle Type":
-            return (item as? VehicleData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+            return (item as? VehicleData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
 
         case "City Category":
-            return (item as? CityCategoryData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+            return (item as? CityCategoryData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
             
         case "City":
-            return (item as? CityData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+            return (item as? CityData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
         
         case "Vehicle Brand":
-            return (item as? BrandData)?.name.lowercased().contains(searchText.lowercased()) ?? false
+            return (item as? BrandData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
 
         default:
             return false

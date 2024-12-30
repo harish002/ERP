@@ -178,7 +178,8 @@ struct ScrollableSelectionView: View {
                                             title: selectionTitle,
                                             value: brand.name,
                                             valueId: brand.id,
-                                            isSelected: brand.id == selectedValue
+                                            isSelected: brand.id == selectedValue,
+                                            imageURl: brand.media_url ?? ""
                                         )
                                         .id(i)
                                     }
@@ -189,7 +190,8 @@ struct ScrollableSelectionView: View {
                                             title: selectionTitle,
                                             value: city.name,
                                             valueId: city.id,
-                                            isSelected: city.id == selectedValue
+                                            isSelected: city.id == selectedValue,
+                                            imageURl: city.media_url ?? ""
                                         )
                                         .id(i)
                                     }
@@ -298,34 +300,33 @@ struct ScrollableSelectionView: View {
     }
     
     @ViewBuilder
-    func CardComponent(title : String, value:String, valueId : String, isSelected : Bool) -> some View {
+    func CardComponent(title : String, value:String, valueId : String, isSelected : Bool, imageURl : String) -> some View {
         VStack(alignment:.center,spacing: 15){
             Rectangle()
                 .stroke(isSelected ? Color(hex: "#1F2ADC") : Color(hex: "#544C4C").opacity(0.2), style: .init(lineWidth: 2))
                 .background(isSelected ? Color(hex: "#E3FFF6") : Color(hex: "#FFFFFF"))
                 .frame(width: 79,height: 74)
                 .overlay(alignment:.center,content: {
-                    let imageURL = URL(string: "https://picsum.photos/200/300")
+                    let imageURL = URL(string: imageURl)
                     AsyncImage(url: imageURL) { phase in
                         if let image = phase.image {
-                            Image("hyundia")
+                            image
                                 .resizable()
-                                .scaledToFit()
-                                .clipShape(Rectangle())
-                                .padding(12)
+                                .frame(width: 79,height: 74)
+                                .padding(2)
                         }
                         else if phase.error != nil {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                            Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20, alignment: .center)
+                                .frame(width: 79,height: 74)
                                 
                         }
                         else {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                            Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20, alignment: .center)
+                                .frame(width: 79,height: 74)
                                 
                         }
                     }

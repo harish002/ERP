@@ -557,6 +557,7 @@ class AccessServiceViewModel : ObservableObject {
     }
     
     // Search Policy Rates
+    @Published var searchPolicyRatesData : [PolicyRateData] = []
     func searchPolicyRates(token : String, searchPayload : SearchPolicyRatePayload) async throws -> (Bool, [PolicyRateData]) {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
@@ -565,11 +566,12 @@ class AccessServiceViewModel : ObservableObject {
                     {
                         let response = try await ApiServices().searchPolicyRateData(token: token, searchData: searchPayload)
                         if !response.items.isEmpty{
-                            self.policyRatesData = response.items
+                            self.searchPolicyRatesData = response.items
                             print("Filtered Policy Rate Data is Fetched!")
                             continuation.resume(returning:( true,response.items))
                         }
                         else {
+                            self.searchPolicyRatesData = []
                             print("Filtered Policy Rate Data is empty!")
                             continuation.resume(returning: (false, []))
                         }

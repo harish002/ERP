@@ -143,7 +143,6 @@ struct UploadVehicleImageAndNumber: View {
     let sections = ["Upload Image", "Manual"]
     @State private var selectedSection = "Upload Image"
     
-
     var body: some View {
         VStack(spacing:0){
             
@@ -405,7 +404,7 @@ struct UploadVehicleImageAndNumber: View {
                 let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
                 if !result {
                     self.policyRateLoader = false
-                    self.showAllPolicyRates = response
+                    self.showAllPolicyRates = []
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
                         snackBar.show(message: "No Data Found, for the filters applied.", title: "No Data", type: .warning)
                     })
@@ -966,6 +965,8 @@ struct UploadVehicleImageAndNumber: View {
                             submittingValue["Vehicle Brand"] = value
                         }
                     )
+                    
+                    selectionView(selectionTitle: "Vehicle Model", staticValue: "Select Vehicle Model")
                     
                     selectionView(selectionTitle: "NCB", staticValue: "Status")
                     

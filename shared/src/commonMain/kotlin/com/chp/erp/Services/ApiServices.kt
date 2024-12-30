@@ -700,7 +700,7 @@ class ApiServices {
     suspend fun getAllInsurerTypes(token: String): InsurerTypes {
         try {
             val response: HttpResponse = client.get {
-                url("${ApiConfig.SALES_TOOL_API}/insurer/all")
+                url("${ApiConfig.SALES_TOOL_API}/insurer/active")
                 contentType(ContentType.Application.Json)
                 header("Authorization", "Bearer $token")
             }
