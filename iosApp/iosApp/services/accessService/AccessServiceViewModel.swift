@@ -4,7 +4,7 @@
 //
 
 import Foundation
-import shared
+@preconcurrency import shared
 
 enum ApiError: Error {
     case networkFailure

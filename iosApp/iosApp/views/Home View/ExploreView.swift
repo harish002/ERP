@@ -121,22 +121,22 @@ struct ExploreView: View {
                                                             if let image = phase.image {
                                                                 image
                                                                     .resizable()
-                                                                    .scaledToFit()
-                                                                    .clipShape(Rectangle())
-                                                                    .padding(12)
+                                                                    .frame(width: 54,height: 54)
+                                                                    .padding(2)
+                                                                    
                                                             }
                                                             else if phase.error != nil {
-                                                                Image(systemName: "exclamationmark.triangle.fill")
+                                                                Image("dummy-image1")
                                                                     .resizable()
                                                                     .aspectRatio(contentMode: .fit)
-                                                                    .frame(width: 20, height: 20, alignment: .center)
+                                                                    .frame(width: 54, height: 54, alignment: .center)
                                                                 
                                                             }
                                                             else {
-                                                                Image(systemName: "exclamationmark.triangle.fill")
+                                                                Image("dummy-image1")
                                                                     .resizable()
                                                                     .aspectRatio(contentMode: .fit)
-                                                                    .frame(width: 20, height: 20, alignment: .center)
+                                                                    .frame(width: 54, height: 54, alignment: .center)
                                                             }
                                                         }
                                                     })
@@ -183,9 +183,7 @@ struct ExploreView: View {
                                                 print("Policy Rate Selected")
                                                 withAnimation{
                                                     let id = policyRate.id
-                                                    DispatchQueue.main.async {
-                                                        accessModel.policyRateId = id
-                                                    }
+                                                    accessModel.policyRateId = id
                                                     router.navigateTo(to: .policyratedetailview)
                                                 }
                                             }
@@ -214,7 +212,7 @@ struct ExploreView: View {
                                         status: "", page: 1, size: 20
                                     )
                                     
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                                         searchPolicyRates(token: token, payload: payload)
                                     }
                                 })

@@ -88,17 +88,17 @@ struct SelectionViewWithImage: View {
                                 .padding(12)
                         }
                         else if phase.error != nil {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                            Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20, alignment: .center)
+                                .frame(width: 54, height: 54, alignment: .center)
                                 
                         }
                         else {
-                            Image(systemName: "exclamationmark.triangle.fill")
+                            Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 20, height: 20, alignment: .center)
+                                .frame(width: 54, height: 54, alignment: .center)
                                 
                         }
                     }

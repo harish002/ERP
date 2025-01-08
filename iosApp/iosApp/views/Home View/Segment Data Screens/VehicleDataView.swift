@@ -76,6 +76,35 @@ struct VehicleDataView: View {
                                 
                                 HStack(spacing:16){
                                     
+                                    Rectangle()
+                                        .frame(width: 54,height: 54,alignment: .center)
+                                        .foregroundStyle(Color(hex: "#ffffff"))
+                                        .overlay(alignment:.leading,content: {
+                                            let imageURL = URL(string: policyRate.insurer.media_url ?? "")
+                                            AsyncImage(url: imageURL) { phase in
+                                                if let image = phase.image {
+                                                    image
+                                                        .resizable()
+                                                        .frame(width: 54,height: 54)
+                                                        .padding(2)
+                                                        
+                                                }
+                                                else if phase.error != nil {
+                                                    Image("dummy-image1")
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fit)
+                                                        .frame(width: 54, height: 54, alignment: .center)
+                                                    
+                                                }
+                                                else {
+                                                    Image("dummy-image1")
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fit)
+                                                        .frame(width: 54, height: 54, alignment: .center)
+                                                }
+                                            }
+                                        })
+                                    
                                     VStack(alignment:.leading,spacing:4){
                                         
                                         Text(policyRate.insurance_type.name)

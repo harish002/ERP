@@ -63,17 +63,27 @@ sealed class ApiException(message: String) : IOException(message) {
 
 @Serializable
 class ApiConfig {
+
     companion object {
 
         @SerialName("ACCESS_API")
-        const val  UAT_ACCESS_API = "https://api.1click.tech/api/access"
-        const val ACCESS_API = "https://api.1clicktech.in/api/access"
+        // const val UAT_ACCESS_API = "https://api.1click.tech/api/access" UAT
 
-        const val  UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications"
+        const val UAT_ACCESS_API = "https://apig.1clickpolicy.com/api/access" // PROD
+
+        // const val ACCESS_API = "https://api.1clicktech.in/api/access" // UAT
+
+        const val ACCESS_API = "https://apig.1clickpolicy.com/api/access" // PROD
+
+        // const val UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications" //UAT
+
+        const val UAT_NOTIFICATION_MANAGEMENT = "https://apig.1clickpolicy.com/api/notifications" //PROD
+
         const val NOTIFICATION_MANAGEMENT = "https://api.1clicktech.in/api/notifications"
 
-        const val SALES_TOOL_API = "https://sales-tool-api.1click.tech"
+        const val SALES_TOOL_API = "https://sales-tool-api.1clickpolicy.com"
     }
+
 }
 
 class ApiServices {
@@ -212,8 +222,8 @@ class ApiServices {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/login")
                 contentType(ContentType.Application.Json)
-                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
-                header("Referer", "https://api.1click.tech")
+                header("X-Project-ID", "d0f634d2-0862-491c-accd-662a2e06b106")
+                header("Referer", "https://apig.1clickpolicy.com")
                 body = Json.encodeToString(UserDetails.serializer(), user)
             }
             if (response.status.isSuccess()) {
@@ -238,7 +248,7 @@ class ApiServices {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/login/send-otp")
                 contentType(ContentType.Application.Json)
                 parameter("input", phone)
-                parameter("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                parameter("X-Project-ID", "d0f634d2-0862-491c-accd-662a2e06b106")
             }
             if (response.status.isSuccess()) {
                 return true
@@ -260,8 +270,8 @@ class ApiServices {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/login/authenticate-otp")
                 contentType(ContentType.Application.Json)
-                header("Referer", "https://api.1click.tech/")
-                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("Referer", "https://apig.1clickpolicy.com")
+                header("X-Project-ID", "d0f634d2-0862-491c-accd-662a2e06b106")
                 parameter("input", phone)
                 parameter("otp", otp)
             }
@@ -283,7 +293,7 @@ class ApiServices {
     suspend fun getUserWhoLoggedIn(token: String, userid: String): UserData {
         try {
             val response: HttpResponse = client.get {
-                url("https://api.1click.tech/api/access/users/$userid")
+                url("https://apig.1clickpolicy.com/api/access/users/$userid")
                 header("Authorization", "Bearer $token")
             }
 
@@ -311,7 +321,7 @@ class ApiServices {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/token")
                 contentType(ContentType.Application.Json)
-                header("Referer", "https://api.1click.tech")
+                header("Referer", "https://apig.1clickpolicy.com")
                 body = Json.encodeToString(RefreshToken.serializer(), refreshToken)
             }
             if (response.status.isSuccess()) {
@@ -336,7 +346,7 @@ class ApiServices {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/resetPassword")
                 contentType(ContentType.Application.Json)
-                header("X-Project-ID", "0d98736c-5f90-41b4-b689-1b1935aab762")
+                header("X-Project-ID", "d0f634d2-0862-491c-accd-662a2e06b106")
                 parameter("email", email)
 
             }

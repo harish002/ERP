@@ -15,7 +15,7 @@ struct PolicyRateDetailView: View {
     @ObservedObject var snackBar : SnackbarModel
     @ObservedObject var router : Router
     
-    @State private var policyRateId : String = ""
+    @State private var policyRateId : String?
     @State private var policyRateData : PolicyRateData?
     let policyRateDetailViewClosed : () -> Void
     
@@ -385,12 +385,11 @@ struct PolicyRateDetailView: View {
         .navigationBarBackButtonHidden()
         .onAppear{
             self.loader = true
-            let rateId = accessModel.policyRateId
-            self.policyRateId = rateId
-            print("Policy Rate Id -> \(rateId)")
+            self.policyRateId = accessModel.policyRateId
+            print("Policy Rate Id -> \(String(describing: policyRateId))")
             
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: {
-                let policyRateData = accessModel.policyRatesData
+                let policyRateData = accessModel.searchPolicyRatesData
 
                 if !policyRateData.isEmpty {
                     let data = policyRateData.filter{ rate in
