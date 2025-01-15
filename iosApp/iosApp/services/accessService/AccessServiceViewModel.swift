@@ -1426,7 +1426,12 @@ class AccessServiceViewModel : ObservableObject {
     func uploadImage(token: String, filePath: String, completion: @escaping (String?) -> Void) {
        
             // Prepare the URL
-            guard let url = URL(string: "https://sales-tool-api.1click.tech/ocr/vehicle_number") else {
+            guard let url = URL(string:
+//            "https://sales-tool-api.1click.tech/ocr/vehicle_number" // UAT
+            "https://sales-tool-api.1clickpolicy.com/ocr/vehicle_number" // PROD
+
+            )
+            else {
                 print("Invalid URL")
                 completion(nil)
                 return

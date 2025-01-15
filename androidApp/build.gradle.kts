@@ -4,8 +4,8 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.kotlinAndroid)
 //    alias(libs.plugins.compose.compiler)
-    id ("kotlin-kapt")
     kotlin("plugin.serialization") version "1.9.20"
+    id ("kotlin-kapt")
     alias(libs.plugins.googleGmsGoogleServices)
 
 }
@@ -15,14 +15,14 @@ android {
     lint{
         abortOnError = false
     }
-    namespace = "com.chp.erp.android"
+    namespace = "com.policy.erp.android"
     compileSdk = 34
     defaultConfig {
-        applicationId = "com.chp.erp.android"
+        applicationId = "com.policy.erp.android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.0"
+        versionCode = 8
+        versionName = "1.0.2"
     }
     buildFeatures {
         compose = true
