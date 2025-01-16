@@ -158,13 +158,13 @@ struct ExploreView: View {
                                                 .frame(maxWidth:.infinity,alignment:.leading)
                                                 
                                                 
-                                                HStack(spacing:2){
+                                                VStack(spacing:2){
                                                     Text("\(policyRate.payouts)")
-                                                        .font(.custom("Poppins-Medium", size: 24))
+                                                        .font(.custom("Poppins-Medium", size: 16))
                                                         .foregroundStyle(Color("title", bundle: nil))
                                                     
-                                                    Text("%")
-                                                        .font(.custom("Poppins-Medium", size: 24))
+                                                    Text("(KM)")
+                                                        .font(.custom("Poppins-Medium", size: 16))
                                                         .foregroundStyle(Color("title", bundle: nil))
                                                 }
                                                 .frame(maxWidth:60,alignment:.trailing)
@@ -209,7 +209,8 @@ struct ExploreView: View {
                                         insurance_type_id: "",
                                         insurer_id: "",
                                         fuel_type_id: "",
-                                        status: "", page: 1, size: 20
+                                        status: "",
+                                        page: 1, size: 20
                                     )
                                     
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
@@ -274,7 +275,6 @@ struct ExploreView: View {
                 status: "", page: 1, size: 20
             )
             searchPolicyRates(token: token, payload: payload)
-            
                     
             DispatchQueue.main.asyncAfter(deadline: .now() + 1, execute: {
                 allCities(token: token)

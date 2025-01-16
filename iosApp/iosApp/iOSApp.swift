@@ -154,7 +154,15 @@ struct iOSApp: App {
                                     router: router,
                                     navigationState: navigationState
                                 )
+                            case .generalpolicyratedetailview:
                                 
+                                GeneralPolicyRateDataView(
+                                    accessModel:accessViewModel,
+                                    snackBar: snackBarManager,
+                                    router: router,
+                                    policyRateDetailViewClosed: {
+                                        router.navigateBack()
+                                    })
                             }
                             
                         }

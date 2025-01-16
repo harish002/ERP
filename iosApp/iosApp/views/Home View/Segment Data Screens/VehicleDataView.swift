@@ -124,11 +124,11 @@ struct VehicleDataView: View {
                                     
                                     HStack(spacing:2){
                                         Text("\(policyRate.payouts)")
-                                            .font(.custom("Gilroy-Bold", size: 32))
+                                            .font(.custom("Poppins-Medium", size: 16))
                                             .foregroundStyle(Color("title", bundle: nil))
                                         
-                                        Text("%")
-                                            .font(.custom("Gilroy-Bold", size: 32))
+                                        Text("KM")
+                                            .font(.custom("Poppins-Medium", size: 16))
                                             .foregroundStyle(Color("title", bundle: nil))
                                     }
                                     .frame(maxWidth:.infinity,alignment:.trailing)

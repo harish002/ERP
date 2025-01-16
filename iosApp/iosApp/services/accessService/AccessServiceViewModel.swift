@@ -32,7 +32,8 @@ class AccessServiceViewModel : ObservableObject {
     @Published var specificCourseId : String = ""       // Used in Course Detail Screen for Fetching Details about the course --> /course/show
     @Published var myCourseId : String = ""             // Used in Course Start View for Getting Course Information --> /my_courses/show
     @Published var fcmToken : String = ""
-    @Published var policyRateId : String = ""           // Used in Policy Rate Detail View to Fetch Specific Policy Rate Data
+    @Published var policyRateId : String = ""  // Used in Policy Rate Detail View to Fetch Specific Policy Rate Data
+    @Published var generalPolicyRateId : String = "" // Used in Policy Rate Detail View to Fetch Specific Policy Rate Data
 
     
     // Module 1 ----------------------------------------------------------------------------------------------------------------
@@ -1269,8 +1270,9 @@ class AccessServiceViewModel : ObservableObject {
                             continuation.resume(returning: ())
                         }
                         else {
+                            self.getInsuranceTypes = []
                             print("Insurance Type With Ids Data is empty!")
-                            continuation.resume(returning: ())
+                            continuation.resume(throwing: ApiError.unknownError(description: "Insurance Types With Segment Id is empty!"))
                         }
                         
                     }
@@ -1312,8 +1314,9 @@ class AccessServiceViewModel : ObservableObject {
                             continuation.resume(returning: ())
                         }
                         else {
+                            self.getRenewalTypesByID = []
                             print("Renewal Type With Ids Data is empty!")
-                            continuation.resume(returning: ())
+                            continuation.resume(throwing: ApiError.unknownError(description: "Renewal Types Segment With Id is empty!"))
                         }
                         
                     }
@@ -1355,8 +1358,96 @@ class AccessServiceViewModel : ObservableObject {
                             continuation.resume(returning: ())
                         }
                         else {
+                            self.getPPtsTypes = []
                             print("PPTs Types With Id Data is empty!")
+                            continuation.resume(throwing: ApiError.unknownError(description: "PPTs Types With Segment Id is empty!"))
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // PPTs Types Using Policy Segment ID
+    @Published var getSlabTypesBySegmentId : [SlabData] = []
+    func getSlabTypesBySegmentId(segmentId : String, token : String) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getSlabTypesBySegmentId(segmentId: segmentId, token: token)
+                        if !(response.data?.isEmpty ?? false){
+                            self.getSlabTypesBySegmentId = response.data ?? []
+                            print("Slab Types with Id Data Fetched!")
                             continuation.resume(returning: ())
+                        }
+                        else {
+                            self.getSlabTypesBySegmentId = []
+                            print("Slab Types With Id Data is empty!")
+                            continuation.resume(throwing: ApiError.unknownError(description: "Slab Types With Segment Id is empty!"))
+                        }
+                        
+                    }
+                    catch let error as NSError {
+                         print("Sent Error", error.localizedDescription)
+                         if error.domain == NSURLErrorDomain {
+                             switch error.code {
+                             case NSURLErrorNotConnectedToInternet :
+                                 continuation.resume(throwing: ApiError.networkFailure)
+
+                             case NSURLErrorTimedOut :
+                                 continuation.resume(throwing: ApiError.lowInternetConnection)
+
+                             default :
+                                 continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                             }
+                         }
+                         else {
+                             continuation.resume(throwing: ApiError.unknownError(description: error.localizedDescription))
+                         }
+                     }
+                }
+            }
+        }
+    }
+    
+    // PPTs Types Using Policy Segment ID
+    @Published var insurerByGroupId : [InsurerX] = []
+    func getInsurersByInsurerGroupId(groupId : String, token : String) async throws -> [InsurerX]{
+        return try await withCheckedThrowingContinuation { continuation in
+            DispatchQueue.main.async {
+                Task {
+                    do
+                    {
+                        let response = try await ApiServices().getInsurerByInsurerGrp(groupID: groupId, token: token)
+                        if !(response.data.isEmpty){
+                            self.insurerByGroupId = response.data
+                            print("Insurer Types with Group Id Data Fetched!")
+                            continuation.resume(returning: response.data)
+                        }
+                        else {
+                            print("Insurer Types With Group Id Data is empty!")
+                            continuation.resume(returning: [])
                         }
                         
                     }
@@ -1385,21 +1476,21 @@ class AccessServiceViewModel : ObservableObject {
     
     // Search General Policy Rate Data
     @Published var generalPolicyRatesData : GeneralPolicyRateResponse?
-    func searchGeneralPolicyRates(token : String, searchPayload : GeneralPolicyRatePayload) async throws -> Bool {
+    func searchGeneralPolicyRates(token : String, searchPayload : GeneralPolicyRatePayload) async throws -> GeneralPolicyRateResponse {
         return try await withCheckedThrowingContinuation { continuation in
             DispatchQueue.main.async {
                 Task {
                     do
                     {
                         let response = try await ApiServices().searchGeneralPolicyRateData(token: token, searchData: searchPayload)
-                        if !(response.items.isEmpty){
+                        if ((response.items?.isEmpty) != nil){
                             self.generalPolicyRatesData = response
                             print("General Filtered Policy Rate Data is Fetched!")
-                            continuation.resume(returning:(true))
+                            continuation.resume(returning:response)
                         }
                         else {
                             print("General Filtered Policy Rate Data is empty!")
-                            continuation.resume(returning: (false))
+                            continuation.resume(throwing: ApiError.unknownError(description: "General Filtered Policy Rate Data is empty!"))
                         }
                     }
                     catch let error as NSError {

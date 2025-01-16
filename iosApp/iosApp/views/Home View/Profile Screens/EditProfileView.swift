@@ -24,6 +24,7 @@ struct EditProfileView: View {
     @State private var gender : String = ""
     @State private var birthday : String = ""
     @State private var mobileNumber : String = ""
+    @State private var profileImage : String = ""
     
     var body: some View {
         VStack(spacing:0){
@@ -68,7 +69,7 @@ struct EditProfileView: View {
                             .stroke(.black, style: .init(lineWidth: 0.5))
                             .frame(width: 127,height: 127)
                             .overlay(content: {
-                                let imageURL = URL(string: imageUrl ?? "https://picsum.photos/200/300")
+                                let imageURL = URL(string: imageUrl ?? "")
                                 AsyncImage(url: imageURL) { phase in
                                     if let image = phase.image {
                                         image
@@ -87,7 +88,6 @@ struct EditProfileView: View {
                                             .resizable()
                                             .scaledToFill()
                                             .clipShape(Circle())
-                                        
                                     }
                                 }
                                 
@@ -120,6 +120,9 @@ struct EditProfileView: View {
             Color(hex: "#F5F8FF")
         )
         .navigationBarBackButtonHidden()
+        .onAppear{
+            
+        }
         .onReceive(accessModel.$userSpecs, perform: {user in
             if let user = user {
                 self.fullName = user.name ?? "Name of the User"
@@ -134,6 +137,8 @@ struct EditProfileView: View {
                 
                 let email = user.email
                 self.emailId = email ?? "abc@gmail.com"
+                
+                self.imageUrl = user.profileImageId ?? ""
             }
         })
     }
@@ -276,19 +281,7 @@ struct EditProfileView: View {
         
     }
     
-//    func extractInitialsAndName(name:String, surname:String){
-//        
-//        let nameOfUser = "\(name) \(surname)"
-//        
-//        guard let nameInitial = name.first else {
-//            return
-//        }
-//        guard let surnameInitial = surname.first else {
-//            return
-//        }
-//        self.nameInitialis = "\(nameInitial)\(surnameInitial)"
-//        self.fullName = nameOfUser
-//    }
+
 }
 
 #Preview {

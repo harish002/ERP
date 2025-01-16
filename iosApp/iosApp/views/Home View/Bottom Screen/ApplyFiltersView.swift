@@ -59,7 +59,7 @@ struct ApplyFiltersView: View {
         "Vehicle Model": ""
     ]
     
-    @State private var searchText: String = "" // State for search text
+    
     
     @State private var isViewAllSheetActive = false
     @State private var selectedViewAllTitle = ""
@@ -75,6 +75,10 @@ struct ApplyFiltersView: View {
     @State private var insurerType : [InsurerData] = []
     @State private var vehicleBrands : [BrandData] = []
     @State private var vehicleModels : [ModelData] = []
+    
+    @State private var matchingIndices: [Int] = []
+    @State private var searchText: String = "" // State for search text
+    @State private var isBottomSheetActive = false
     
     let NCBTypes : [String] = ["Yes", "No"]
     
@@ -113,8 +117,7 @@ struct ApplyFiltersView: View {
                         ){ value in
                             submittingValue["Vehicle Type"] = value
                         }
-                        
-
+                       
                         ScrollableSelectionView(
                             accessModel: accessModel,
                             selectionTitle: "Vehicle Brand",
@@ -122,19 +125,27 @@ struct ApplyFiltersView: View {
                             onTapOfCard: {value,title  in
                                 submittingValue["Vehicle Brand"] = value
                                 self.selectedViewAllTitle = title
-                            }
+                            },
+                            stateValue: Binding(
+                                get: { submittingValue["State"] ?? "" }, // Provide a default value if nil
+                                set: { submittingValue["State"] = $0 }
+                            ),
+                            modelId: Binding(
+                                get: { submittingValue["Vehicle Brand"] ?? "" }, // Provide a default value if nil
+                                set: { submittingValue["Vehicle Brand"] = $0 }
+                            )
                         )
-                        
+
                         selectionView(selectionTitle: "Vehicle Model", staticValue: "Select Vehicle Model")
                         
                         selectionView(selectionTitle: "Fuel Type", staticValue: "Select Fuel Type")
                         
-                        selectionView(selectionTitle: "NCB", staticValue: "Select Status")
+                        dropDownView(selectionTitle: "NCB", staticValue: "Select Status")
                         
-                        
-                        selectionView(selectionTitle: "State", staticValue: "Select State")
                         
                         selectionView(selectionTitle: "City Category", staticValue: "Select City Category")
+                        
+                        selectionView(selectionTitle: "State", staticValue: "Select State")
                         
                         
                         ScrollableSelectionView(
@@ -143,7 +154,14 @@ struct ApplyFiltersView: View {
                             image: "",
                             onTapOfCard: {value,title  in
                                 submittingValue["City"] = value
-                            }
+                            }, stateValue: Binding(
+                                get: { submittingValue["State"] ?? "" }, // Provide a default value if nil
+                                set: { submittingValue["State"] = $0 }
+                            ),
+                            modelId: Binding(
+                                get: { submittingValue["Vehicle Brand"] ?? "" }, // Provide a default value if nil
+                                set: { submittingValue["Vehicle Brand"] = $0 }
+                            )
                         )
                         
                         selectionView(selectionTitle: "Insurance Type", staticValue: "Select Insurance Type")
@@ -281,27 +299,298 @@ struct ApplyFiltersView: View {
                 self.vehicleModels = values
             }
         })
-        
-        
     }
-    
-
-    
     
     @ViewBuilder
     func selectionView(selectionTitle : String, staticValue : String) -> some View {
         
         let filters = getFilterList(for: selectionTitle)
         
-        @State var searchText : String = ""
-        
-        VStack(alignment:.leading,spacing:8){
+        VStack(alignment:.leading,spacing:12){
+            
             Text(selectionTitle)
                 .font(.custom("Poppins-SemiBold", size: 16))
                 .padding(.leading,5)
             
             VStack(alignment:.leading,spacing:0){
-                HStack(spacing:0){
+                HStack(alignment:.center,spacing:0){
+                    
+                    if let value = selectedValue[selectionTitle]  {
+                        if selectedValue[selectionTitle] == "" {
+                            Text(staticValue)
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#C4C4C4"))
+                                .onAppear{
+                                    print("\(selectionTitle) -> \(value)")
+                                }
+                        }
+                        else {
+                            Text(value)
+                                .font(.custom("Poppins-Medium", size: 14))
+                                .foregroundStyle(Color(hex: "#000000"))
+                                .onAppear{
+                                    print("\(selectionTitle) -> \(value)")
+                                }
+                        }
+                        
+                    }
+                    else {
+                        Text(staticValue)
+                            .font(.custom("Poppins-Medium", size: 14))
+                            .foregroundStyle(Color(hex: "#C4C4C4"))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.7)
+                    }
+                    
+                    Spacer()
+                    
+                    Image("Vector")
+                        .resizable()
+                        .frame(width: 10,height: 16)
+                        .foregroundStyle(Color(hex: "#000000"))
+                        .padding(.bottom,5)
+                }
+                .padding(.horizontal,16)
+                
+            }
+            .padding(.vertical,12)
+            .overlay{
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color(hex: "#544C4C"),lineWidth: 1)
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withAnimation{
+                    dropDownViewSelected[selectionTitle] = true // Activate the bottom sheet for this title
+                }
+            }
+        }
+        .sheet(isPresented: Binding(
+            get: { dropDownViewSelected[selectionTitle] ?? false },
+            set: { dropDownViewSelected[selectionTitle] = $0 }
+        )){
+            BottomSheet(selectionTitle: selectionTitle, staticValue: staticValue, filters: filters)
+                .onAppear{
+                    // Trigger view updates when `searchText` changes
+                    print("\(selectionTitle) -> \(filters)")
+                    matchingIndices = getMatchingIndices(searchValue: "", selectionTitle: selectionTitle, filters: filters)
+                }
+        }
+        
+    }
+    
+    
+    @ViewBuilder
+    func BottomSheet(selectionTitle : String, staticValue : String, filters : [Any]) -> some View{
+        
+        VStack(alignment: .center, spacing: 16){
+            // Search Field
+            HStack(alignment:.center,spacing:0){
+                TextField("Type \(selectionTitle)", text: $searchText)
+                    .font(.custom("Poppins-Medium", size: 14))
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                
+                Spacer()
+                
+                Image(systemName: "magnifyingglass")
+                    .resizable()
+                    .frame(width: 20, height: 20)
+                    .foregroundStyle(Color(hex: "#000000"))
+                    .padding(.trailing, 16)
+                    
+            }
+            .background(Color(hex: "#F5F5F5"))
+            .cornerRadius(6)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(Color(hex: "#C4C4C4"), lineWidth: 1)
+            )
+            .padding(.horizontal,16)
+            
+            ScrollView(.vertical,showsIndicators: false){
+                VStack(alignment:.leading,spacing:12){
+                    
+                    HStack{
+                        Text(staticValue)
+                            .font(.custom("Poppins-Medium", size: 14))
+                            .foregroundStyle(Color(hex: "#C4C4C4"))
+                        
+                        Spacer()
+                        
+                    }
+                    .padding(.horizontal,16)
+                    .padding(.vertical,16)
+                    .background(
+                        selectedValue[selectionTitle] == "" ?
+                        Color(hex: "#E3FFF6") : Color.clear
+                    )
+                    .cornerRadius(6, corners: [.allCorners])
+                    .padding(.horizontal,16)
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        withAnimation{
+                            selectedValue[selectionTitle] = ""
+                            submittingValue[selectionTitle] = ""
+                            dropDownViewSelected[selectionTitle] = false
+                            print("\(String(describing: selectedValue[selectionTitle]))")
+                        }
+                    }
+                    
+                    
+                    ForEach(matchingIndices.filter { $0 < filters.count },id: \.self){i in
+                        
+                        let singleList = filters[i]
+                        
+                        switch selectionTitle {
+                        case "Vehicle Type":
+                            if let vehicle = singleList as? VehicleData {
+                                singleFilterValue(title: selectionTitle, value: vehicle.name, valueId: vehicle.id)
+                            }
+                            
+                        case "Fuel Type":
+                            if let fuel = singleList as? FuelTypeData {
+                                singleFilterValue(title: selectionTitle, value: fuel.name, valueId: fuel.id)
+                            }
+                            
+                        case "NCB":
+                            if let ncb = singleList as? String {
+                                if ncb == "Yes"{
+                                    singleFilterValue(title: selectionTitle, value: ncb, valueId: "1")
+                                }
+                                else {
+                                    singleFilterValue(title: selectionTitle, value: ncb, valueId: "0")
+                                }
+                                
+                            }
+                            
+                        case "State":
+                            if let state = singleList as? StatesData {
+                                singleFilterValue(title: selectionTitle, value: state.name, valueId: state.id)
+                            }
+                            
+                        case "City Category":
+                            if let cityCategory = singleList as? CityCategoryData {
+                                singleFilterValue(title: selectionTitle, value: cityCategory.name, valueId: cityCategory.id)
+                            }
+                            
+                        case "City":
+                            if let city = singleList as? CityData {
+                                singleFilterValue(title: selectionTitle, value: city.name, valueId: city.id)
+                            }
+                            
+                        case "Insurance Type":
+                            if let insurance = singleList as? InsuranceTypeData {
+                                singleFilterValue(title: selectionTitle, value: insurance.name, valueId: insurance.id)
+                            }
+                            
+                        case "Renewal Type":
+                            if let renewal = singleList as? RenewalTypeData {
+                                singleFilterValue(title: selectionTitle, value: renewal.name, valueId: renewal.id)
+                            }
+                            
+                        case "Insurer" :
+                            if let insurer = singleList as? InsurerData {
+                                singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
+                            }
+                            
+                        case "Vehicle Brand":
+                            if let brand = singleList as? BrandData {
+                                singleFilterValue(title: selectionTitle, value: brand.name, valueId: brand.id)
+                            }
+                            
+                        case "Vehicle Model":
+                            
+                            if let model = singleList as? ModelData {
+                                if model.vehicle_brand_id == submittingValue["Vehicle Brand"] {
+                                    singleFilterValue(title: selectionTitle, value: model.name, valueId: model.id)
+                                }
+                            }
+                            
+                        default :
+                            EmptyView()
+                        }
+                        
+                    }
+                    
+                }
+                .padding(.top,8)
+            }
+        
+        
+        }
+        .padding(.vertical,16)
+        .background(
+            Color(hex: "#FFFFFF")
+        )
+        .frame(maxWidth: .infinity,maxHeight: .infinity,alignment: .top)
+        .onChange(of: searchText) { newValue in
+            // Trigger view updates when `searchText` changes
+            matchingIndices = getMatchingIndices(searchValue: newValue, selectionTitle: selectionTitle, filters: filters)
+        }
+       
+      
+    }
+    
+    // Function to return matching indices
+    func getMatchingIndices(searchValue: String, selectionTitle: String, filters:[Any]) -> [Int] {
+        if searchValue.isEmpty {
+            return Array(filters.indices) // Return all indices if search text is empty
+        }
+        return filters.enumerated().compactMap { index, item in
+            matchesSearchCriteria(item: item, searchValue: searchValue, selectionTitle: selectionTitle) ? index : nil
+        }
+    }
+    
+    func matchesSearchCriteria(item: Any,searchValue : String, selectionTitle: String) -> Bool {
+        switch selectionTitle {
+        case "Vehicle Type":
+            return (item as? VehicleData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+
+        case "City Category":
+            return (item as? CityCategoryData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+            
+        case "City":
+            return (item as? CityData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+        
+        case "Vehicle Brand":
+            return (item as? BrandData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+            
+        case "Vehicle Model":
+            return (item as? ModelData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+        
+        case "Fuel Type":
+            return (item as? FuelTypeData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+            
+        case "Renewal Type":
+            return (item as? RenewalTypeData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+            
+        case "Insurer":
+            return (item as? InsurerData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+        
+        case "Insurance Type":
+            return (item as? InsuranceTypeData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+            
+        case "State" :
+            return (item as? StatesData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+
+        default:
+            return false
+        }
+    }
+    
+    @ViewBuilder
+    func dropDownView(selectionTitle : String, staticValue : String) -> some View {
+        let filters = getFilterList(for: selectionTitle)
+        
+        VStack(alignment:.leading,spacing:8){
+            
+            Text(selectionTitle)
+                .font(.custom("Poppins-SemiBold", size: 16))
+                .padding(.leading,5)
+            
+            VStack(alignment:.leading,spacing:0){
+                HStack(alignment: .center, spacing:0){
                     
                     if let value = selectedValue[selectionTitle]  {
                         if selectedValue[selectionTitle] == "" {
@@ -336,21 +625,19 @@ struct ApplyFiltersView: View {
                         .resizable()
                         .frame(width: 20,height: 20)
                         .foregroundStyle(Color(hex: "#000000"))
-                        .padding(.bottom,5)
+                        .padding(.bottom,6)
                 }
                 .padding(.horizontal,16)
                 
-                
                 if dropDownViewSelected[selectionTitle] ?? false {
-                    VStack(alignment:.leading,spacing:0){
-                        
+                    VStack(alignment:.leading,spacing:16){
                         HStack{
                             Text(staticValue)
-                                .font(.custom("Poppins-Medium", size: 14))
+                                .font(.custom("Poppins-Medium", size: 16))
                                 .foregroundStyle(Color(hex: "#C4C4C4"))
                            
                             Spacer()
-                            
+                           
                         }
                         .padding(.horizontal,16)
                         .padding(.vertical,16)
@@ -358,6 +645,7 @@ struct ApplyFiltersView: View {
                             selectedValue[selectionTitle] == "" ?
                             Color(hex: "#E3FFF6") : Color.clear
                         )
+                        .padding(.horizontal,16)
                         .contentShape(Rectangle())
                         .onTapGesture {
                             withAnimation{
@@ -441,6 +729,7 @@ struct ApplyFiltersView: View {
                                     EmptyView()
                             }
                             
+                            
                         }
                         
                     }
@@ -467,7 +756,7 @@ struct ApplyFiltersView: View {
     func singleFilterValue(title: String,value: String, valueId : String) -> some View{
         HStack{
             Text(value)
-                .font(.custom("Poppins-Medium", size: 14))
+                .font(.custom("Poppins-Medium", size: 16))
                 .foregroundStyle(Color(hex: "#000000"))
             
             Spacer()
@@ -477,8 +766,11 @@ struct ApplyFiltersView: View {
         .padding(.vertical,16)
         .background(
             selectedValue[title] == value ?
-            Color(hex: "#E3FFF6") : Color.clear
+            LinearGradient(gradient: Gradient(colors: [Color(hex: "#E3FFF6"),Color(hex: "#E3FFF6")]), startPoint: .leading, endPoint: .trailing)
+            : LinearGradient(gradient: Gradient(colors: [Color(hex: "#FFFFFF"),Color(hex: "#EBF1FF")]), startPoint: .leading, endPoint: .trailing)
         )
+        .cornerRadius(12, corners: [.allCorners])
+        .padding(.horizontal,16)
         .contentShape(Rectangle())
         .onTapGesture {
             withAnimation{
@@ -636,6 +928,19 @@ struct ApplyFiltersView: View {
                                 if let insurer = singleList as? InsurerData {
                                     singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
                                 }
+                                
+                            case "Vehicle Brand":
+                                if let brand = singleList as? BrandData {
+                                    singleFilterValue(title: selectionTitle, value: brand.name, valueId: brand.id)
+                                }
+                            
+                            case "Vehicle Model":
+                                if let model = singleList as? ModelData {
+                                    if model.vehicle_brand_id == submittingValue["Vehicle Brand"] {
+                                        searchSingleFilterValue(title: selectionTitle, value: model.name, valueId: model.id, searchText: searchText)
+                                    }
+                                }
+                                
                             default:
                                 EmptyView()
                             }
@@ -726,3 +1031,112 @@ struct ApplyFiltersView: View {
         
     }
 }
+
+
+//                if dropDownViewSelected[selectionTitle] ?? false {
+//                    VStack(alignment:.leading,spacing:0){
+//
+//
+//                        HStack{
+//                            Text(staticValue)
+//                                .font(.custom("Poppins-Medium", size: 14))
+//                                .foregroundStyle(Color(hex: "#C4C4C4"))
+//
+//                            Spacer()
+//
+//                        }
+//                        .padding(.horizontal,16)
+//                        .padding(.vertical,16)
+//                        .background(
+//                            selectedValue[selectionTitle] == "" ?
+//                            Color(hex: "#E3FFF6") : Color.clear
+//                        )
+//                        .contentShape(Rectangle())
+//                        .onTapGesture {
+//                            withAnimation{
+//                                selectedValue[selectionTitle] = ""
+//                                submittingValue[selectionTitle] = ""
+//                                dropDownViewSelected[selectionTitle] = false
+//                                print("\(String(describing: selectedValue[selectionTitle]))")
+//                            }
+//                        }
+//
+//
+//                        ForEach(filters.indices,id: \.self){i in
+//                            let singleList = filters[i]
+//
+//                            switch selectionTitle {
+//                                case "Vehicle Type":
+//                                if let vehicle = singleList as? VehicleData {
+//                                    singleFilterValue(title: selectionTitle, value: vehicle.name, valueId: vehicle.id)
+//                                }
+//
+//                                case "Fuel Type":
+//                                if let fuel = singleList as? FuelTypeData {
+//                                    singleFilterValue(title: selectionTitle, value: fuel.name, valueId: fuel.id)
+//                                }
+//
+//                                case "NCB":
+//                                if let ncb = singleList as? String {
+//                                    if ncb == "Yes"{
+//                                        singleFilterValue(title: selectionTitle, value: ncb, valueId: "1")
+//                                    }
+//                                    else {
+//                                        singleFilterValue(title: selectionTitle, value: ncb, valueId: "0")
+//                                    }
+//
+//                                }
+//
+//                                case "State":
+//                                if let state = singleList as? StatesData {
+//                                    singleFilterValue(title: selectionTitle, value: state.name, valueId: state.id)
+//                                }
+//
+//                                case "City Category":
+//                                if let cityCategory = singleList as? CityCategoryData {
+//                                    singleFilterValue(title: selectionTitle, value: cityCategory.name, valueId: cityCategory.id)
+//                                }
+//
+//                                case "City":
+//                                if let city = singleList as? CityData {
+//                                    singleFilterValue(title: selectionTitle, value: city.name, valueId: city.id)
+//                                }
+//
+//                                case "Insurance Type":
+//                                if let insurance = singleList as? InsuranceTypeData {
+//                                    singleFilterValue(title: selectionTitle, value: insurance.name, valueId: insurance.id)
+//                                }
+//
+//                                case "Renewal Type":
+//                                if let renewal = singleList as? RenewalTypeData {
+//                                    singleFilterValue(title: selectionTitle, value: renewal.name, valueId: renewal.id)
+//                                }
+//
+//                                case "Insurer" :
+//                                if let insurer = singleList as? InsurerData {
+//                                    singleFilterValue(title: selectionTitle, value: insurer.name, valueId: insurer.id)
+//                                }
+//
+//                                case "Vehicle Brand":
+//                                if let brand = singleList as? BrandData {
+//                                    singleFilterValue(title: selectionTitle, value: brand.name, valueId: brand.id)
+//                                }
+//
+//                                case "Vehicle Model":
+//
+//                                if let model = singleList as? ModelData {
+//                                    if model.vehicle_brand_id == submittingValue["Vehicle Brand"] {
+//                                        singleFilterValue(title: selectionTitle, value: model.name, valueId: model.id)
+//                                    }
+//                                }
+//
+//                                default :
+//                                    EmptyView()
+//                            }
+//
+//                        }
+//
+//                    }
+//                    .padding(.top,8)
+//
+//                }

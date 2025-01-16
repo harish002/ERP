@@ -16,7 +16,7 @@ struct SMEDataView: View {
     @ObservedObject var navigationState : NavigationState
     @ObservedObject var snackBar : SnackbarModel
     
-    @State private var showAllPolicyRates : [PolicyRateData] = []
+    @State private var showAllPolicyRates : [GeneralPolicyRateItem] = []
 
     @State private var loader = false
     
@@ -38,7 +38,7 @@ struct SMEDataView: View {
                         
                         Spacer()
                         
-                        Text("Vehicle Data")
+                        Text("SME Data")
                             .font(.custom("Poppins-SemiBold", size: 24))
                             .foregroundStyle(Color.black)
                         
@@ -78,6 +78,35 @@ struct SMEDataView: View {
                                 
                                 HStack(spacing:16){
                                     
+                                    Rectangle()
+                                        .frame(width: 54,height: 54,alignment: .center)
+                                        .foregroundStyle(Color(hex: "#ffffff"))
+                                        .overlay(alignment:.leading,content: {
+                                            let imageURL = URL(string: policyRate.insurer.media_url)
+                                            AsyncImage(url: imageURL) { phase in
+                                                if let image = phase.image {
+                                                    image
+                                                        .resizable()
+                                                        .frame(width: 54,height: 54)
+                                                        .padding(2)
+                                                        
+                                                }
+                                                else if phase.error != nil {
+                                                    Image("dummy-image1")
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fit)
+                                                        .frame(width: 54, height: 54, alignment: .center)
+                                                    
+                                                }
+                                                else {
+                                                    Image("dummy-image1")
+                                                        .resizable()
+                                                        .aspectRatio(contentMode: .fit)
+                                                        .frame(width: 54, height: 54, alignment: .center)
+                                                }
+                                            }
+                                        })
+                                    
                                     VStack(alignment:.leading,spacing:4){
                                         
                                         Text(policyRate.insurance_type.name)
@@ -95,14 +124,18 @@ struct SMEDataView: View {
                                     
                                     
                                     
-                                    HStack(spacing:2){
-                                        Text("\(policyRate.payouts)")
-                                            .font(.custom("Gilroy-Bold", size: 32))
-                                            .foregroundStyle(Color("title", bundle: nil))
+                                    let payoutsValue = Double(policyRate.payouts) ?? 0.0 // Convert String to Double with a fallback to 0.0
+                                    let points = String(format: "%.2f", payoutsValue * 0.1)
+                                    
+                                    VStack(spacing:2){
+                                        Text("\(points)")
+                                                .font(.custom("Gilroy-Bold", size: 16))
+                                                .foregroundStyle(Color("title", bundle: nil))
                                         
-                                        Text("%")
-                                            .font(.custom("Gilroy-Bold", size: 32))
-                                            .foregroundStyle(Color("title", bundle: nil))
+                                        Text("Points")
+                                                .font(.custom("Gilroy-Bold", size: 16))
+                                                .foregroundStyle(Color("title", bundle: nil))
+
                                     }
                                     .frame(maxWidth:.infinity,alignment:.trailing)
                                     
@@ -120,10 +153,8 @@ struct SMEDataView: View {
                                     print("Policy Rate Selected")
                                     withAnimation{
                                         let id = policyRate.id
-                                        DispatchQueue.main.async {
-                                            accessModel.policyRateId = id
-                                        }
-                                        router.navigateTo(to: .policyratedetailview)
+                                        accessModel.generalPolicyRateId = id
+                                        router.navigateTo(to: .generalpolicyratedetailview)
                                     }
                                 }
                             }
@@ -135,22 +166,22 @@ struct SMEDataView: View {
                         }
                         .refreshable(action: {
                             let token = retrieveToken() ?? ""
-                            let payload = SearchPolicyRatePayload(
-                                state_id: "",
-                                city_id: "",
-                                city_category_id: "",
-                                vehicle_type_id: "",
-                                vehicle_model_id: "",
+                            let payload = GeneralPolicyRatePayload(
+                                insurer_id: "",
                                 renewal_type_id: "",
                                 insurance_type_id: "",
-                                insurer_id: "",
-                                fuel_type_id: "",
-                                status: "", page: 1, size: 50
+                                policy_segment_id: "3e2d3437-7949-4047-bb25-97392928423a",
+                                slab_id: "",
+                                product_id: "",
+                                ppt_id: "",
+                                insurer_group_id:"",
+                                payouts: "",
+                                payins: "",
+                                remarks: "",
+                                description: ""
                             )
                             
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                searchPolicyRates(token: token, payload: payload)
-                            }
+                            searchGeneralPolicyRates(token: token, payload: payload)
                         })
                     }
                     else {
@@ -173,6 +204,7 @@ struct SMEDataView: View {
                             
                             Spacer()
                         }
+                        .frame(maxWidth: .infinity,alignment: .center)
                     }
                 }
             }
@@ -185,57 +217,48 @@ struct SMEDataView: View {
             Color(hex: "#F5F8FF")
         )
         .navigationBarBackButtonHidden()
-        .onReceive(accessModel.$policyRatesData, perform: { policy in
-            if !policy.isEmpty {
-                self.showAllPolicyRates = policy
+        .onReceive(accessModel.$generalPolicyRatesData, perform: {value in
+            if !(value?.items?.isEmpty ?? false) {
+                self.showAllPolicyRates = value?.items ?? []
             }
             else {
                 self.showAllPolicyRates = []
             }
-            
         })
-        .onReceive(accessModel.$generalPolicyRatesData, perform: {value in
-            if !(value?.items.isEmpty ?? false) {
-                print("Health Policy Rate -> \(value?.items)")
-            }
-        })
+   
     }
     
     
-    func searchPolicyRates(token : String, payload : SearchPolicyRatePayload){
+    func searchGeneralPolicyRates(token : String, payload : GeneralPolicyRatePayload){
         Task.init{
             do
             {
-                let (result,response) = try await accessModel.searchPolicyRates(token: token, searchPayload: payload)
+                let result = try await accessModel.searchGeneralPolicyRates(token: token, searchPayload: payload)
                 
-                if result {
+                if !(result.items?.isEmpty ?? false) {
                     self.loader = false
-                    self.showAllPolicyRates = response
+                    self.showAllPolicyRates = result.items ?? []
                 }
                 else {
                     self.loader = false
-                    self.showAllPolicyRates = response
+                    self.showAllPolicyRates = []
                 }
             }
             catch ApiError.networkFailure {
                 // Handle network failure, e.g., show error Snackbar
-                self.loader = false
                 snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
             } catch ApiError.lowInternetConnection {
                 // Handle low internet connection, e.g., show error Snackbar
-                self.loader = false
                 snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
             } catch ApiError.serverError(let status) {
                 // Handle server errors, e.g., show error Snackbar
-                self.loader = false
                 snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
             } catch ApiError.unknownError(let description){
                 // Handle unknown errors
-                self.loader = false
                 print("Data Fetching Failed -> \(description)")
                 snackBar.show(message: description, title: "Error", type: .error)
             }
-            
+
         }
     }
     

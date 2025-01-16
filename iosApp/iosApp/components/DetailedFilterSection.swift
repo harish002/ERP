@@ -31,6 +31,7 @@ struct DetailedFilterSection: View {
     @State private var cityCategories : [CityCategoryData] = []
     @State private var cityData : [CityData] = []
     @State private var vehicleBrands : [BrandData] = []
+    @State private var vehicleModels : [ModelData] = []
     
     @State private var matchingIndices: [Int] = []
     
@@ -87,6 +88,17 @@ struct DetailedFilterSection: View {
                                     )
                                 }
                                 
+                            case "Vehicle Model":
+                                if let model = singleList as? ModelData {
+                                    CardComponent(
+                                        title: selectionTitle,
+                                        value: model.name,
+                                        valueId: model.id,
+                                        isSelected: model.id == selectedValue,
+                                        imageURl: ""
+                                    )
+                                }
+                                
                             default :
                                 EmptyView()
                             }
@@ -129,18 +141,23 @@ struct DetailedFilterSection: View {
                 self.vehicleBrands = values
             }
         })
+        .onReceive(accessModel.$vehicleModels, perform: {values in
+            if !values.isEmpty{
+                self.vehicleModels = values
+            }
+        })
     
     }
     
     // Function to return matching indices
-        private func getMatchingIndices(searchValue: String, selectionTitle: String) -> [Int] {
-            if searchValue.isEmpty {
-                return Array(filtersList.indices) // Return all indices if search text is empty
-            }
-            return filtersList.enumerated().compactMap { index, item in
-                matchesSearchCriteria(item: item, searchValue: searchValue, selectionTitle: selectionTitle) ? index : nil
-            }
+    private func getMatchingIndices(searchValue: String, selectionTitle: String) -> [Int] {
+        if searchValue.isEmpty {
+            return Array(filtersList.indices) // Return all indices if search text is empty
         }
+        return filtersList.enumerated().compactMap { index, item in
+            matchesSearchCriteria(item: item, searchValue: searchValue, selectionTitle: selectionTitle) ? index : nil
+        }
+    }
     
     private func logSearchTerm(_ term: String) {
         print("User searched for: \(term)")
@@ -171,17 +188,28 @@ struct DetailedFilterSection: View {
                                 
                         }
                         else {
-                            Image("dummy-image1")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 79,height: 74)
+                            let initials = extractInitialsAndName(name: value)
+                            
+                            if ((initials?.isEmpty) != nil) {
+                
+                                Text(initials?.uppercased() ?? "")
+                                    .font(.custom("Poppins-Medium", size: 24))
+                                  
+                            }
+                            else {
+                                
+                                Image("dummy-image1")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 79,height: 74)
+                            }
                                 
                         }
                     }
                     
                 })
             
-            Text(value)
+            Text(value.capitalized)
                 .font(.custom("Poppins-Medium", size: 14))
                 .foregroundStyle(Color(hex: "#000000"))
                 .frame(width: 80,alignment: .center)
@@ -209,6 +237,9 @@ struct DetailedFilterSection: View {
             return cityData  // Returning the full array of `CityData` objects // Returning the full array of `InsurerData` objects
         case "Vehicle Brand":
             return vehicleBrands
+        
+        case "Vehicle Model":
+            return vehicleModels
 
         default:
             return []
@@ -228,10 +259,28 @@ struct DetailedFilterSection: View {
         
         case "Vehicle Brand":
             return (item as? BrandData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
+            
+        case "Vehicle Model":
+            return (item as? ModelData)?.name.lowercased().contains(searchValue.lowercased()) ?? false
 
         default:
             return false
         }
+    }
+    
+    func extractInitialsAndName(name: String) -> String? {
+        // Trim any leading or trailing whitespace
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Check if the name has at least two characters
+        guard trimmedName.count >= 2 else {
+            return nil
+        }
+        
+        // Extract the first two characters
+        let initials = trimmedName.prefix(2)
+        
+        return String(initials)
     }
 }
 

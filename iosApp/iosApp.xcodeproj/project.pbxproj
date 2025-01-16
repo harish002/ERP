@@ -11,6 +11,7 @@
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		2558021F2CA2A5C400F1AAEC /* PushNotificationFile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2558021E2CA2A5C400F1AAEC /* PushNotificationFile.swift */; };
+		255D1E432D3625C5002EA62F /* GeneralPolicyRateDataView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 255D1E422D3625C5002EA62F /* GeneralPolicyRateDataView.swift */; };
 		2578D2682D0444B100460FF8 /* Poppins-SemiBoldItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2578D2652D0444B100460FF8 /* Poppins-SemiBoldItalic.ttf */; };
 		2578D2692D0444B100460FF8 /* Poppins-ExtraLight.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2578D25C2D0444B100460FF8 /* Poppins-ExtraLight.ttf */; };
 		2578D26A2D0444B100460FF8 /* Poppins-ThinItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 2578D2672D0444B100460FF8 /* Poppins-ThinItalic.ttf */; };
@@ -162,6 +163,7 @@
 		058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		2152FB032600AC8F00CF470E /* iOSApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iOSApp.swift; sourceTree = "<group>"; };
 		2558021E2CA2A5C400F1AAEC /* PushNotificationFile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationFile.swift; sourceTree = "<group>"; };
+		255D1E422D3625C5002EA62F /* GeneralPolicyRateDataView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPolicyRateDataView.swift; sourceTree = "<group>"; };
 		2578D2562D0444B100460FF8 /* Poppins-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Black.ttf"; sourceTree = "<group>"; };
 		2578D2572D0444B100460FF8 /* Poppins-BlackItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-BlackItalic.ttf"; sourceTree = "<group>"; };
 		2578D2582D0444B100460FF8 /* Poppins-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Poppins-Bold.ttf"; sourceTree = "<group>"; };
@@ -429,6 +431,7 @@
 				25791BD72C9337C300B1079B /* ExploreView.swift */,
 				25791C5B2C9340AB00B1079B /* NotificationView.swift */,
 				2578D2812D07105E00460FF8 /* PolicySegmentsView.swift */,
+				255D1E422D3625C5002EA62F /* GeneralPolicyRateDataView.swift */,
 			);
 			path = "Home View";
 			sourceTree = "<group>";
@@ -946,6 +949,7 @@
 				25791C522C933EE900B1079B /* LMSVerifyOtpView.swift in Sources */,
 				25791C5E2C9341E600B1079B /* ProfileView.swift in Sources */,
 				2578D29D2D09649C00460FF8 /* HelperFunctions.swift in Sources */,
+				255D1E432D3625C5002EA62F /* GeneralPolicyRateDataView.swift in Sources */,
 				25791BCF2C93374700B1079B /* LMSLoginView.swift in Sources */,
 				25791C0F2C93392900B1079B /* SearchBar.swift in Sources */,
 				25791C532C933EE900B1079B /* OTPSentFaliureView.swift in Sources */,

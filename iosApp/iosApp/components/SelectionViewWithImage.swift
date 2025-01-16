@@ -24,19 +24,20 @@ struct SelectionViewWithImage: View {
     @State private var selectedValue : String? = nil
     
     var body: some View {
-        VStack(alignment: .center, spacing: 8){
+        VStack(alignment: .leading, spacing: 12){
             Text(selectionTitle)
                 .font(.custom("Poppins-SemiBold", size: 16))
                 .foregroundStyle(Color(hex: "#000000"))
+                .padding(.leading,8)
             
-            LazyHStack(alignment:.center,spacing:12){
+            HStack(spacing:12){
                 ForEach(filtersList.indices,id: \.self){i in
                     let singleList = filtersList[i]
                     
                     switch selectionTitle {
                         case "Vehicle Type":
                         if let vehicle = singleList as? VehicleData {
-                            CardComponent(title: selectionTitle, value: vehicle.name,valueId: vehicle.id,isSelected: selectedValue == vehicle.id)
+                            CardComponent(title: selectionTitle, value: vehicle.name,valueId: vehicle.id,isSelected: selectedValue == vehicle.id, imageUrl: vehicle.media_url ?? "")
                         }
                         
                         default :
@@ -45,6 +46,7 @@ struct SelectionViewWithImage: View {
                     
                 }
             }
+            .frame(maxWidth: .infinity,alignment: .center)
 
         }
         .onReceive(accessModel.$vehicleTypes, perform: {values in
@@ -71,34 +73,34 @@ struct SelectionViewWithImage: View {
     }
     
     @ViewBuilder
-    func CardComponent(title : String, value:String, valueId : String, isSelected : Bool) -> some View {
+    func CardComponent(title : String, value:String, valueId : String, isSelected : Bool, imageUrl : String) -> some View {
         VStack(alignment:.center,spacing: 15){
             Rectangle()
                 .stroke(isSelected ? Color(hex: "#1F2ADC") : Color(hex: "#544C4C").opacity(0.2), style: .init(lineWidth: 2))
                 .background(Color(hex: "#FFFFFF"))
                 .frame(width: 100,height: 100)
                 .overlay(alignment:.center,content: {
-                    let imageURL = URL(string: "https://picsum.photos/200/300")
+                    let imageURL = URL(string: imageUrl)
                     AsyncImage(url: imageURL) { phase in
                         if let image = phase.image {
-                            Image("image")
+                            image
                                 .resizable()
                                 .scaledToFit()
                                 .clipShape(Rectangle())
-                                .padding(12)
+                                .padding(2)
                         }
                         else if phase.error != nil {
                             Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 54, height: 54, alignment: .center)
+                                .frame(width: 100, height: 100, alignment: .center)
                                 
                         }
                         else {
                             Image("dummy-image1")
                                 .resizable()
                                 .aspectRatio(contentMode: .fit)
-                                .frame(width: 54, height: 54, alignment: .center)
+                                .frame(width: 100, height: 100, alignment: .center)
                                 
                         }
                     }
@@ -108,7 +110,7 @@ struct SelectionViewWithImage: View {
             Text(value)
                 .font(.custom("Poppins-Medium", size: 14))
                 .foregroundStyle(Color(hex: "#000000"))
-                .frame(width: 80,alignment: .center)
+                .frame(width: 100,alignment: .center)
                 .lineLimit(1)
         }
         .contentShape(Rectangle())
@@ -147,6 +149,8 @@ struct ScrollableSelectionView: View {
     let selectionTitle : String
     let image : String
     let onTapOfCard : (String,String) -> Void
+    @Binding var stateValue : String
+    @Binding var modelId : String
     
     @State private var filtersList: [Any] = [] // Original list
     
@@ -157,12 +161,15 @@ struct ScrollableSelectionView: View {
     @State private var cityData : [CityData] = []
     @State private var vehicleBrands : [BrandData] = []
     @State private var selectedValue : String? = nil
+    @State private var vehicleModels : [ModelData] = []
+
     
     var body: some View {
-        VStack(alignment: .center, spacing: 8){
+        VStack(alignment: .leading, spacing: 12){
             Text(selectionTitle)
                 .font(.custom("Poppins-SemiBold", size: 16))
                 .foregroundStyle(Color(hex: "#000000"))
+                .padding(.leading,8)
             
             ScrollViewReader{scrollViewProxy in
                 ScrollView(.horizontal,showsIndicators: false){
@@ -186,14 +193,26 @@ struct ScrollableSelectionView: View {
                                     
                                 case "City":
                                     if let city = singleList as? CityData {
-                                        CardComponent(
-                                            title: selectionTitle,
-                                            value: city.name,
-                                            valueId: city.id,
-                                            isSelected: city.id == selectedValue,
-                                            imageURl: city.media_url ?? ""
-                                        )
-                                        .id(i)
+                                            CardComponent(
+                                                title: selectionTitle,
+                                                value: city.name,
+                                                valueId: city.id,
+                                                isSelected: city.id == selectedValue,
+                                                imageURl: city.media_url ?? ""
+                                            )
+                                            .id(i)
+                                    }
+                                
+                                case "Vehicle Model":
+                                    if let model = singleList as? ModelData {
+                                            CardComponent(
+                                                title: selectionTitle,
+                                                value: model.name,
+                                                valueId: model.id,
+                                                isSelected: model.id == selectedValue,
+                                                imageURl: ""
+                                            )
+                                            .id(i)
                                     }
                                     
                                 default :
@@ -237,6 +256,14 @@ struct ScrollableSelectionView: View {
                             }
                         }
                         
+                    case "Vehicle Model":
+                        if let index = filtersList.firstIndex(where: { ($0 as? ModelData)?.id == selectedValue }) {
+                            // Scroll to the selected element
+                            withAnimation {
+                                scrollViewProxy.scrollTo(index, anchor: .leading)
+                            }
+                        }
+                        
                     default:break
                     }
                 }
@@ -244,6 +271,11 @@ struct ScrollableSelectionView: View {
             .onAppear {
                 self.filtersList = getFilterList(for: selectionTitle) // Initialize the list
             }
+            .onChange(of: stateValue, perform: {state in
+                
+                self.filtersList = getFilterList(for: selectionTitle)
+            })
+
         }
         .sheet(isPresented: $isViewAllScreenActive, content: {
             DetailedFilterSection(
@@ -252,6 +284,7 @@ struct ScrollableSelectionView: View {
                 filtersList: filtersList,
                 onTapOfCard: {value in
                     handleSelection(value)
+                    onTapOfCard(value,selectionTitle)
                 },
                 isViewAllScreenActive: $isViewAllScreenActive,
                 selectedValue: $selectedValue
@@ -277,6 +310,12 @@ struct ScrollableSelectionView: View {
                 self.vehicleBrands = values
             }
         })
+        .onReceive(accessModel.$vehicleModels, perform: {values in
+            if !values.isEmpty{
+                self.vehicleModels = values
+            }
+        })
+        
     
     }
     
@@ -291,6 +330,11 @@ struct ScrollableSelectionView: View {
             }
         case "City":
             if let index = filtersList.firstIndex(where: { ($0 as? CityData)?.id == valueId }) {
+                let selectedItem = filtersList.remove(at: index)
+                filtersList.insert(selectedItem, at: 0)
+            }
+        case "Vehicle Model":
+            if let index = filtersList.firstIndex(where: { ($0 as? ModelData)?.id == valueId }) {
                 let selectedItem = filtersList.remove(at: index)
                 filtersList.insert(selectedItem, at: 0)
             }
@@ -312,7 +356,7 @@ struct ScrollableSelectionView: View {
                         if let image = phase.image {
                             image
                                 .resizable()
-                                .frame(width: 79,height: 74)
+                                .frame(width: 77,height: 72)
                                 .padding(2)
                         }
                         else if phase.error != nil {
@@ -323,20 +367,31 @@ struct ScrollableSelectionView: View {
                                 
                         }
                         else {
-                            Image("dummy-image1")
-                                .resizable()
-                                .aspectRatio(contentMode: .fit)
-                                .frame(width: 79,height: 74)
+                            let initials = extractInitialsAndName(name: value)
+                            
+                            if ((initials?.isEmpty) != nil) {
+                
+                                Text(initials?.uppercased() ?? "")
+                                    .font(.custom("Poppins-Medium", size: 24))
+                                  
+                            }
+                            else {
+                                
+                                Image("dummy-image1")
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                                    .frame(width: 79,height: 74)
+                            }
                                 
                         }
                     }
                     
                 })
             
-            Text(value)
+            Text(value.capitalized)
                 .font(.custom("Poppins-Medium", size: 14))
                 .foregroundStyle(Color(hex: "#000000"))
-                .frame(width: 80,alignment: .center)
+                .frame(width: 100,alignment: .center)
                 .lineLimit(1)
         }
         .contentShape(Rectangle())
@@ -353,17 +408,44 @@ struct ScrollableSelectionView: View {
         switch selectionTitle {
         case "Vehicle Type":
             return vehicleType  // Returning the full array of `VehicleData` objects
- // Returning the full array of `StatesData` objects
+            
         case "City Category":
             return cityCategories  // Returning the full array of `CityCategoryData` objects
+        // Returning the full array of `CityData` objects
         case "City":
-            return cityData  // Returning the full array of `CityData` objects // Returning the full array of `InsurerData` objects
+            return cityData
+                .filter { $0.state.id == stateValue } // Filter by stateValue
+                .sorted {
+                    $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+                }
         case "Vehicle Brand":
             return vehicleBrands
+        
+        case "Vehicle Model":
+            return vehicleModels
+                .filter { $0.vehicle_brand_id == modelId } // Filter by stateValue
+                .sorted {
+                    $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending
+                }
 
         default:
             return []
         }
+    }
+    
+    func extractInitialsAndName(name: String) -> String? {
+        // Trim any leading or trailing whitespace
+        let trimmedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        
+        // Check if the name has at least two characters
+        guard trimmedName.count >= 2 else {
+            return nil
+        }
+        
+        // Extract the first two characters
+        let initials = trimmedName.prefix(2)
+        
+        return String(initials)
     }
 }
 

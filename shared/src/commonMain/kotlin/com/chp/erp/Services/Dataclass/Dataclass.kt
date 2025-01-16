@@ -895,8 +895,8 @@ data class SlabData(
     val max_amount: Int,
     val name: String,
     val status: Int,
-    val remarks: String,
-    val description: String
+    val remarks: String? = null,
+    val description: String? = null
 )
 
 @Serializable
@@ -1050,7 +1050,109 @@ data class RenewalTypesBySegmentIdData(
 data class GeneralPolicyRateResponse(
     val message: String,
     val total: Int,
-    val items: List<String>
+    val items: List<GeneralPolicyRateItem>? = emptyList()
+)
+
+@Serializable
+data class GeneralPolicyRateItem(
+    val id: String,
+    val insurance_type: InsuranceTypeY,
+    val policy_segment: PolicySegmentX,
+    val renewal_type: RenewalType,
+    val slab: Slab,
+    val product: Product,
+    val insurer: InsurerX,
+    val ppt: Ppt,
+    val payouts: String,
+    val payins: String? = null,
+    val remarks: String? = null,
+    val description: String? = null
+)
+
+@Serializable
+data class PolicySegmentX(
+    val id: String,
+    val name: String,
+    val remarks: String,
+    val status: Int,
+    val description: String? = null,
+    val data_table_name: String,
+    val class_path: String
+)
+
+@Serializable
+data class Slab(
+    val id: String,
+    val policy_segment: PolicySegmentX,
+    val min_amount: Int,
+    val max_amount: Int,
+    val name: String,
+    val status: Int,
+    val remarks: String,
+    val description: String
+)
+
+@Serializable
+data class Product(
+    val id: String,
+    val insurance_type: InsuranceType,
+    val policy_segment: PolicySegmentX,
+    val status: Int,
+    val name: String,
+    val remarks: String? = null,
+    val description: String? = null
+)
+
+@Serializable
+data class InsurerByInsurerGrp(
+    val message: String,
+    val data : List<InsurerX>
+)
+
+@Serializable
+data class InsurerX(
+    val id: String,
+    val name: String,
+    val status: Int,
+    val remarks: String? = null,
+    val description: String? = null,
+    val media_id: String,
+    val media_url: String,
+    val created_at: String,
+    val insurer_groups: List<InsurerGroup>
+)
+
+@Serializable
+data class InsuranceTypeY(
+    val name: String,
+    val description: String? = null,
+    val policy_segment_id: String,
+    val created_at: String? = null,
+    val id: String,
+    val policy_segment: PolicySegment? = null,
+    val status: Int
+)
+
+@Serializable
+data class Ppt(
+    val id: String,
+    val policy_segment: PolicySegmentX,
+    val name: String,
+    val min: Int,
+    val max: Int,
+    val remarks: String,
+    val description: String,
+    val status: Int
+)
+
+@Serializable
+data class InsurerGroup(
+    val id: String,
+    val name: String,
+    val description: String,
+    val remarks: String,
+    val status: Int,
+    val policy_segment: PolicySegmentX
 )
 
 

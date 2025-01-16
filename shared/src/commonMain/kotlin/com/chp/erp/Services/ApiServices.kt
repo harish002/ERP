@@ -12,6 +12,7 @@ import com.example.lms.Services.Dataclass.GetPolicyRates
 import com.example.lms.Services.Dataclass.GetVehicleDetails
 import com.example.lms.Services.Dataclass.InsuranceTypeUsingSegmentID
 import com.example.lms.Services.Dataclass.InsuranceTypes
+import com.example.lms.Services.Dataclass.InsurerByInsurerGrp
 import com.example.lms.Services.Dataclass.InsurerGroupResponse
 import com.example.lms.Services.Dataclass.InsurerTypes
 import com.example.lms.Services.Dataclass.PPTsTypesBySegmentId
@@ -32,6 +33,8 @@ import com.example.lms.Services.Dataclass.VehicleBrands
 import com.example.lms.Services.Dataclass.VehicleModels
 import com.example.lms.Services.Dataclass.VehicleTypes
 import com.example.lms.Services.Dataclass.VerifyOTP
+import com.example.lms.lms.Services.ApiConfig.Companion.Referer_URL
+import com.example.lms.lms.Services.ApiConfig.Companion.UAT_ACCESS_API
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -66,22 +69,26 @@ class ApiConfig {
 
     companion object {
 
-        @SerialName("ACCESS_API")
-        // const val UAT_ACCESS_API = "https://api.1click.tech/api/access" UAT
+//         const val UAT_ACCESS_API = "https://api.1click.tech/api/access"  // UAT
 
         const val UAT_ACCESS_API = "https://apig.1clickpolicy.com/api/access" // PROD
 
-        // const val ACCESS_API = "https://api.1clicktech.in/api/access" // UAT
+//         const val ACCESS_API = "https://api.1clicktech.in/api/access" // UAT
 
         const val ACCESS_API = "https://apig.1clickpolicy.com/api/access" // PROD
+
+        // Referer Base URL
+//        const val Referer_URL =  "https://api.1click.tech" // UAT
+        const val Referer_URL =  "https://apig.1clickpolicy.com" // PROD
 
         // const val UAT_NOTIFICATION_MANAGEMENT = "https://api.1click.tech/api/notifications" //UAT
 
         const val UAT_NOTIFICATION_MANAGEMENT = "https://apig.1clickpolicy.com/api/notifications" //PROD
 
-        const val NOTIFICATION_MANAGEMENT = "https://api.1clicktech.in/api/notifications"
+//        const val SALES_TOOL_API = "https://sales-tool-api.1click.tech" // UAT
 
-        const val SALES_TOOL_API = "https://sales-tool-api.1clickpolicy.com"
+        const val SALES_TOOL_API = "https://sales-tool-api.1clickpolicy.com" // PROD
+
     }
 
 }
@@ -104,7 +111,7 @@ class ApiServices {
     suspend fun setOTPApi(userid: String): Pair<HttpStatusCode, String> {
         try {
             val response: HttpResponse = client.get() {
-                url("${ApiConfig.ACCESS_API}/verification/mobile/$userid")
+                url("${ApiConfig.UAT_ACCESS_API}/verification/mobile/$userid")
                 contentType(ContentType.Application.Json)
             }
             val responseBody = response.body<String>()
@@ -126,7 +133,7 @@ class ApiServices {
     suspend fun verifyOTP(requestBody: VerifyOTP): String {
         try {
             val response: HttpResponse = client.post() {
-                url("${ApiConfig.ACCESS_API}/verify/mobile")
+                url("${ApiConfig.UAT_ACCESS_API}/verify/mobile")
                 contentType(ContentType.Application.Json)
                 body = Json.encodeToString(VerifyOTP.serializer(), requestBody)
 
@@ -149,7 +156,7 @@ class ApiServices {
     suspend fun checkUsernameEndpoint(username: String): Boolean {
         try {
             val response: HttpResponse = client.get {
-                url("${ApiConfig.ACCESS_API}/users/check-username?")
+                url("${ApiConfig.UAT_ACCESS_API}/users/check-username?")
                 contentType(ContentType.Application.Json)
                 parameter("username", username)
             }
@@ -172,7 +179,7 @@ class ApiServices {
     suspend fun checkPhoneNumber(phone: String): Boolean {
         try {
             val response: HttpResponse = client.get {
-                url("${ApiConfig.ACCESS_API}/users/check-mobile-number?")
+                url("${ApiConfig.UAT_ACCESS_API}/users/check-mobile-number?")
                 contentType(ContentType.Application.Json)
                 parameter("mobileNumber", phone)
             }
@@ -195,7 +202,7 @@ class ApiServices {
     suspend fun checkEmail(email: String): Boolean {
         try {
             val response: HttpResponse = client.get {
-                url("${ApiConfig.ACCESS_API}/users/check-email?")
+                url("${ApiConfig.UAT_ACCESS_API}/users/check-email?")
                 contentType(ContentType.Application.Json)
                 parameter("email", email)
             }
@@ -223,7 +230,7 @@ class ApiServices {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/login")
                 contentType(ContentType.Application.Json)
                 header("X-Project-ID", "d0f634d2-0862-491c-accd-662a2e06b106")
-                header("Referer", "https://apig.1clickpolicy.com")
+                header("Referer", Referer_URL)
                 body = Json.encodeToString(UserDetails.serializer(), user)
             }
             if (response.status.isSuccess()) {
@@ -270,7 +277,7 @@ class ApiServices {
             val response: HttpResponse = client.post {
                 url("${ApiConfig.UAT_ACCESS_API}/auth/login/authenticate-otp")
                 contentType(ContentType.Application.Json)
-                header("Referer", "https://apig.1clickpolicy.com")
+                header("Referer", Referer_URL)
                 header("X-Project-ID", "d0f634d2-0862-491c-accd-662a2e06b106")
                 parameter("input", phone)
                 parameter("otp", otp)
@@ -293,7 +300,7 @@ class ApiServices {
     suspend fun getUserWhoLoggedIn(token: String, userid: String): UserData {
         try {
             val response: HttpResponse = client.get {
-                url("https://apig.1clickpolicy.com/api/access/users/$userid")
+                url("${ApiConfig.UAT_ACCESS_API}/users/$userid")
                 header("Authorization", "Bearer $token")
             }
 
@@ -881,6 +888,54 @@ class ApiServices {
         }
         catch (e: Exception) {
             println("All Insurance Type Using SegmentID Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Slab Types Using Policy Segment ID
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getSlabTypesBySegmentId(segmentId : String, token: String) : SlabResponse {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/slab/policy_segment/${segmentId}")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Insurance Type Using SegmentID Error Message ${e.message}")
+            throw e.message?.let { IOException(it) }!!
+        }
+    }
+
+    // Insurer Types Using Group Insurer
+    @Throws(IOException::class, CancellationException::class)
+    suspend fun getInsurerByInsurerGrp(groupID : String, token: String) : InsurerByInsurerGrp {
+        try {
+            val response : HttpResponse = client.get {
+                url("${ApiConfig.SALES_TOOL_API}/insurer/insurers/group/${groupID}")
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+            }
+            if (response.status.isSuccess()){
+                return response.body()
+            }
+            else{
+                throw IOException(
+                    response.body<String>()
+                )
+            }
+        }
+        catch (e: Exception) {
+            println("All Insurer Type Using Insurer Group Error Message ${e.message}")
             throw e.message?.let { IOException(it) }!!
         }
     }

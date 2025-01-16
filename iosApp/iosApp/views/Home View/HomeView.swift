@@ -295,28 +295,6 @@ struct HomeView: View {
 //    )
 //}
 
-//let token = retrieveToken() ?? ""
-//let userId = retrieveUserId() ?? ""
+
 //
-//Task.init{
-//    // Get User Data who is Logged In
-//    do
-//    {
-//        _ = try await accessModel.getUserData(token: token, userId: userId)
-//
-//    }
-//    catch ApiError.networkFailure {
-//        // Handle network failure, e.g., show error Snackbar
-//        snackBar.show(message: "Network Failure. Please check your connection.", title: "Error", type: .error)
-//    } catch ApiError.lowInternetConnection {
-//        // Handle low internet connection, e.g., show error Snackbar
-//        snackBar.show(message: "Connection Timed Out. Please try again.", title: "Error", type: .error)
-//    } catch ApiError.serverError(let status) {
-//        // Handle server errors, e.g., show error Snackbar
-//        snackBar.show(message: "Server Error: \(status)", title: "Error", type: .error)
-//    } catch ApiError.unknownError(let description){
-//        // Handle unknown errors
-//        print("Data Fetching Failed -> \(description)")
-//        snackBar.show(message: "Ooops..Something went wrong, try one more time.", title: "Error", type: .error)
-//    }
-//}
+

@@ -14,7 +14,8 @@ class Router : ObservableObject {
    public enum Destination : Codable, Hashable {
        
        case startscreen, homescreen, notificationscreen, editprofilescreen, policyratedetailview,
-            vehicledataview, motorview,heathDataView, healthview, lifeDataView, lifeview, smeDataView, smeview, healthCashless, motorCashless
+            vehicledataview, motorview,heathDataView, healthview, lifeDataView, lifeview, smeDataView, smeview, healthCashless, motorCashless,
+            generalpolicyratedetailview
        
    }
     
