@@ -54,7 +54,7 @@ fun LifeData(viewModel: ApiViewModel, mainNavController: NavController) {
     Scaffold(
         modifier = Modifier
             .fillMaxSize(),
-        topBar = {
+        topBar =  {
             Box(
                 modifier = Modifier
                     .background(MaterialTheme.colorScheme.scrim)

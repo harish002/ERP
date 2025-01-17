@@ -21,8 +21,8 @@ android {
         applicationId = "com.policy.erp.android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.0.2"
+        versionCode = 10
+        versionName = "1.0.4"
     }
     buildFeatures {
         compose = true

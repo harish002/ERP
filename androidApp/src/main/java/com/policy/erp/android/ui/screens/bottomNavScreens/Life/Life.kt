@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -66,7 +67,6 @@ fun LifeView(context: Context, viewModel: ApiViewModel, mainNavController: NavHo
     var ppTsTypes by mutableStateOf<PPTsTypesData?>(null)
 
 
-
     val slabData by viewModel.getSlabTypesBySegmentId.collectAsState()
     val productData by viewModel.getProductTypes.collectAsState()
     val insurerGroupData by viewModel.getInsurerGroupsObj1.collectAsState()
@@ -97,9 +97,8 @@ fun LifeView(context: Context, viewModel: ApiViewModel, mainNavController: NavHo
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(insurerGroupsState.value["name"]) {
-        if(insurerGroupsState.value["id"].isNullOrBlank()){
-        }
-        else{
+        if (insurerGroupsState.value["id"].isNullOrBlank()) {
+        } else {
             Methods().retrieve_Token(context)?.let {
                 insurerGroupsState.value["id"]?.let { it1 ->
                     viewModel.fetchInsurerByInsurerGrp(
@@ -159,24 +158,34 @@ fun LifeView(context: Context, viewModel: ApiViewModel, mainNavController: NavHo
             }
         },
         bottomBar = {
+            var loading by remember { mutableStateOf(false) }
+
             Box(modifier = Modifier.padding(8.dp)) {
-                CustBtn(text = "Submit", isblue = true,) {
+                CustBtn(
+                    text = if (loading) {
+                        "Loading...."
+                    } else {
+                        "Submit"
+                    },
+                    isblue = true,
+                ) {
+                    loading = true
                     val filterpayload = GeneralPolicyRatePayload(
                         insurer_id = insurerTypesState.value["id"] ?: "",
                         renewal_type_id = renewalTypesState.value["id"] ?: "",
                         insurance_type_id = insuranceTypesByIdState.value["id"] ?: "",
-                        policy_segment_id  = "50ec3716-3e49-47ff-8b3d-c768700c9328",
-                        slab_id  = slabTypesState.value["id"] ?: "",
-                        product_id  = productTypesState.value["id"] ?: "",
-                        ppt_id  =  "",
-                        insurer_group_id  = insurerGroupsState.value["id"] ?: "",
-                        payouts  = "",
-                        payins  =  "",
-                        remarks  = "",
-                        description  =  "",
+                        policy_segment_id = "50ec3716-3e49-47ff-8b3d-c768700c9328",
+                        slab_id = slabTypesState.value["id"] ?: "",
+                        product_id = productTypesState.value["id"] ?: "",
+                        ppt_id = "",
+                        insurer_group_id = insurerGroupsState.value["id"] ?: "",
+                        payouts = "",
+                        payins = "",
+                        remarks = "",
+                        description = "",
                     )
                     coroutineScope.launch {
-                        val result =Methods()
+                        val result = Methods()
                             .retrieve_Token(context)
                             ?.let { it1 ->
                                 viewModel.filterGeneralSearchData(
@@ -184,14 +193,13 @@ fun LifeView(context: Context, viewModel: ApiViewModel, mainNavController: NavHo
                                 )
                             }
 
-                        if(result.isNullOrEmpty()){
+                        if (result.isNullOrEmpty()) {
                             Toast.makeText(context, "No Data Found", Toast.LENGTH_SHORT).show()
-                        }
-                        else{
+                        } else {
                             Toast.makeText(context, "match found", Toast.LENGTH_SHORT).show()
                             BottomBarScreen.Life_Data.route?.let { mainNavController.navigate(it) }
-
                         }
+                        loading = false
                     }
                 }
             }
@@ -209,38 +217,34 @@ fun LifeView(context: Context, viewModel: ApiViewModel, mainNavController: NavHo
                         // Retrieve the token first
                         Methods().retrieve_Token(context)?.let { token ->
                             // Use async to call multiple suspend functions concurrently
-                            val allInsurerTypesDeferred = async { viewModel.getAllInsurerTypes(token) }
-                            val slabDataDeferred = async { viewModel.fetchSlabTypesBySegmentId(token,
-                                "50ec3716-3e49-47ff-8b3d-c768700c9328") }
-                            val productDeferred = async { viewModel.getProductTypes(token) }
-                            val pptDeferred = async {
-                                viewModel.getPPTsTypesBySegmentId(
+                            viewModel.getAllInsurerTypes(token)
+                            viewModel.fetchSlabTypesBySegmentId(
+                                token,
+                                "50ec3716-3e49-47ff-8b3d-c768700c9328"
+                            )
+                            viewModel.getProductTypes(token)
+                            viewModel.getPPTsTypesBySegmentId(
+                                "50ec3716-3e49-47ff-8b3d-c768700c9328",
+                                token
+                            )
+
+                            viewModel.getInsurerGroups(token)
+
+                            Methods().retrieve_Token(context)?.let { it ->
+                                viewModel.getInsuranceTypeByPolicySegments(
                                     "50ec3716-3e49-47ff-8b3d-c768700c9328",
-                                    token
+                                    it
                                 )
                             }
-                            val insuranceGroupDeferred = async { viewModel.getInsurerGroups(token) }
-                            val insuranceTypesBySegmentIdDeferred = async {
-                                Methods().retrieve_Token(context)?.let { it ->
-                                    viewModel.getInsuranceTypeByPolicySegments(
-                                        "50ec3716-3e49-47ff-8b3d-c768700c9328",
-                                        it
-                                    )
-                                }
-                            }
-                            val renewalTypeDeferred = async {
-                                viewModel.fetchAllRenewalTypesBySegmentId(token,
-                                    "50ec3716-3e49-47ff-8b3d-c768700c9328")
-                            }
+
+
+                            viewModel.fetchAllRenewalTypesBySegmentId(
+                                token,
+                                "50ec3716-3e49-47ff-8b3d-c768700c9328"
+                            )
+
 
                             // Await all results
-                            allInsurerTypesDeferred.await()
-                            slabDataDeferred.await()
-                            renewalTypeDeferred.await()
-                            productDeferred.await()
-                            pptDeferred.await()
-                            insuranceGroupDeferred.await()
-                            insuranceTypesBySegmentIdDeferred.await()
                         }
                     } catch (e: Exception) {
                         println("Error occurred: ${e.message}")

@@ -35,6 +35,7 @@ import androidx.navigation.NavController
 import com.policy.erp.android.ERPTheme
 import com.policy.erp.android.apiServices.ApiViewModel
 import com.policy.erp.android.ui.screens.GridItem
+import com.policy.erp.android.ui.screens.convertStringToInt
 import com.policy.lms.Services.Dataclass.PolicyRateData
 
 @SuppressLint("UnrememberedMutableState")
@@ -206,7 +207,7 @@ fun Health_Rate_Details(
                     val specificPolicyRate1 = RatesList.filter { i -> i?.id == data }
                     specificPolicyRate1.firstOrNull()?.let { it2 ->
 
-                        GridItem("Points ", it2.payouts)
+                        GridItem("Points ", convertStringToInt(it2.payouts).toString())
 
                         GridItem("Insurer", it2.insurer.name)
 

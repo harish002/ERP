@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -48,7 +49,6 @@ import com.policy.lms.Services.Dataclass.ProductData
 import com.policy.lms.Services.Dataclass.RenewalTypes
 import com.policy.lms.Services.Dataclass.SlabData
 import com.policy.lms.android.Services.Methods
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -67,12 +67,12 @@ fun HealthView(context: Context, viewModel: ApiViewModel, mainNavController: Nav
     var renewalTypes by mutableStateOf<RenewalTypes?>(null)
 
 
-    val slabData by viewModel.getAllSlabTypes.collectAsState()
+    val slabData by viewModel.getSlabTypesBySegmentId.collectAsState()
     val productData by viewModel.getProductTypes.collectAsState()
     val insurerGroupData by viewModel.getInsurerGroupsObj1.collectAsState()
     val insuranceTypesByIdData by viewModel.getInsuranceTypeByID.collectAsState()
     val allInsurerTypes by viewModel.getInsurerByInsurerGrp.collectAsState()
-    val allRenewalTypes by viewModel.getAllRenewalTypes.collectAsState()
+    val allRenewalTypes by viewModel.getAllRenewalTypesBySegmentId.collectAsState()
     val policySegmentsData by viewModel.getPolicySegments.collectAsState() // This is an direct list
 
 
@@ -93,9 +93,8 @@ fun HealthView(context: Context, viewModel: ApiViewModel, mainNavController: Nav
     val allrenewalTypes = allRenewalTypes?.data
 
     LaunchedEffect(insurerGroupsState.value["name"]) {
-        if(insurerGroupsState.value["id"].isNullOrBlank()){
-        }
-        else{
+        if (insurerGroupsState.value["id"].isNullOrBlank()) {
+        } else {
             Methods().retrieve_Token(context)?.let {
                 insurerGroupsState.value["id"]?.let { it1 ->
                     viewModel.fetchInsurerByInsurerGrp(
@@ -156,8 +155,17 @@ fun HealthView(context: Context, viewModel: ApiViewModel, mainNavController: Nav
             }
         },
         bottomBar = {
+            var loading by remember { mutableStateOf(false) }
+
             Box(modifier = Modifier.padding(8.dp)) {
-                CustBtn(text = "Submit", isblue = true) {
+                CustBtn(
+                    text = if (loading) {
+                        "Loading...."
+                    } else {
+                        "Submit"
+                    }, isblue = true
+                ) {
+                    loading = true
                     val filterpayload = GeneralPolicyRatePayload(
                         insurer_id = insurerTypesState.value["id"] ?: "",
                         renewal_type_id = renewalTypesState.value["id"] ?: "",
@@ -188,9 +196,8 @@ fun HealthView(context: Context, viewModel: ApiViewModel, mainNavController: Nav
                             BottomBarScreen.Health_Data.route?.let { mainNavController.navigate(it) }
                         }
 
+                        loading = false
                     }
-
-
                 }
             }
         },
@@ -206,21 +213,24 @@ fun HealthView(context: Context, viewModel: ApiViewModel, mainNavController: Nav
                         // Retrieve the token first
                         Methods().retrieve_Token(context)?.let { token ->
                             // Use async to call multiple suspend functions concurrently
-                            val slabDataDeferred = async { viewModel.getAllSlabTypes(token) }
-                            val productDeferred = async { viewModel.getProductTypes(token) }
-                            val insuranceGroupDeferred = async { viewModel.getInsurerGroups(token) }
-                            val insuranceTypesBySegmentIdDeferred = async {
-                                viewModel.getInsuranceTypeByPolicySegments(
-                                    "3b554917-a340-4682-9eac-3ffe13ec660f",
-                                    token
-                                )
-                            }
+                            viewModel.fetchSlabTypesBySegmentId(
+                                token,
+                                "3b554917-a340-4682-9eac-3ffe13ec660f"
+                            )
+                            viewModel.getProductTypes(token)
 
-                            // Await all results
-                            slabDataDeferred.await()
-                            productDeferred.await()
-                            insuranceGroupDeferred.await()
-                            insuranceTypesBySegmentIdDeferred.await()
+                            viewModel.getInsurerGroups(token)
+
+                            viewModel.getInsuranceTypeByPolicySegments(
+                                "3b554917-a340-4682-9eac-3ffe13ec660f",
+                                token
+                            )
+
+                            viewModel.fetchAllRenewalTypesBySegmentId(
+                                token,
+                                "3b554917-a340-4682-9eac-3ffe13ec660f"
+                            )
+
                         }
                     } catch (e: Exception) {
                         println("Error occurred: ${e.message}")

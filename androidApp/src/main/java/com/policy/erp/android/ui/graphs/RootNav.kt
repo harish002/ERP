@@ -23,6 +23,7 @@ import androidx.navigation.navArgument
 import com.policy.erp.android.ui.graphs.Graph
 import com.policy.erp.android.ui.screens.CustSplashScreen
 import com.policy.erp.android.apiServices.ApiViewModel
+import com.policy.erp.android.apiServices.project_id
 import com.policy.lms.android.Services.Methods
 import com.policy.erp.android.ui.screens.auth.Auth_Main
 import com.policy.lms.android.Services.getfirstInstall
@@ -82,14 +83,13 @@ fun RootNavGraph(
                             CoroutineScope(Dispatchers.IO).launch {
                                 Methods().retrieve_DToken(context)?.let {
                                     Methods().retrieve_Token(context)?.let { it1 ->
-
                                         Methods().retrieve_userID(context)?.let { it2 ->
-//                                            viewModel.registerDeviceForNotification(
-//                                                token = it1,
-//                                                projectId = project_id,
-//                                                userId = it2,
-//                                                deviceToken = it
-//                                            )
+                                            viewModel.registerDeviceForNotification(
+                                                token = it1,
+                                                projectId = project_id,
+                                                userId = it2,
+                                                deviceToken = it
+                                            )
                                         }
 
                                     }

@@ -23,10 +23,9 @@
     </queries>
 
     <application
-
+        android:name=".App"
         android:allowBackup="false"
         android:supportsRtl="true"
-        android:name="com.policy.erp.android.App"
         android:label="Sales Tool"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/AppTheme"

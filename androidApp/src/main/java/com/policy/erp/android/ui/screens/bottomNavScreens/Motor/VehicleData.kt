@@ -41,14 +41,14 @@ fun VehicleData(viewModel: ApiViewModel, mainNavController: NavController) {
 //    val vechiclepolicyRatesList by viewModel.getfilterPolicyRateData.collectAsState()
     val vechiclFilterRatesList by viewModel.getFilterRates.collectAsState()
 
-    val filterPolicyRateDatalist by viewModel.getfilterPolicyRateData.collectAsState()
+//    val filterPolicyRateDatalist by viewModel.getfilterPolicyRateData.collectAsState()
 
 
 
-    LaunchedEffect(filterPolicyRateDatalist) {
-        // Update policyRatesList based on filterPolicyRateDatalist
-        viewModel.updatePolicyRates(filterPolicyRateDatalist)
-    }
+//    LaunchedEffect(filterPolicyRateDatalist) {
+//        // Update policyRatesList based on filterPolicyRateDatalist
+//        viewModel.updatePolicyRates(filterPolicyRateDatalist)
+//    }
 
     Scaffold(
         modifier = Modifier

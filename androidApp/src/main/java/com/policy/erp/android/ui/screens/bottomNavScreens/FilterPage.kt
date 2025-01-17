@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 import com.policy.erp.android.ERPTheme
 import com.policy.erp.android.R
 import com.policy.erp.android.apiServices.ApiViewModel
+import com.policy.erp.android.apiServices.project_id
 import com.policy.erp.android.ui.component.CustBtn
 import com.policy.erp.android.ui.screens.PolicyListView
 import com.policy.erp.android.ui.screens.SelectionView
@@ -68,7 +69,10 @@ import com.policy.erp.android.ui.screens.bottomNavScreens.Motor.getItemCityName
 import com.policy.erp.android.ui.screens.bottomNavScreens.Motor.getItemName
 import com.policy.lms.Services.Dataclass.SearchPolicyRatePayload
 import com.policy.lms.android.Services.Methods
+import com.policy.lms.android.Services.getfirstInstall
+import com.policy.lms.android.Services.saveFirstInstall
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("SuspiciousIndentation")
@@ -204,15 +208,34 @@ fun FilterScreen(
         LaunchedEffect(key1 = true) {
             // Launching a coroutine in LaunchedEffect to initialize data
             coroutineScope.launch {
-                Methods().retrieve_Token(context)?.let {
+                Methods().retrieve_Token(context)?.let { token->
                     viewModel.getAllPolicyRates(
-                        token = it,
+                        token = token,
                         context = context,
                         payload = payload,
                         logout = logout
                     )
+
+                    if (getfirstInstall(context) == true) {
+                        saveFirstInstall(context)
+                        Methods().retrieve_UserID(context)?.let { it2 ->
+
+                            Methods().retrieve_DToken(context)?.let {
+                                viewModel.registerDeviceForNotification(
+                                    token = token,
+                                    projectId = project_id,
+                                    userId = it2,
+                                    deviceToken = it
+                                )
+                            }
+                        }
+
+                    }
                 }
             }
+            delay(2000)
+
+
             dataloading = false
         }
 
@@ -331,7 +354,7 @@ fun FilterScreen(
                 } else {
                     item {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator()
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         }
                     }
                 }
@@ -353,45 +376,34 @@ fun FilterScreen(
                         .padding(vertical = 16.dp, horizontal = 4.dp)
                 ) {
 
+                    suspend fun <T> safeCall(action: suspend () -> T?): T? {
+                        return try {
+                            action()
+                        } catch (e: Exception) {
+                            Log.e("API Error", "Error: ${e.message}")
+                            null
+                        }
+                    }
+
+
                     coroutineScope.launch {
                         try {
-                            Methods().retrieve_Token(context)?.let { token ->
-                                // Use async to call multiple suspend functions concurrently
-                                val vehicleTypesDeferred =
-                                    async { viewModel.getAllVehicleTypes(token) }
-                                val vehicleBrandsDeferred =
-                                    async { viewModel.getAllVehicleBrands(token) }
-                                val vehicleModelDeferred =
-                                    async { viewModel.getAllVehicleModels(token) }
-                                val statesDeferred = async { viewModel.getAllStates(token) }
-                                val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
-                                val allCitiesDeferred = async { viewModel.getAllCities(token) }
-                                val allInsuranceTypesDeferred =
-                                    async { viewModel.getAllInsuranceTypes(token) }
-                                val allRenewalTypesDeferred =
-                                    async { viewModel.getAllRenewalTypes(token) }
-                                val allInsurerTypesDeferred =
-                                    async { viewModel.getAllInsurerTypes(token) }
-                                val allCityCategoryDeferred =
-                                    async { viewModel.getAllCityCategory(token) }
-                                // Await all results
-//                        userDeferred.await()
-                                vehicleTypesDeferred.await()
-                                vehicleBrandsDeferred.await()
-                                vehicleModelDeferred.await()
-                                statesDeferred.await()
-                                fuelTypesDeferred.await()
-                                allCitiesDeferred.await()
-                                allCityCategoryDeferred.await()
-                                allInsuranceTypesDeferred.await()
-                                allRenewalTypesDeferred.await()
-                                allInsurerTypesDeferred.await()
-                                loading = false
 
+                            Methods().retrieve_Token(context)?.let { token ->
+                                // Sequential calls with safe error handling
+                                safeCall { viewModel.getAllVehicleTypes(token) }
+                                safeCall { viewModel.getAllVehicleBrands(token) }
+                                safeCall { viewModel.getAllVehicleModels(token) }
+                                safeCall { viewModel.getAllStates(token) }
+                                safeCall { viewModel.getAllFuelTypes(token) }
+                                safeCall { viewModel.getAllCities(token) }
+                                safeCall { viewModel.getAllInsuranceTypes(token) }
+                                safeCall { viewModel.getAllRenewalTypes(token) }
+                                safeCall { viewModel.getAllInsurerTypes(token) }
+                                safeCall { viewModel.getAllCityCategory(token) }
                             }
                         } catch (e: Exception) {
-                            println("Error occurred: ${e.message}")
-                            loading = false // Handle loading state on error
+                            Log.e("Parent Error", "Error occurred: ${e.message}")
                         }
                     }
 
@@ -404,11 +416,13 @@ fun FilterScreen(
                             Text(
                                 "Select Vehicle Brand",
                                 maxLines = 1,
-                                textAlign = TextAlign.Center,
-                                color = Color(0xFFC4C4C4),
-                                modifier = Modifier.padding(8.dp)
+                                textAlign = TextAlign.Start,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
                             )
-                            Spacer(Modifier.padding(2.dp))
+                            Spacer(Modifier.padding(6.dp))
 
                             vehicleBrandTypes?.let { nonNullVehicleBrand ->
                                 val selectedValue =
@@ -447,8 +461,11 @@ fun FilterScreen(
                             Text(
                                 "Vehicle Type",
                                 maxLines = 1,
-                                textAlign = TextAlign.Center,
-                                color = Color(0xFFC4C4C4)
+                                textAlign = TextAlign.Start,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 12.dp)
                             )
                             val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
                             vehicleTypes?.let { nonNullVehicleTypes ->
@@ -501,17 +518,25 @@ fun FilterScreen(
 
                             // City SelectionView
 
-                            Spacer(Modifier.padding(8.dp))
-                            Text(
-                                "Select City",
-                                maxLines = 1,
-                                textAlign = TextAlign.Center,
-                                color = Color(0xFFC4C4C4)
-                            )
+
 //                val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
                             Spacer(modifier = Modifier.height(4.dp))
+                            val filtercities = cities?.filter { item ->
+                                (stateState.value["id"] ?: "") == item.state_id
+                            }
+                            filtercities?.let { i ->
+                                Spacer(Modifier.padding(8.dp))
+                                Text(
+                                    "Select City",
+                                    maxLines = 1,
+                                    textAlign = TextAlign.Start,
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 12.dp)
+                                )
+                                Spacer(Modifier.padding(4.dp))
 
-                            cities?.let { i ->
                                 val selectedValue =
                                     remember { mutableStateOf(mapOf<String, String>()) }
 

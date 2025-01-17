@@ -178,15 +178,15 @@ fun Otp_Screen(
                                     context, "Logged In Successfully",
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                if(viewModel.userSpec.value?.verifications?.isEmpty() == true){
-                                    authnavController.navigate("${AuthScreen.Verify_Account.route}/login")
-                                }else{
+//                                if(viewModel.userSpec.value?.verifications?.isEmpty() == true){
+//                                    authnavController.navigate("${AuthScreen.Verify_Account.route}/login")
+//                                }else{
                                     mainNavController.navigate(Graph.MAIN) {
                                         popUpTo(Graph.AUTH) {
                                             inclusive = true
                                         }
                                     }
-                                }
+//                                }
                             } else {
                                 Toast.makeText(
                                     context, result.toString(),

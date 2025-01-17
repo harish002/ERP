@@ -518,8 +518,8 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
     var policyRateLoader by remember { mutableStateOf(false) } // Loader for policy rates retrieval
     val coroutineScope = rememberCoroutineScope()
 
-    var xyzdata = remember { mutableListOf<PolicyRateData?>() }
 
+    var xyzdata = remember { mutableListOf<PolicyRateData?>() }
 
 
     // Assuming getVehicleDetails is provided by some data source
@@ -564,8 +564,6 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
     var insurance_Types by mutableStateOf<InsuranceTypeData?>(null)
     var renewal_Types by mutableStateOf<RenewalTypeData?>(null)
     var insurer_Type by mutableStateOf<InsurerData?>(null)
-
-
 
 
     val vehicleTypes = vehiclType?.data
@@ -712,7 +710,6 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
     }
 
 
-
 //    fun loadVehicleBrand(accessModel: ApiViewModel) {
 //        // Get the vehicle type from vehicle details
 //        val vehicleBrand = getVehicleDetails?.result?.vehicle_type
@@ -848,359 +845,377 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
         }
     }
 
+    var loadingData by remember { mutableStateOf(false) }
+
     LazyColumn {
-        coroutineScope.launch {
-            try {
-                Methods().retrieve_Token(context)?.let { token ->
-                    // Use async to call multiple suspend functions concurrently
-                    val vehicleTypesDeferred =
-                        async { viewModel.getAllVehicleTypes(token) }
-                    val vehicleBrandsDeferred =
-                        async { viewModel.getAllVehicleBrands(token) }
-                    val vehicleModelDeferred =
-                        async { viewModel.getAllVehicleModels(token) }
-                    val statesDeferred = async { viewModel.getAllStates(token) }
-                    val fuelTypesDeferred = async { viewModel.getAllFuelTypes(token) }
-                    val allCitiesDeferred = async { viewModel.getAllCities(token) }
-                    val allInsuranceTypesDeferred =
-                        async { viewModel.getAllInsuranceTypes(token) }
-                    val allRenewalTypesDeferred =
-                        async { viewModel.getAllRenewalTypes(token) }
-                    val allInsurerTypesDeferred =
-                        async { viewModel.getAllInsurerTypes(token) }
-                    val allCityCategoryDeferred =
-                        async { viewModel.getAllCityCategory(token) }
-                    // Await all results
-//                        userDeferred.await()
-                    vehicleTypesDeferred.await()
-                    vehicleBrandsDeferred.await()
-                    vehicleModelDeferred.await()
-                    statesDeferred.await()
-                    fuelTypesDeferred.await()
-                    allCitiesDeferred.await()
-                    allCityCategoryDeferred.await()
-                    allInsuranceTypesDeferred.await()
-                    allRenewalTypesDeferred.await()
-                    allInsurerTypesDeferred.await()
 
 
-                }
+        // Safe API call helper function
+        suspend fun <T> safeCall(action: suspend () -> T?): T? {
+            return try {
+                action()
             } catch (e: Exception) {
-                println("Error occurred: ${e.message}")
-//                loading = false // Handle loading state on error
+                Log.e("API Error", "Error: ${e.message}")
+                null
             }
         }
 
-        item {
-            Column(
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(2.dp)
-            ) {
-                Text(
-                    text = "Enter Vehicle Number",
-                    style = TextStyle(
-                        fontFamily = FontFamily(Font(R.font.gilroy_semibold)),
-                        fontSize = 22.sp,
-                        color = Color(0xFF4E4E4E)
-                    )
-                )
 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    OutlinedTextField(
-                        value = enteredVehicleNumber,
-                        onValueChange = { enteredVehicleNumber = it },
-                        label = { },
-                        modifier = Modifier.fillMaxWidth(0.7f)
-                    )
-                    Spacer(Modifier.padding(2.dp))
-                    Button(
-                        onClick = {
-                            coroutineScope.launch {
-                                vehicleNumberLoader = true
-                                val result = Methods().retrieve_Token(context)
-                                    ?.let {
-                                        enteredVehicleNumber.let { it1 ->
-                                            viewModel.getVehicleDetails(
-                                                it,
-                                                it1
-                                            )
-                                        }
-                                    }
+        coroutineScope.launch {
+            try {
 
-                                if (result == "success") {
-                                    delay(2000)
-                                    loadStatesData(viewModel)
-                                    loadFuelType(viewModel)
-                                    loadCities(viewModel)
-                                    loadInsurerType(viewModel)
-                                    loadRenewalType(viewModel)
-                                    loadVehicleType(viewModel)
-                                    loadCityCategories(viewModel)
-                                    delay(1000)
-
-                                    val payload = SearchPolicyRatePayload(
-                                        state_id = states_Data?.id ?: "",
-                                        city_id = city_Data?.id ?: "",
-                                        city_category_id = city_Categories?.id
-                                            ?: "",
-                                        vehicle_type_id = vehicle_Type?.id ?: "",
-                                        renewal_type_id = renewal_Types?.id ?: "",
-                                        insurer_id = insurer_Type?.id ?: "",
-                                        fuel_type_id = fuel_Type?.id ?: "",
-                                        insurance_type_id = "",
-                                        vehicle_model_id = "",
-                                        status = "0",
-                                        page = 1,
-                                        size = 50
-                                    )
-                                    xyzdata = (Methods().retrieve_Token(context)
-                                        ?.let {
-                                            viewModel.filterPolicyRateData(
-                                                it,
-                                                payload
-                                            )
-                                        }?.toMutableList()
-                                        ?: emptyList()).toMutableList()
-                                    if (xyzdata.isEmpty()) {
-                                        Toast.makeText(
-                                            context,
-                                            "No Policy Data Found ",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                        vehicleNumberLoader = false
-                                    }
-
-
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        result,
-                                        Toast.LENGTH_SHORT
-                                    )
-                                        .show()
-                                }
-                                Log.d("getVehicleDetails", result.toString())
-                            }
-                        },
-                        modifier = Modifier
-                            .wrapContentSize()
-                            .padding(top = 8.dp),
-                        shape = RoundedCornerShape(6.dp),
-                        enabled = !vehicleNumberLoader
-                    ) {
-                        if (vehicleNumberLoader) {
-                            CircularProgressIndicator(
-                                color = Color.Blue,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        } else {
-                            Text(
-                                text = "Submit",
-                                maxLines = 1,
-                                style = TextStyle(
-                                    fontFamily = FontFamily(Font(R.font.gilroy_semibold)),
-                                    fontSize = 16.sp,
-                                    color = Color.White
-                                )
-                            )
-                        }
-                    }
+                Methods().retrieve_Token(context)?.let { token ->
+                    // Sequential calls with safe error handling
+                    safeCall { viewModel.getAllVehicleTypes(token) }
+                    safeCall { viewModel.getAllVehicleBrands(token) }
+                    safeCall { viewModel.getAllVehicleModels(token) }
+                    safeCall { viewModel.getAllStates(token) }
+                    safeCall { viewModel.getAllFuelTypes(token) }
+                    safeCall { viewModel.getAllCities(token) }
+                    safeCall { viewModel.getAllInsuranceTypes(token) }
+                    safeCall { viewModel.getAllRenewalTypes(token) }
+                    safeCall { viewModel.getAllInsurerTypes(token) }
+                    safeCall { viewModel.getAllCityCategory(token) }
                 }
-                if (enteredVehicleNumber.isNotEmpty()) {
+            } catch (e: Exception) {
+                Log.e("Parent Error", "Error occurred: ${e.message}")
+            }
+        }
+
+        if (loadingData) {
+            item {
+                Box(
+                    Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
+            }
+        } else {
+            item {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(2.dp)
+                ) {
                     Text(
-                        text = "Please verify the vehicle number before continuing",
+                        text = "Enter Vehicle Number",
                         style = TextStyle(
                             fontFamily = FontFamily(Font(R.font.gilroy_semibold)),
-                            fontSize = 16.sp,
-                            color = Color.Blue
-                        ),
-                        modifier = Modifier.padding(top = 8.dp)
+                            fontSize = 22.sp,
+                            color = Color(0xFF4E4E4E)
+                        )
                     )
-                }
-                if (policyRateLoader) {
-                    CircularProgressIndicator()
-                }
 
-            }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                        // Add horizontal padding
+                    ) {
+                        OutlinedTextField(
+                            value = enteredVehicleNumber,
+                            onValueChange = { enteredVehicleNumber = it },
+                            label = { Text("Vehicle Number") }, // Add a label for accessibility
+                            modifier = Modifier
+                                .weight(0.7f) // Use weight for responsive width
+                                .height(56.dp) // Set a fixed height for uniformity
+                        )
 
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+                        Spacer(modifier = Modifier.width(8.dp)) // Use width for spacing instead of padding
 
-                Text(
-                    "Select Vehicle Brand",
-                    maxLines = 1,
-                    textAlign = TextAlign.Center,
-                    color = Color(0xFFC4C4C4),
-                    modifier = Modifier.padding(8.dp)
-                )
-                Spacer(Modifier.padding(2.dp))
+                        Button(
+                            onClick = {
+                                coroutineScope.launch {
+                                    vehicleNumberLoader = true
+                                    val token = Methods().retrieve_Token(context)
+                                    val result = token?.let {
+                                        viewModel.getVehicleDetails(
+                                            it,
+                                            enteredVehicleNumber
+                                        )
+                                    }
 
-                vehicleBrandTypes?.let { nonNullVehicleBrand ->
-                    val selectedValue =
-                        remember { mutableStateOf(mapOf<String, String>()) }
+                                    if (result == "success") {
+                                        delay(2000)
+                                        loadStatesData(viewModel)
+                                        loadFuelType(viewModel)
+                                        loadCities(viewModel)
+                                        loadInsurerType(viewModel)
+                                        loadRenewalType(viewModel)
+                                        loadVehicleType(viewModel)
+                                        loadCityCategories(viewModel)
 
-                    VehicleBrandSelection(
-                        vehicleBrand = nonNullVehicleBrand,
-                        selectedValue = vehicleBrandState,
-                        selectionTitle = "VehicleBrand",
-                        onItemSelected = { i ->
-                            selectedValue.value =
-                                mapOf("VehicleBrand" to getItemBrandName(i))
+                                        val payload = SearchPolicyRatePayload(
+                                            state_id = states_Data?.id ?: "",
+                                            city_id = city_Data?.id ?: "",
+                                            city_category_id = city_Categories?.id ?: "",
+                                            vehicle_type_id = vehicle_Type?.id ?: "",
+                                            renewal_type_id = renewal_Types?.id ?: "",
+                                            insurer_id = insurer_Type?.id ?: "",
+                                            fuel_type_id = fuel_Type?.id ?: "",
+                                            insurance_type_id = "",
+                                            vehicle_model_id = "",
+                                            status = "0",
+                                            page = 1,
+                                            size = 50
+                                        )
+
+                                        xyzdata = (Methods().retrieve_Token(context)?.let {
+                                            viewModel.filterPolicyRateData(it, payload)
+                                        }?.toMutableList() ?: emptyList()).toMutableList()
+
+                                        if (xyzdata.isEmpty()) {
+                                            Toast.makeText(
+                                                context,
+                                                "No Policy Data Found",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    } else {
+                                        Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
+                                    }
+                                    vehicleNumberLoader = false
+                                    Log.d("getVehicleDetails", result.toString())
+                                }
+                            },
+                            modifier = Modifier
+
+                                .weight(0.3f) // Use weight for responsive width
+                                .height(56.dp) // Set a fixed height for uniformity
+                            , // Add some padding to the button
+                            shape = RoundedCornerShape(6.dp),
+                            enabled = !vehicleNumberLoader
+                        ) {
+                            if (vehicleNumberLoader) {
+                                CircularProgressIndicator(
+                                    color = Color.Blue,
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            } else {
+                                Text(
+                                    text = "Submit",
+                                    maxLines = 1,
+                                    style = TextStyle(
+                                        fontFamily = FontFamily(Font(R.font.gilroy_semibold)),
+                                        fontSize = 14.sp,
+                                        color = Color.White
+                                    )
+                                )
+                            }
                         }
+                    }
+
+
+                    if (enteredVehicleNumber.isNotEmpty()) {
+                        Text(
+                            text = "Please verify the vehicle number before continuing",
+                            style = TextStyle(
+                                fontFamily = FontFamily(Font(R.font.gilroy_semibold)),
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colorScheme.primary
+                            ),
+                            modifier = Modifier.padding(top = 8.dp)
+                        )
+                    }
+                    if (policyRateLoader) {
+                        CircularProgressIndicator()
+                    }
+
+                }
+
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+
+                    Text(
+                        "Select Vehicle Brand",
+                        maxLines = 1,
+                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
                     )
-                }
-                Spacer(Modifier.padding(vertical = 4.dp))
+                    Spacer(Modifier.padding(6.dp))
 
-                val modelTypes = vehicleModelTypes?.filter { item ->
-                    (vehicleBrandState.value["id"] ?: "") == item.vehicle_brand_id
-                }
+                    vehicleBrandTypes?.let { nonNullVehicleBrand ->
+                        val selectedValue =
+                            remember { mutableStateOf(mapOf<String, String>()) }
 
-                SelectionView(
-                    selectionTitle = "Vehicle Model",
-                    staticValue = "Please select a Vehicle Model",
-                    selectedValue = vehicleModelState,
-                    dropDownViewSelected = vehicleModelDropdownState,
-                    listTypes = modelTypes
-                )
+                        VehicleBrandSelection(
+                            vehicleBrand = nonNullVehicleBrand,
+                            selectedValue = vehicleBrandState,
+                            selectionTitle = "VehicleBrand",
+                            onItemSelected = { i ->
+                                selectedValue.value =
+                                    mapOf("VehicleBrand" to getItemBrandName(i))
+                            }
+                        )
+                    }
+                    Spacer(Modifier.padding(vertical = 4.dp))
+
+                    val modelTypes = vehicleModelTypes?.filter { item ->
+                        (vehicleBrandState.value["id"] ?: "") == item.vehicle_brand_id
+                    }
+
+                    SelectionView(
+                        selectionTitle = "Vehicle Model",
+                        staticValue = "Please select a Vehicle Model",
+                        selectedValue = vehicleModelState,
+                        dropDownViewSelected = vehicleModelDropdownState,
+                        listTypes = modelTypes
+                    )
 
 
 // Vehicle Type SelectionView
 //                item {
-                Spacer(Modifier.padding(vertical = 4.dp))
+                    Spacer(Modifier.padding(vertical = 4.dp))
 
-                Text(
-                    "Vehicle Type",
-                    maxLines = 1,
-                    textAlign = TextAlign.Center,
-                    color = Color(0xFFC4C4C4)
-                )
-                val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
-                vehicleTypes?.let { nonNullVehicleTypes ->
-                    VehicleTypeSelection(
-                        vehicleTypes = nonNullVehicleTypes,
-                        selectedValue = vehicleTypeState,
-                        selectionTitle = "VehicleType",
-                        onItemSelected = { i ->
-                            selectedValue.value = mapOf("VehicleType" to getItemName(i))
-                        }
+                    Text(
+                        "Vehicle Type",
+                        maxLines = 1,
+                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp)
                     )
-                }
+                    val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
+                    vehicleTypes?.let { nonNullVehicleTypes ->
+                        VehicleTypeSelection(
+                            vehicleTypes = nonNullVehicleTypes,
+                            selectedValue = vehicleTypeState,
+                            selectionTitle = "VehicleType",
+                            onItemSelected = { i ->
+                                selectedValue.value = mapOf("VehicleType" to getItemName(i))
+                            }
+                        )
+                    }
 
-                // Fuel Type SelectionView
-                SelectionView(
-                    selectionTitle = "Fuel Type",
-                    staticValue = "Please select a fuel",
-                    selectedValue = fuelTypeState,
-                    dropDownViewSelected = fuelTypeDropdownState,
-                    listTypes = fuelTypes
-                )
-
-                // NCB Type SelectionView
-                SelectionView(
-                    selectionTitle = "NCB Type",
-                    staticValue = "select an NCB Type",
-                    selectedValue = ncbState,
-                    dropDownViewSelected = ncbDropdownState,
-                    listTypes = ncbTypes
-                )
-
-                // State SelectionView
-                if (states != null) {
+                    // Fuel Type SelectionView
                     SelectionView(
-                        selectionTitle = "State",
-                        staticValue = "Please select a state",
-                        selectedValue = stateState,
-                        dropDownViewSelected = stateDropdownState,
-                        listTypes = states.sortedBy { i-> i.name }
+                        selectionTitle = "Fuel Type",
+                        staticValue = "Please select a fuel",
+                        selectedValue = fuelTypeState,
+                        dropDownViewSelected = fuelTypeDropdownState,
+                        listTypes = fuelTypes
                     )
-                }
+
+                    // NCB Type SelectionView
+                    SelectionView(
+                        selectionTitle = "NCB Type",
+                        staticValue = "select an NCB Type",
+                        selectedValue = ncbState,
+                        dropDownViewSelected = ncbDropdownState,
+                        listTypes = ncbTypes
+                    )
+
+                    // State SelectionView
+                    if (states != null) {
+                        SelectionView(
+                            selectionTitle = "State",
+                            staticValue = "Please select a state",
+                            selectedValue = stateState,
+                            dropDownViewSelected = stateDropdownState,
+                            listTypes = states.sortedBy { i -> i.name }
+                        )
+                    }
 
 
-                // City Category SelectionView
-                SelectionView(
-                    selectionTitle = "City Category",
-                    staticValue = "select a city category",
-                    selectedValue = cityCategoryState,
-                    dropDownViewSelected = cityCategoryDropdownState,
-                    listTypes = cityCategories
-                )
+                    // City Category SelectionView
+                    SelectionView(
+                        selectionTitle = "City Category",
+                        staticValue = "select a city category",
+                        selectedValue = cityCategoryState,
+                        dropDownViewSelected = cityCategoryDropdownState,
+                        listTypes = cityCategories
+                    )
 
-                // City SelectionView
+                    // City SelectionView
 
-                Spacer(Modifier.padding(8.dp))
-                Text(
-                    "Select City",
-                    maxLines = 1,
-                    textAlign = TextAlign.Center,
-                    color = Color(0xFFC4C4C4)
-                )
 //                val selectedValue = remember { mutableStateOf(mapOf<String, String>()) }
-                Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
-                val filtercities = cities?.filter { item ->
-                    (stateState.value["id"] ?: "") == item.state_id
-                }
-                filtercities?.let { i ->
-                    val selectedValue =
-                        remember { mutableStateOf(mapOf<String, String>()) }
+                    val filtercities = cities?.filter { item ->
+                        (stateState.value["id"] ?: "") == item.state_id
+                    }
+                    filtercities?.let { i ->
+                        Spacer(Modifier.padding(8.dp))
+                        Text(
+                            "Select City",
+                            maxLines = 1,
+                            textAlign = TextAlign.Start,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp)
+                        )
+                        Spacer(Modifier.padding(4.dp))
 
-                    VehicleCitySelection(
-                        city = i,
-                        selectedValue = cityState,
-                        selectionTitle = "City",
-                        onItemSelected = { i ->
+                        val selectedValue =
+                            remember { mutableStateOf(mapOf<String, String>()) }
+
+                        VehicleCitySelection(
+                            city = i,
+                            selectedValue = cityState,
+                            selectionTitle = "City",
+                            onItemSelected = { i ->
 //                            cityState.value =
 //                                mapOf("VehicleBrand" to getItemCityName(cityDropdownState))
-                            selectedValue.value =
-                                mapOf("VehicleType" to getItemCityName(i))
+                                selectedValue.value =
+                                    mapOf("VehicleType" to getItemCityName(i))
 
-                        }
-                    )
-                }
+                            }
+                        )
+                    }
 
 
-                Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
 
 //                            Divider(modifier = Modifier.padding(), color = Color.Black, thickness = 1.dp)
-                // Insurance Type SelectionView
-                SelectionView(
-                    selectionTitle = "Insurance Type",
-                    staticValue = "select an insurance type",
-                    selectedValue = insuranceTypeState,
-                    dropDownViewSelected = insuranceTypeDropdownState,
-                    listTypes = insuranceTypes
-                )
+                    // Insurance Type SelectionView
+                    SelectionView(
+                        selectionTitle = "Insurance Type",
+                        staticValue = "select an insurance type",
+                        selectedValue = insuranceTypeState,
+                        dropDownViewSelected = insuranceTypeDropdownState,
+                        listTypes = insuranceTypes
+                    )
 
-                // Renewal Type SelectionView
-                SelectionView(
-                    selectionTitle = "Renewal Type",
-                    staticValue = "select a renewal type",
-                    selectedValue = renewalTypeState,
-                    dropDownViewSelected = renewalTypeDropdownState,
-                    listTypes = renewalTypes
-                )
+                    // Renewal Type SelectionView
+                    SelectionView(
+                        selectionTitle = "Renewal Type",
+                        staticValue = "select a renewal type",
+                        selectedValue = renewalTypeState,
+                        dropDownViewSelected = renewalTypeDropdownState,
+                        listTypes = renewalTypes
+                    )
 
-                // Insurer SelectionView
-                SelectionView(
-                    selectionTitle = "Insurer",
-                    staticValue = "Please select an insurer",
-                    selectedValue = insurerState,
-                    dropDownViewSelected = insurerDropdownState,
-                    listTypes = insurers
-                )
+                    // Insurer SelectionView
+                    SelectionView(
+                        selectionTitle = "Insurer",
+                        staticValue = "Please select an insurer",
+                        selectedValue = insurerState,
+                        dropDownViewSelected = insurerDropdownState,
+                        listTypes = insurers
+                    )
 //                }
+                }
             }
         }
 
         item {
-            CustBtn(text = "Submit", isblue = true) {
+            var loading by remember { mutableStateOf(false) }
+
+            CustBtn(
+                text = if (loading) {
+                    "Loading...."
+                } else {
+                    "Submit"
+                },
+                isblue = true
+            ) {
+                loading = true
                 val filterpayload = SearchPolicyRatePayload(
                     state_id = stateState.value["id"] ?: "",
                     city_id = cityState.value["id"] ?: "",
@@ -1220,17 +1235,22 @@ fun ManualContent(viewModel: ApiViewModel, context: Context, mainNavController: 
                     size = 20
                 )
                 coroutineScope.launch {
+
                     val result = Methods().retrieve_Token(context)?.let { it1 ->
                         viewModel.filterPolicyRateData(
-                            it1, filterpayload
+                            it1,
+                            filterpayload
                         )
                     }
                     if (result != null) {
                         viewModel.updateFilterPolicyRates(result)
+
                         BottomBarScreen.Vehicle_Data.route?.let { mainNavController.navigate(it) }
-                    }else{
-                        Toast.makeText(context, "No data Found\n $result", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(context, "No data Found\n $result", Toast.LENGTH_SHORT)
+                            .show()
                     }
+                    loading = false
 
                 }
             }
@@ -1498,7 +1518,10 @@ fun VehicleBrandSelection(
                     modifier = Modifier
                         .clickable {
                             selectedValue.value =
-                                mapOf(selectionTitle to getItemBrandName(vehicleBrand), "id" to getItemBrandId(vehicleBrand))
+                                mapOf(
+                                    selectionTitle to getItemBrandName(vehicleBrand),
+                                    "id" to getItemBrandId(vehicleBrand)
+                                )
                             onItemSelected(vehicleBrand)
                         }
                 ) {
@@ -1579,7 +1602,6 @@ fun VehicleBrandSelection(
         }
     }
 }
-
 
 
 // Helper Functions
@@ -1705,12 +1727,16 @@ fun VehicleCitySelection(
                         SubcomposeAsyncImage(
                             model = getItemCityImageUrl(city),
                             contentDescription = "City Image",
-                            contentScale = ContentScale.FillBounds,
+                            contentScale = ContentScale.Fit,
                             modifier = Modifier.size(48.dp),
                             loading = { CircularProgressIndicator() },
                             error = {
-                                val initials = getItemCityName(city).split(" ")
-                                    .joinToString("") { it.take(2) }.uppercase()
+//                                val initials = getItemCityName(city).split(" ")
+//                                    .joinToString("") { it.take(2) }.uppercase()
+                                val cityName = getItemCityName(city) // e.g., "test city"
+                                val initials =
+                                    cityName.split(" ").firstOrNull()?.take(2)?.uppercase() ?: ""
+
 
                                 if (initials != null) {
                                     Text(
@@ -1786,7 +1812,8 @@ fun VehicleCitySelection(
                                 modifier = Modifier,
                                 loading = { CircularProgressIndicator() },
                                 error = {
-                                    val initials = getItemCityName(city).split(" ").joinToString(" ") { it.take(2) }.uppercase()
+                                    val initials = getItemCityName(city).split(" ")
+                                        .joinToString(" ") { it.take(2) }.uppercase()
                                     if (initials != null) {
                                         Text(
                                             text = initials,

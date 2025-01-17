@@ -32,6 +32,30 @@ class Methods {
         editor.apply()
     }
 
+    //save userID
+    fun save_UserID(token: String, context: Context) {
+        clearUserID(context)
+        val sharedPreferences = context
+            .getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.putString("UserID", token)
+        editor.apply()
+    }
+
+    // Retrieve userID
+    fun retrieve_UserID(context: Context): String? {
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        return sharedPreferences.getString("UserID", null)
+    }
+
+    // Clear userID
+    fun clearUserID(context: Context) {
+        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
+        val editor = sharedPreferences.edit()
+        editor.remove("UserID")
+        editor.apply()
+    }
+
     // Save refresh token
     fun save_RefreshToken(context: Context, refreshToken: String) {
         clearRefreshToken(context)
@@ -40,6 +64,8 @@ class Methods {
         editor.putString("RefreshToken", refreshToken)
         editor.apply()
     }
+
+
 
     // Retrieve refresh token
     fun retrieveRefreshToken(context: Context): String? {
@@ -123,7 +149,7 @@ class Methods {
 
 fun getfirstInstall(context: Context): Boolean? {
     val sharedPref = context.getSharedPreferences(
-        "1clickAuction",
+        "1clickpolicy sales tool",
         Context.MODE_PRIVATE
     ) ?: return null
     return sharedPref.getBoolean("firstInstall", true)
@@ -131,7 +157,7 @@ fun getfirstInstall(context: Context): Boolean? {
 
 fun saveFirstInstall(context: Context) {
     val sharedPref =
-        context.getSharedPreferences("1clickAuction", Context.MODE_PRIVATE) ?: return
+        context.getSharedPreferences("1clickpolicy sales tool", Context.MODE_PRIVATE) ?: return
     with(sharedPref.edit()) {
         putBoolean("firstInstall", false)
         commit()

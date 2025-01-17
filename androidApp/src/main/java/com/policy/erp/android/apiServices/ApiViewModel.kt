@@ -644,10 +644,7 @@ class ApiViewModel : ViewModel() {
 
     suspend fun getInsurerGroups(token: String): InsurerGroupResponse? {
         return try {
-            val deferredResponse = viewModelScope.async {
-                ApiServices().getAllInsurerGroups(token)
-            }
-            val response = deferredResponse.await()
+            val response = ApiServices().getAllInsurerGroups(token)
             Log.d("get all InsurerGroups", response.toString())
             _getInsurerGroups.value = response
             return response
@@ -760,10 +757,9 @@ class ApiViewModel : ViewModel() {
     suspend fun filterPolicyRateData(token: String, searchData: SearchPolicyRatePayload)
             : List<PolicyRateData?> {
         return try {
-            val deferredResponse = viewModelScope.async {
+            val response =
                 ApiServices().searchPolicyRateData(token, searchData)
-            }
-            val response = deferredResponse.await()
+
             Log.d("Succexx Policy Rate Data", response.toString())
             _getfilterPolicyRateData.value = response.items
             return response.items
@@ -937,7 +933,7 @@ class ApiViewModel : ViewModel() {
                     projectId, userId, deviceToken
                 )
             }
-            Log.d("Success registerDeviceForNotification", response.toString())
+            Log.d("registerDevice 200", response.toString())
             _deviceRegiestration.value = response
             return "Success"
         } catch (e: Exception) {

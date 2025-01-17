@@ -26,8 +26,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -80,9 +82,8 @@ fun SMEView(context: Context, viewModel: ApiViewModel, mainNavController: NavHos
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(insurerGroupsState.value["name"]) {
-        if(insurerGroupsState.value["id"].isNullOrBlank()){
-        }
-        else{
+        if (insurerGroupsState.value["id"].isNullOrBlank()) {
+        } else {
             Methods().retrieve_Token(context)?.let {
                 insurerGroupsState.value["id"]?.let { it1 ->
                     viewModel.fetchInsurerByInsurerGrp(
@@ -143,8 +144,20 @@ fun SMEView(context: Context, viewModel: ApiViewModel, mainNavController: NavHos
             }
         },
         bottomBar = {
+            var loading by remember { mutableStateOf(false) }
+
             Box(modifier = Modifier.padding(8.dp)) {
-                CustBtn(text = "Submit", isblue = true,) {
+                CustBtn(
+                    text = if (loading) {
+                        "Loading...."
+                    } else {
+                        "Submit"
+                    },
+                    isblue = true,
+                ) {
+
+                    loading = true
+
                     val filterpayload = GeneralPolicyRatePayload(
                         insurer_id = insurerTypesState.value["id"] ?: "",
                         renewal_type_id = renewalTypesState.value["id"] ?: "",
@@ -174,6 +187,7 @@ fun SMEView(context: Context, viewModel: ApiViewModel, mainNavController: NavHos
                             Toast.makeText(context, "match found", Toast.LENGTH_SHORT).show()
                             BottomBarScreen.SME_Data.route?.let { mainNavController.navigate(it) }
                         }
+                        loading = false
                     }
                 }
             }
@@ -190,26 +204,22 @@ fun SMEView(context: Context, viewModel: ApiViewModel, mainNavController: NavHos
                     try {
                         Methods().retrieve_Token(context)?.let { token ->
                             // Use async to call multiple suspend functions concurrently
-                            val productDeferred = async { viewModel.getProductTypes(token) }
-                            val renewalTypeDeferred = async { viewModel.fetchAllRenewalTypesBySegmentId(token,
-                                "3e2d3437-7949-4047-bb25-97392928423a") }
-                            val insuranceGroupDeferred = async { viewModel.getInsurerGroups(token) }
-                            val insuranceTypesBySegmentIdDeferred = async {
-                                viewModel.getInsuranceTypeByPolicySegments(
-                                    "3e2d3437-7949-4047-bb25-97392928423a",
-                                    token
-                                )
-                            }
-                            val allInsurerTypesDeferred = async { viewModel.getAllInsurerTypes(token) }
+                            viewModel.getProductTypes(token)
 
-                            // Await all results
-                            awaitAll(
-                                productDeferred,
-                                renewalTypeDeferred,
-                                insuranceGroupDeferred,
-                                insuranceTypesBySegmentIdDeferred,
-                                allInsurerTypesDeferred
+                            viewModel.fetchAllRenewalTypesBySegmentId(
+                                token,
+                                "3e2d3437-7949-4047-bb25-97392928423a"
                             )
+
+                            viewModel.getInsurerGroups(token)
+                            viewModel.getInsuranceTypeByPolicySegments(
+                                "3e2d3437-7949-4047-bb25-97392928423a",
+                                token
+                            )
+
+                            viewModel.getAllInsurerTypes(token)
+
+
                         }
                     } catch (e: Exception) {
                         println("Error occurred: ${e.message}")

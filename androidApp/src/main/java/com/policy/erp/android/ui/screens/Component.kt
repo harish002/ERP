@@ -942,19 +942,28 @@ fun SelectionRow(
             color =
 //            Color.Black,
             MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier
+                .weight(1f)
+                .background(
+                    if (isSelected) {
+                        Color(0xFF04C98B).copy(alpha = 0.3f)
+                    } else {
+                        Color.Transparent
+                    }
+                )
+                .padding(horizontal = 10.dp, vertical = 6.dp)
         )
 
-        if (isSelected) {
-            Box(
-                modifier = Modifier.size(16.dp)
-            ) {
-                Canvas(modifier = Modifier.fillMaxSize()) {
-                    drawCircle(Color(0xFFFFFFFF))
-                    drawCircle(Color(0xFF3960F6), radius = 8.dp.toPx())
-                }
-            }
-        }
+//        if (isSelected) {
+//            Box(
+//                modifier = Modifier.size(16.dp)
+//            ) {
+//                Canvas(modifier = Modifier.fillMaxSize()) {
+//                    drawCircle(Color(0xFFFFFFFF))
+//                    drawCircle(Color(0xFF3960F6), radius = 8.dp.toPx())
+//                }
+//            }
+//        }
     }
 }
 
@@ -1073,7 +1082,7 @@ fun DropdownMenu(
                 .padding(bottom = 8.dp),
             singleLine = true,
             colors = TextFieldDefaults.textFieldColors(
-                backgroundColor = MaterialTheme.colorScheme.surface,
+                backgroundColor = Color.Transparent,
                 cursorColor = MaterialTheme.colorScheme.primary,
                 focusedIndicatorColor = MaterialTheme.colorScheme.primary
             )
