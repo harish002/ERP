@@ -374,7 +374,7 @@ data class Insurer(
     val media_id : String? = null,
     val media_url : String? = null,
     val created_at: String? = null,
-    val insurer_groups : List<String>? = emptyList()
+    val insurer_groups : List<InsurerGroup>? = emptyList()
 )
 
 @Serializable
@@ -1146,10 +1146,10 @@ data class Ppt(
 
 @Serializable
 data class InsurerGroup(
-    val id: String,
-    val name: String,
-    val description: String,
-    val remarks: String,
+    val id: String?=null,
+    val name: String?=null,
+    val description: String?=null,
+    val remarks: String?=null,
     val status: Int,
     val policy_segment: PolicySegmentX
 )

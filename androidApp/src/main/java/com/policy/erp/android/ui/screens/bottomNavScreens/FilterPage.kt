@@ -205,34 +205,35 @@ fun FilterScreen(
         )
 
 
-        LaunchedEffect(key1 = true) {
+        LaunchedEffect(Unit) {
             // Launching a coroutine in LaunchedEffect to initialize data
-            coroutineScope.launch {
-                Methods().retrieve_Token(context)?.let { token->
-                    viewModel.getAllPolicyRates(
-                        token = token,
-                        context = context,
-                        payload = payload,
-                        logout = logout
-                    )
 
-                    if (getfirstInstall(context) == true) {
-                        saveFirstInstall(context)
-                        Methods().retrieve_UserID(context)?.let { it2 ->
+//            coroutineScope.launch {
 
-                            Methods().retrieve_DToken(context)?.let {
-                                viewModel.registerDeviceForNotification(
-                                    token = token,
-                                    projectId = project_id,
-                                    userId = it2,
-                                    deviceToken = it
-                                )
-                            }
+
+            Methods().retrieve_Token(context)?.let { token ->
+                if (getfirstInstall(context) == true) {
+                    saveFirstInstall(context)
+                    Methods().retrieve_DToken(context)?.let { Dtoken->
+                        Methods().retrieve_userID(context)?.let { Uid->
+                            viewModel.registerDeviceForNotification(
+                                token = token,
+                                projectId = project_id,
+                                userId = Uid,
+                                deviceToken = Dtoken
+                            )
                         }
-
                     }
                 }
+                //Get Policy Rate Data
+                viewModel.getAllPolicyRates(
+                    token = token,
+                    context = context,
+                    payload = payload,
+                    logout = logout
+                )
             }
+
             delay(2000)
 
 
@@ -329,7 +330,8 @@ fun FilterScreen(
                         item {
                             // Display a message when there are no items
                             Image(
-                                painter = painterResource(R.drawable.not_found),
+                                painter = painterResource(
+                                    R.drawable.not_found),
                                 contentDescription = "Not Found Image"
                             )
                             Text(
@@ -453,7 +455,6 @@ fun FilterScreen(
                                 listTypes = modelTypes
                             )
 
-
 // Vehicle Type SelectionView
 //                item {
                             Spacer(Modifier.padding(vertical = 4.dp))
@@ -481,6 +482,7 @@ fun FilterScreen(
 
                             // Fuel Type SelectionView
                             SelectionView(
+
                                 selectionTitle = "Fuel Type",
                                 staticValue = "Please select a fuel",
                                 selectedValue = fuelTypeState,

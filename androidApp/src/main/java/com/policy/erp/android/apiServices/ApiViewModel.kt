@@ -76,7 +76,11 @@ class ApiViewModel : ViewModel() {
             Methods().save_Token(authToken, context)
             val authRefreshToken = response.refreshToken
             Methods().save_RefreshToken(context, authRefreshToken)
-            Methods().save_userID(response.id, context)
+            val userID=response.userData.id
+            if (userID != null) {
+                Methods().save_userID(userID, context)
+                Log.d("User ID", userID)
+            }
             val userData = UserData(
                 id = response.userData.id,
                 name = response.userData.name,
@@ -930,11 +934,13 @@ class ApiViewModel : ViewModel() {
             val response = withContext(Dispatchers.IO) {
                 ApiServices().registerDeviceForNotification(
                     token,
-                    projectId, userId, deviceToken
+                    projectId,
+                    userId,
+                    deviceToken
                 )
             }
-            Log.d("registerDevice 200", response.toString())
             _deviceRegiestration.value = response
+            Log.d("registerDev200", response.toString())
             return "Success"
         } catch (e: Exception) {
             Log.e(

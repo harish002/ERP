@@ -299,6 +299,13 @@ sealed class BottomBarScreen(
         icon = R.drawable.profile,
 //        icon_focused = Icons.Outlined.AccountCircle
     )
+    // for User Security
+    data object Security  : BottomBarScreen(
+        route = "security",
+        title = "security",
+        icon = R.drawable.security,
+//        icon_focused = Icons.Outlined.AccountCircle
+    )
 
     // for All Categories
     data object Notification : BottomBarScreen(

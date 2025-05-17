@@ -21,8 +21,8 @@ android {
         applicationId = "com.policy.erp.android"
         minSdk = 24
         targetSdk = 34
-        versionCode = 10
-        versionName = "1.0.4"
+        versionCode = 11
+        versionName = "1.0.5"
     }
     buildFeatures {
         compose = true
@@ -89,6 +89,7 @@ dependencies {
     implementation (libs.androidx.camera.camera2)
     implementation (libs.androidx.camera.lifecycle)
     implementation (libs.androidx.camera.view)
+
     // Coil
     implementation (libs.coil.compose.v140)
 

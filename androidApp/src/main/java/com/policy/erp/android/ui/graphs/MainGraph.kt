@@ -3,6 +3,7 @@ package com.policy.erp.android.ui.graphs
 import android.content.Context
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -28,6 +29,7 @@ import com.policy.erp.android.ui.screens.bottomNavScreens.SME.SMEData
 import com.policy.erp.android.ui.screens.bottomNavScreens.SME.SMEView
 import com.policy.erp.android.ui.screens.bottomNavScreens.Setting.Network.HealthCashless
 import com.policy.erp.android.ui.screens.bottomNavScreens.Setting.Network.MotorCashless
+import com.policy.erp.android.ui.screens.bottomNavScreens.Setting.Security
 
 
 val allRoutes = mutableListOf(
@@ -47,8 +49,7 @@ fun MainNavGraph(
 //  paddingValues: PaddingValues,
     onBottomNavigationStateChanged: (Boolean) -> Unit,
     logout: () -> Unit
-) {
-
+){
     NavHost(
         navController = mainNavController,
         route = Graph.MAIN,
@@ -147,6 +148,11 @@ fun MainNavGraph(
         BottomBarScreen.HealthCashless.route?.let { it1 ->
             composable(route = it1) {
                 HealthCashless(mainNavController, context)
+            }
+        }
+        BottomBarScreen.Security.route?.let { it1 ->
+            composable(route = it1) {
+                Security(mainNavController, context, viewModel, rootnavController, logout)
             }
         }
         BottomBarScreen.MotorCashless.route?.let { it1 ->

@@ -76,26 +76,26 @@ fun RootNavGraph(
                         )
 //                }
 
-//                      FOR FIRST Install DETECTION
-//                       {
-                        if (getfirstInstall(context) == true) {
-                            saveFirstInstall(context)
-                            CoroutineScope(Dispatchers.IO).launch {
-                                Methods().retrieve_DToken(context)?.let {
-                                    Methods().retrieve_Token(context)?.let { it1 ->
-                                        Methods().retrieve_userID(context)?.let { it2 ->
-                                            viewModel.registerDeviceForNotification(
-                                                token = it1,
-                                                projectId = project_id,
-                                                userId = it2,
-                                                deviceToken = it
-                                            )
-                                        }
-
-                                    }
-                                }
-                            }
-                        }
+////                      FOR FIRST Install DETECTION
+////                       {
+//                        if (getfirstInstall(context) == true) {
+//                            saveFirstInstall(context)
+//                            CoroutineScope(Dispatchers.IO).launch {
+//                                Methods().retrieve_DToken(context)?.let {
+//                                    Methods().retrieve_Token(context)?.let { it1 ->
+//                                        Methods().retrieve_userID(context)?.let { it2 ->
+//                                            viewModel.registerDeviceForNotification(
+//                                                token = it1,
+//                                                projectId = project_id,
+//                                                userId = it2,
+//                                                deviceToken = it
+//                                            )
+//                                        }
+//
+//                                    }
+//                                }
+//                            }
+//                        }
                     }
 
 
@@ -131,7 +131,6 @@ fun RootNavGraph(
                             viewModel,
                             context = context,
                         ) {
-
                             Methods().clearToken(context)
                             rootnavController.navigate(Graph.ROOT)
                             {

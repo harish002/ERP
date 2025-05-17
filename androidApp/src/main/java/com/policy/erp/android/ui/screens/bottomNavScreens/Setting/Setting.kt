@@ -131,16 +131,21 @@ fun Setting(
                                 }
                             }
 
+                            SettingComp(R.drawable.security,"Security"){
+                                BottomBarScreen.Security.route?.let { it1 ->
+                                    mainNavController.navigate(
+                                        it1
+                                    )
+                                }
+                            }
+
                             SettingComp(R.drawable.vehicle_history,"Vehicle History"){
                                 Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
-
                             }
 
                             SettingComp(R.drawable.update,"Update"){
                                 Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
-
                             }
-
                         }
                     }
                 }

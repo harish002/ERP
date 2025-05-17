@@ -16,6 +16,7 @@ import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
 import com.policy.lms.android.Services.Methods
 import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.Constants.MessageNotificationKeys.TAG
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -65,6 +66,9 @@ class MyFirebaseMessageReceiver : FirebaseMessagingService() {
                           remoteMessage.getData().get("message"));
         }*/
 
+        Log.d(TAG, "From: ${remoteMessage.from}")
+
+
         // Second case when notification payload is
         // received.
         if (remoteMessage.getNotification() != null) {
@@ -82,6 +86,9 @@ class MyFirebaseMessageReceiver : FirebaseMessagingService() {
                     }
                 }
             }
+        }
+        else{
+            Log.d("notificationTest",remoteMessage.data.toString())
         }
     }
     //to show the notification

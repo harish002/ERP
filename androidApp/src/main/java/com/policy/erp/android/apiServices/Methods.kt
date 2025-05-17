@@ -32,30 +32,6 @@ class Methods {
         editor.apply()
     }
 
-    //save userID
-    fun save_UserID(token: String, context: Context) {
-        clearUserID(context)
-        val sharedPreferences = context
-            .getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.putString("UserID", token)
-        editor.apply()
-    }
-
-    // Retrieve userID
-    fun retrieve_UserID(context: Context): String? {
-        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
-        return sharedPreferences.getString("UserID", null)
-    }
-
-    // Clear userID
-    fun clearUserID(context: Context) {
-        val sharedPreferences = context.getSharedPreferences("MyPreferences", Context.MODE_PRIVATE)
-        val editor = sharedPreferences.edit()
-        editor.remove("UserID")
-        editor.apply()
-    }
-
     // Save refresh token
     fun save_RefreshToken(context: Context, refreshToken: String) {
         clearRefreshToken(context)
